@@ -1,0 +1,428 @@
+/**
+ * Black Hole Brand - NUCLEAR FORCE OVERRIDE
+ * Kill ALL green/yellow colors with PURPLE
+ * Priority: !important on EVERYTHING
+ */
+
+/* CRITICAL: Kill browser default colors */
+* {
+  border-color: inherit !important;
+}
+
+/* SCROLLBAR - PURPLE NOT GREEN */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-deep-gray) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-singularity-purple) !important;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple-light) !important;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-singularity-purple) var(--color-deep-gray) !important;
+}
+
+/* CRITICAL: Override template's default colors */
+body {
+  background-color: var(--color-space-black) !important;
+  color: var(--color-pure-white) !important;
+}
+
+/* NUCLEAR OPTION: Kill ALL inline styles with green/yellow */
+[style*="#ADFF00"],
+[style*="#adff00"],
+[style*="ADFF00"],
+[style*="adff00"],
+[style*="#CBFE1C"],
+[style*="#cbfe1c"],
+[style*="CBFE1C"],
+[style*="cbfe1c"],
+[style*="rgb(173, 255, 0)"],
+[style*="rgb(203, 254, 28)"],
+[style*="rgba(173, 255, 0"],
+[style*="rgba(203, 254, 28"] {
+  background: var(--color-singularity-purple) !important;
+  background-color: var(--color-singularity-purple) !important;
+  background-image: none !important;
+  border-color: var(--color-singularity-purple) !important;
+  color: var(--color-pure-white) !important;
+}
+
+/* Kill ANY element with green/yellow background */
+*[class*="bg"],
+*[class*="background"] {
+  background-color: inherit !important;
+}
+
+div[style*="background-color"][style*="CBFE1C"],
+div[style*="background-color"][style*="ADFF00"],
+div[style*="background"][style*="CBFE1C"],
+div[style*="background"][style*="ADFF00"] {
+  background-color: var(--color-singularity-purple) !important;
+  background: var(--color-singularity-purple) !important;
+}
+
+/* Kill green borders and underlines */
+[style*="border"][style*="ADFF00"],
+[style*="border"][style*="CBFE1C"],
+hr[style*="ADFF00"],
+hr[style*="CBFE1C"],
+.border-green,
+.bg-green {
+  border-color: var(--color-singularity-purple) !important;
+  background-color: var(--color-singularity-purple) !important;
+}
+
+/* Force progress bars, sliders, lines to purple */
+progress,
+[role="progressbar"],
+.progress,
+.progress-bar,
+.progress-line,
+#progressLine,
+hr,
+.divider,
+.line {
+  background-color: var(--color-singularity-purple) !important;
+  background: var(--color-singularity-purple) !important;
+  border-color: var(--color-singularity-purple) !important;
+}
+
+/* Progress bar wrapper */
+.progress-bar-wrapper,
+.progress-container {
+  background-color: var(--color-nebula-gray) !important;
+}
+
+/* NUCLEAR: Kill ALL green/yellow in SVG - case insensitive */
+svg[style*="ADFF00"],
+svg[style*="CBFE1C"],
+svg[style*="adff00"],
+svg[style*="cbfe1c"],
+path[fill="#ADFF00"],
+path[fill="#adff00"],
+path[fill="#CBFE1C"],
+path[fill="#cbfe1c"],
+path[stroke="#ADFF00"],
+path[stroke="#adff00"],
+path[stroke="#CBFE1C"],
+path[stroke="#cbfe1c"],
+path[fill*="ADFF00"],
+path[fill*="CBFE1C"],
+path[stroke*="ADFF00"],
+path[stroke*="CBFE1C"] {
+  fill: var(--color-singularity-purple) !important;
+  stroke: var(--color-singularity-purple) !important;
+}
+
+/* Target SVG paths directly by attribute selector */
+svg path[fill="#CBFE1C"],
+svg path[fill="#cbfe1c"],
+svg path[fill="#ADFF00"],
+svg path[fill="#adff00"] {
+  fill: var(--color-singularity-purple) !important;
+}
+
+svg path[stroke="#CBFE1C"],
+svg path[stroke="#cbfe1c"],
+svg path[stroke="#ADFF00"],
+svg path[stroke="#adff00"] {
+  stroke: var(--color-singularity-purple) !important;
+}
+
+/* Force hero background to dark */
+.hero-section,
+.hero-7,
+.hero-wrapper,
+.hero-content {
+  background-color: var(--color-space-black) !important;
+}
+
+/* Force all sections to dark background */
+section {
+  background-color: var(--color-space-black) !important;
+}
+
+.about-section,
+.service-section-7,
+.team-section,
+.news-section {
+  background: var(--color-space-black) !important;
+}
+
+/* Override any light gray backgrounds */
+.bg-cover[style*="background"] {
+  background-color: var(--color-space-black) !important;
+}
+
+/* CRITICAL: Kill green (#ADFF00) and yellow (#CBFE1C) buttons */
+*[style*="#ADFF00"],
+*[style*="#CBFE1C"],
+*[style*="ADFF00"],
+*[style*="CBFE1C"] {
+  background: var(--gradient-primary) !important;
+  color: var(--color-space-black) !important;
+}
+
+/* FORCE BUTTON COLORS - PURPLE DOMINANT */
+.gt-theme-btn,
+.theme-btn,
+button[type="submit"],
+.hero-button a,
+a.gt-theme-btn,
+a.theme-btn,
+.gt-box {
+  background: var(--color-singularity-purple) !important;
+  background-image: linear-gradient(135deg, #6C5CE7 0%, #8B7AE8 100%) !important;
+  border: 2px solid var(--color-singularity-purple) !important;
+  color: var(--color-pure-white) !important;
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4) !important;
+}
+
+.gt-style-border,
+.theme-btn.gt-style-border,
+.hero-button a.gt-style-border,
+a.gt-theme-btn.gt-style-border {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 2px solid var(--color-singularity-purple) !important;
+  color: var(--color-singularity-purple) !important;
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.3) !important;
+}
+
+/* Button hover states - MORE PURPLE */
+.gt-theme-btn:hover,
+.theme-btn:hover {
+  background: var(--color-purple-light) !important;
+  background-color: #8B7AE8 !important;
+  background-image: linear-gradient(135deg, #8B7AE8 0%, #6C5CE7 100%) !important;
+  color: var(--color-pure-white) !important;
+  box-shadow: 0 8px 40px rgba(108, 92, 231, 0.7) !important;
+  transform: translateY(-3px) !important;
+}
+
+.gt-style-border:hover {
+  background: var(--color-singularity-purple) !important;
+  background-color: var(--color-singularity-purple) !important;
+  background-image: none !important;
+  border-color: var(--color-singularity-purple) !important;
+  color: var(--color-pure-white) !important;
+  box-shadow: 0 8px 40px rgba(108, 92, 231, 0.7) !important;
+}
+
+/* Override yellow/green accent colors with PURPLE (not cyan) */
+.section-title h6,
+h6,
+.widget-head h5,
+.hero-content h6 {
+  color: var(--color-singularity-purple) !important;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(108, 92, 231, 0.6) !important;
+}
+
+/* Game case study titles - PURPLE not cyan */
+.gt-game-case-content h3,
+.gt-game-case-content h3 a {
+  color: var(--color-singularity-purple) !important;
+  text-shadow: 0 0 10px rgba(108, 92, 231, 0.5) !important;
+}
+
+.gt-game-case-content h3 a:hover {
+  color: var(--color-purple-light) !important;
+}
+
+/* Force all headings to white */
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5,
+.hero-content h1,
+.section-title h2,
+.title {
+  color: var(--color-pure-white) !important;
+}
+
+/* Override any template gradients with brand gradient */
+.gradient,
+[class*="gradient"],
+*[style*="linear-gradient"][style*="CBFE1C"],
+*[style*="linear-gradient"][style*="ADFF00"] {
+  background: var(--gradient-primary) !important;
+}
+
+/* Force dark cards */
+.service-box,
+.service-box-items,
+.team-box-items,
+.news-box-items,
+.about-box,
+.about-box-item .about-box {
+  background-color: var(--color-deep-gray) !important;
+  border-color: var(--color-nebula-gray) !important;
+}
+
+/* Override footer */
+footer,
+.footer-section-5,
+.gt-footer-section,
+.footer-bottom-5,
+.footer-bottom {
+  background-color: var(--color-deep-gray) !important;
+}
+
+/* Override any light text */
+p, li, span {
+  color: var(--color-lunar-silver) !important;
+}
+
+/* Links cyan */
+a {
+  color: var(--color-blackhole-cyan) !important;
+}
+
+a:hover {
+  color: var(--color-singularity-purple) !important;
+}
+
+/* Override header */
+header,
+.header-7,
+.header-2,
+#header-sticky {
+  background-color: var(--color-space-black) !important;
+  border-bottom-color: var(--color-nebula-gray) !important;
+}
+
+/* Force menu links to lunar silver */
+.main-menu ul li a {
+  color: var(--color-lunar-silver) !important;
+}
+
+.main-menu ul li a:hover,
+.main-menu ul li.active a {
+  color: var(--color-singularity-purple) !important;
+}
+
+/* Override service section background image */
+.service-section-7[style*="background-image"] {
+  background-color: var(--color-space-black) !important;
+  background-image: none !important;
+}
+
+/* Force all background images to overlay with dark */
+[style*="background-image"]::before {
+  background-color: rgba(10, 10, 12, 0.8) !important;
+}
+
+/* Override preloader background */
+.preloader,
+#preloader {
+  background-color: var(--color-space-black) !important;
+}
+
+/* Force icon colors */
+.service-icon,
+.feature-icon,
+i {
+  color: var(--color-blackhole-cyan) !important;
+}
+
+/* Numbers and decorative elements - PURPLE */
+.gt-number,
+.number,
+.gt-serial,
+[class*="number"]::before,
+[class*="number"]::after,
+.dot-number::before,
+.dot-number::after {
+  color: var(--color-singularity-purple) !important;
+  background: var(--color-singularity-purple) !important;
+  -webkit-text-stroke-color: var(--color-singularity-purple) !important;
+}
+
+/* Section title underline - PURPLE */
+.section-title h6::after,
+.section-title h6::before,
+h6::after,
+h6::before {
+  background: var(--color-singularity-purple) !important;
+  border-color: var(--color-singularity-purple) !important;
+}
+
+/* Footer section title underlines - PURPLE */
+.footer-widget .widget-head h5::after,
+.footer-widget .widget-head h5::before,
+.footer-widget h5::after,
+.footer-widget h5::before,
+.widget-title::after,
+.widget-title::before {
+  background: var(--color-singularity-purple) !important;
+  border-color: var(--color-singularity-purple) !important;
+}
+
+/* Pagination dots and controls - PURPLE */
+.swiper-pagination-bullet,
+.swiper-pagination-bullet-active,
+.dots-container .dot,
+.pagination-dot,
+[class*="pagination"] [class*="bullet"],
+[class*="dots"] [class*="dot"] {
+  background: var(--color-singularity-purple) !important;
+  border-color: var(--color-singularity-purple) !important;
+}
+
+/* Team member cards and overlays - PURPLE */
+.team-box-items,
+.team-member-card,
+.gt-team-image,
+[class*="team"] [class*="overlay"],
+[class*="team"] [class*="background"] {
+  background-color: var(--color-deep-gray) !important;
+}
+
+/* Quote icons - PURPLE */
+.quote-icon,
+.gt-quote,
+[class*="quote"],
+blockquote::before,
+blockquote::after {
+  color: var(--color-singularity-purple) !important;
+  fill: var(--color-singularity-purple) !important;
+}
+
+/* Override form inputs */
+input,
+textarea,
+select {
+  background-color: var(--color-deep-gray) !important;
+  border-color: var(--color-nebula-gray) !important;
+  color: var(--color-pure-white) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-lunar-silver) !important;
+}
+
+/* Kill any yellow/green highlights */
+::selection {
+  background-color: var(--color-singularity-purple) !important;
+  color: var(--color-pure-white) !important;
+}
+
+/* Override breadcrumb */
+.gt-breadcrumb-wrapper {
+  background-color: var(--color-space-black) !important;
+}
+

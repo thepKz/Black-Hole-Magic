@@ -1,3 +1,6 @@
+import { HOME_VERSION } from '@/config/home';
+
+// Home 2 Components
 import HeroSection2 from '@/components/home-2/HeroSection2';
 import AboutSection2 from '@/components/home-2/AboutSection2';
 import VideoSection2 from '@/components/home-2/VideoSection2';
@@ -8,7 +11,35 @@ import TeamSection2 from '@/components/home-2/TeamSection2';
 import NewsSection2 from '@/components/home-2/NewsSection2';
 import NewsletterSection from '@/components/home-2/NewsletterSection';
 
-export default function Home2Page() {
+// Home 7 Components
+import HeroSection7 from '@/components/home-7/HeroSection7';
+import AboutSection7 from '@/components/home-7/AboutSection7';
+import ServiceSection7 from '@/components/home-7/ServiceSection7';
+import GameCaseStudySection from '@/components/home-7/GameCaseStudySection';
+import TopFeatureSection from '@/components/home-7/TopFeatureSection';
+import TeamSection7 from '@/components/home-7/TeamSection7';
+import TestimonialSection7 from '@/components/home-7/TestimonialSection7';
+import CounterSection7 from '@/components/home-7/CounterSection7';
+import NewsSection7 from '@/components/home-7/NewsSection7';
+
+export default function HomePage() {
+  // Render home-2 or home-7 based on config
+  if (HOME_VERSION === 'home-7') {
+    return (
+      <>
+        <HeroSection7 />
+        <AboutSection7 />
+        <ServiceSection7 />
+        <GameCaseStudySection />
+        <TopFeatureSection />
+        <TeamSection7 />
+        <TestimonialSection7 />
+        <CounterSection7 />
+        <NewsSection7 />
+      </>
+    );
+  }
+
   return (
     <>
       <HeroSection2 />

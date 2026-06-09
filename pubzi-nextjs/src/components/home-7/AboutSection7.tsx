@@ -20,36 +20,37 @@ export default function AboutSection7() {
             <div className="col-lg-7">
               <div className="about-content">
                 <div className="section-title mb-0">
-                  <h6 className="wow fadeInUp">about xports</h6>
+                  <h6 className="wow fadeInUp">ABOUT BLACK HOLE</h6>
                   <h2 className="wow fadeInUp" data-wow-delay=".3s">
-                    We focus on creating
-                    beautiful games
+                    Converging Digital Worlds<br />Into One Ecosystem
                   </h2>
                 </div>
                 <p className="about-text wow fadeInUp" data-wow-delay=".5s">
-                  A game studio crafting exciting, high-quality video games, prioritizing immersive gameplay and mechanics.
+                  Black Hole is a next-generation digital ecosystem that brings together game publishing,
+                  fintech infrastructure, platform solutions, and enterprise technology under one unified framework.
+                  We empower businesses to thrive in the digital economy.
                 </p>
                 <div className="about-box-wrapper wow fadeInUp" data-wow-delay=".3s">
                   <div className="about-box-item">
                     <div className="about-box bg-color">
                       <div className="icon">
-                        <img src="assets/img/home-7/icon/01.svg" alt="img" />
+                        <span style={{ fontSize: '32px' }}>🛡️</span>
                       </div>
                       <div className="content">
-                        <h5>VR Supported</h5>
+                        <h5>Enterprise Security</h5>
                         <p>
-                          A game studio crafting exciting, video games
+                          Bank-grade security protocols protecting your digital assets
                         </p>
                       </div>
                     </div>
                     <div className="about-box border-none">
                       <div className="icon">
-                        <img src="assets/img/home-7/icon/02.svg" alt="img" />
+                        <span style={{ fontSize: '32px' }}>⚡</span>
                       </div>
                       <div className="content">
-                        <h5>Location Tagging</h5>
+                        <h5>Lightning Fast</h5>
                         <p>
-                          A game studio crafting exciting, video games
+                          Optimized performance at scale for global operations
                         </p>
                       </div>
                     </div>
@@ -57,23 +58,23 @@ export default function AboutSection7() {
                   <div className="about-box-item">
                     <div className="about-box">
                       <div className="icon">
-                        <img src="assets/img/home-7/icon/03.svg" alt="img" />
+                        <span style={{ fontSize: '32px' }}>🌍</span>
                       </div>
                       <div className="content">
-                        <h5>Multi dimension</h5>
+                        <h5>Global Reach</h5>
                         <p>
-                          A game studio crafting exciting, video games
+                          Operate seamlessly in 150+ countries worldwide
                         </p>
                       </div>
                     </div>
                     <div className="about-box border-none bg-color">
                       <div className="icon">
-                        <img src="assets/img/home-7/icon/04.svg" alt="img" />
+                        <span style={{ fontSize: '32px' }}>✓</span>
                       </div>
                       <div className="content">
-                        <h5>Console System</h5>
+                        <h5>Compliance Ready</h5>
                         <p>
-                          A game studio crafting exciting, video games
+                          Meet international standards and regulatory requirements
                         </p>
                       </div>
                     </div>

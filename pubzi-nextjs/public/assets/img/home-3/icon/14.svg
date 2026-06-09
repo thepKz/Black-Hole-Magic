@@ -5,12 +5,12 @@
 </g>
 <defs>
 <linearGradient id="paint0_linear_301_12313" x1="8" y1="27.9999" x2="48" y2="27.9999" gradientUnits="userSpaceOnUse">
-<stop stop-color="#CBFE1C"/>
-<stop offset="0.4375" stop-color="#CBFE1C"/>
+<stop stop-color="#6C5CE7"/>
+<stop offset="0.4375" stop-color="#6C5CE7"/>
 </linearGradient>
 <linearGradient id="paint1_linear_301_12313" x1="0" y1="12.7939" x2="25.5878" y2="12.7939" gradientUnits="userSpaceOnUse">
-<stop stop-color="#CBFE1C"/>
-<stop offset="0.4375" stop-color="#CBFE1C"/>
+<stop stop-color="#6C5CE7"/>
+<stop offset="0.4375" stop-color="#6C5CE7"/>
 </linearGradient>
 <clipPath id="clip0_301_12313">
 <rect width="48" height="48" fill="white"/>

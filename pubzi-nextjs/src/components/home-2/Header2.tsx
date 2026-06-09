@@ -35,26 +35,11 @@ export default function Header2() {
                                                         <li>
                                                             <div className="homemenu-items">
                                                                 <div className="homemenu">
-                                                                    <div className="homemenu-thumb">
-                                                                        <img src="/assets/img/header/home-1.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/" className="gt-theme-btn">
-                                                                                Multi Page
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Gaming
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
                                                                     <div className="homemenu-thumb mb-15">
                                                                         <img src="/assets/img/header/home-2.jpg" alt="img" />
                                                                         <div className="demo-button">
                                                                             <Link href="/" className="gt-theme-btn">
-                                                                                Multi Page
+                                                                                View Demo
                                                                             </Link>
                                                                         </div>
                                                                     </div>
@@ -66,70 +51,10 @@ export default function Header2() {
                                                                 </div>
                                                                 <div className="homemenu">
                                                                     <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-3.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/home-3" className="gt-theme-btn">
-                                                                                Multi Page
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Soccer Club
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-4.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/home-4" className="gt-theme-btn">
-                                                                                Multi Page
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Home 04
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-5.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/home-5" className="gt-theme-btn">
-                                                                                Multi Page
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Gaming News
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-6.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/home-6" className="gt-theme-btn">
-                                                                                Multi Page
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Gamer
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
                                                                         <img src="/assets/img/header/home-7.jpg" alt="img" />
                                                                         <div className="demo-button">
                                                                             <Link href="/home-7" className="gt-theme-btn">
-                                                                                Multi Page
+                                                                                View Demo
                                                                             </Link>
                                                                         </div>
                                                                     </div>
@@ -148,12 +73,7 @@ export default function Header2() {
                                                         Home
                                                     </Link>
                                                     <ul className="submenu">
-                                                        <li><Link href="/">Gaming</Link></li>
                                                         <li><Link href="/">Esport</Link></li>
-                                                        <li><Link href="/home-3">Soccer Club</Link></li>
-                                                        <li><Link href="/home-4">Home 04</Link></li>
-                                                        <li><Link href="/home-5">Gaming News</Link></li>
-                                                        <li><Link href="/home-6">Gamer</Link></li>
                                                         <li><Link href="/home-7">Gaming Studio</Link></li>
                                                     </ul>
                                                 </li>

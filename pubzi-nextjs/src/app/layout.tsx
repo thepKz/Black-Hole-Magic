@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
+import "./brand-colors.css";
+import "./typography.css";
 import "./globals.css";
+import "./brand-overrides.css";
+import "./force-brand-colors.css";
+import "./glow-effects.css";
+import "./gsap-animations.css";
 import Preloader from "@/components/shared/Preloader";
 import BackToTop from "@/components/shared/BackToTop";
 import MouseCursor from "@/components/shared/MouseCursor";
 import ClientInit from "@/components/ClientInit";
 
 export const metadata: Metadata = {
-  title: "Pubzi - eSports and Gaming",
-  description: "Pubzi - eSports and Gaming HTML Template",
+  title: "Black Hole - eSports and Gaming",
+  description: "Black Hole - eSports and Gaming Platform",
 };
 
 export default function RootLayout({
@@ -19,6 +25,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="shortcut icon" href="/assets/img/favicon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
         <link rel="stylesheet" href="/assets/css/all.min.css" />
         <link rel="stylesheet" href="/assets/css/animate.css" />

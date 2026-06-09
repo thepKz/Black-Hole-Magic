@@ -26,6 +26,23 @@ export function initJQueryPlugins() {
     meanExpand: ['<i class="far fa-plus"></i>'],
   });
 
+  // Mobile Menu Dropdown Toggle (for offcanvas)
+  $(document).on('click', '.mean-expand', function(e: any) {
+    e.preventDefault();
+    $(this).toggleClass('mean-clicked');
+    $(this).prev('a').next('.submenu, .mean-nav ul').slideToggle(300);
+  });
+
+  // Search Popup Toggle
+  $(".search-toggler").on("click", function (e: any) {
+    e.preventDefault();
+    $(".search-popup").toggleClass("active");
+  });
+
+  $(".search-popup__overlay").on("click", function () {
+    $(".search-popup").removeClass("active");
+  });
+
   // Sidebar Toggle
   $(".offcanvas__close,.offcanvas__overlay").on("click", function () {
     $(".offcanvas__info").removeClass("info-open");

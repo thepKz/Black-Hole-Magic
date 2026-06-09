@@ -1,0 +1,311 @@
+/**
+ * Black Hole Glow Effects & Hover States
+ * Purple-cyan cosmic glow effects for interactive elements
+ */
+
+/* ============================================
+   SERVICE/ECOSYSTEM BOX GLOW
+   ============================================ */
+
+.service-box-items {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.service-box-items::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--gradient-primary);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+  filter: blur(15px);
+}
+
+.service-box-items:hover::before {
+  opacity: 1;
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+.service-box-items:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 60px rgba(108, 92, 231, 0.4),
+    0 0 40px rgba(0, 206, 201, 0.2);
+  border-color: var(--color-singularity-purple);
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 1; filter: blur(15px); }
+  50% { opacity: 0.7; filter: blur(20px); }
+}
+
+/* ============================================
+   BUTTON GLOW & RIPPLE
+   ============================================ */
+
+.gt-theme-btn,
+.theme-btn {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+  transition: all 0.3s ease;
+}
+
+.gt-theme-btn::after,
+.theme-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.gt-theme-btn:hover::after,
+.theme-btn:hover::after {
+  width: 400px;
+  height: 400px;
+}
+
+.gt-theme-btn:hover,
+.theme-btn:hover {
+  box-shadow:
+    0 8px 30px rgba(108, 92, 231, 0.6),
+    0 0 60px rgba(108, 92, 231, 0.4);
+  transform: translateY(-3px);
+}
+
+.gt-style-border:hover {
+  box-shadow:
+    0 8px 30px rgba(0, 206, 201, 0.6),
+    0 0 60px rgba(0, 206, 201, 0.4);
+}
+
+/* ============================================
+   TEXT GLOW
+   ============================================ */
+
+h1, .h1 {
+  text-shadow: 0 0 30px rgba(108, 92, 231, 0.3);
+}
+
+h2, .h2 {
+  text-shadow: 0 0 20px rgba(108, 92, 231, 0.2);
+}
+
+.hero-content h1 {
+  text-shadow:
+    0 0 20px rgba(108, 92, 231, 0.6),
+    0 0 40px rgba(0, 206, 201, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  animation: text-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes text-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 20px rgba(108, 92, 231, 0.6),
+      0 0 40px rgba(0, 206, 201, 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 30px rgba(108, 92, 231, 0.8),
+      0 0 60px rgba(0, 206, 201, 0.5),
+      0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.hero-content h6 {
+  color: var(--color-blackhole-cyan);
+  text-shadow: 0 0 15px rgba(0, 206, 201, 0.6);
+}
+
+/* ============================================
+   CARD HOVER EFFECTS
+   ============================================ */
+
+.team-box-items,
+.news-box-items {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.team-box-items:hover,
+.news-box-items:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 15px 40px rgba(108, 92, 231, 0.3),
+    0 0 30px rgba(0, 206, 201, 0.2);
+  border-color: var(--color-singularity-purple);
+}
+
+/* ============================================
+   LINK HOVER GLOW
+   ============================================ */
+
+.main-menu ul li a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.main-menu ul li a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(108, 92, 231, 0.6);
+}
+
+.main-menu ul li a:hover::after,
+.main-menu ul li.active a::after {
+  width: 100%;
+}
+
+/* ============================================
+   ICON GLOW
+   ============================================ */
+
+.service-icon,
+.feature-icon {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 5px rgba(0, 206, 201, 0.3));
+}
+
+.service-box-items:hover .service-icon,
+.feature-icon:hover {
+  filter: drop-shadow(0 0 20px rgba(108, 92, 231, 0.8));
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* ============================================
+   FORM INPUTS GLOW
+   ============================================ */
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-singularity-purple);
+  box-shadow:
+    0 0 0 3px rgba(108, 92, 231, 0.2),
+    0 0 20px rgba(108, 92, 231, 0.3);
+  outline: none;
+}
+
+/* ============================================
+   COSMIC PARTICLE BACKGROUND
+   ============================================ */
+
+.section-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1200px;
+  height: 1200px;
+  background: radial-gradient(
+    circle,
+    rgba(108, 92, 231, 0.15) 0%,
+    rgba(0, 206, 201, 0.08) 40%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: cosmic-pulse 8s ease-in-out infinite;
+}
+
+@keyframes cosmic-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+/* ============================================
+   BACK TO TOP GLOW
+   ============================================ */
+
+.gt-back-to-top {
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+  transition: all 0.3s ease;
+}
+
+.gt-back-to-top:hover {
+  box-shadow:
+    0 8px 30px rgba(108, 92, 231, 0.7),
+    0 0 40px rgba(108, 92, 231, 0.5);
+  transform: translateY(-3px);
+}
+
+/* ============================================
+   PRELOADER GLOW
+   ============================================ */
+
+.letters-loading {
+  animation: letter-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes letter-glow {
+  0%, 100% {
+    color: var(--color-singularity-purple);
+    text-shadow:
+      0 0 10px rgba(108, 92, 231, 0.8),
+      0 0 20px rgba(108, 92, 231, 0.4);
+  }
+  50% {
+    color: var(--color-blackhole-cyan);
+    text-shadow:
+      0 0 20px rgba(0, 206, 201, 0.8),
+      0 0 40px rgba(0, 206, 201, 0.4);
+  }
+}
+
+/* ============================================
+   SMOOTH SCROLLING
+   ============================================ */
+
+* {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .service-box-items:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+
+  .gt-theme-btn:hover,
+  .theme-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Reduce glow intensity on mobile */
+  .section-glow::before {
+    opacity: 0.4;
+  }
+}

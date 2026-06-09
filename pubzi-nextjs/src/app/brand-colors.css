@@ -1,0 +1,72 @@
+/**
+ * Black Hole Brand Colors
+ * Color Palette for Black Hole eSports & Gaming Platform
+ * PRIMARY: PURPLE (Singularity Purple dominates)
+ */
+
+:root {
+  /* Primary Brand Colors */
+  --color-space-black: #0A0A0C;
+  --color-singularity-purple: #6C5CE7;
+  --color-blackhole-cyan: #00CEC9;
+
+  /* Neutral Colors */
+  --color-deep-gray: #15151A;
+  --color-nebula-gray: #2A2A33;
+  --color-lunar-silver: #D8D8E0;
+  --color-pure-white: #FFFFFF;
+
+  /* Semantic Colors - PURPLE DOMINANT */
+  --color-primary: var(--color-singularity-purple);
+  --color-primary-hover: #5849d4;
+  --color-secondary: var(--color-blackhole-cyan);
+  --color-secondary-hover: #00b8b0;
+
+  --color-background: var(--color-space-black);
+  --color-surface: var(--color-deep-gray);
+  --color-border: var(--color-nebula-gray);
+
+  --color-text-primary: var(--color-pure-white);
+  --color-text-secondary: var(--color-lunar-silver);
+  --color-text-muted: var(--color-nebula-gray);
+
+  /* Gradients - PURPLE FIRST */
+  --gradient-primary: linear-gradient(135deg, var(--color-singularity-purple) 0%, #8B7AE8 50%, var(--color-singularity-purple) 100%);
+  --gradient-purple-dominant: linear-gradient(135deg, var(--color-singularity-purple) 0%, #9381ED 100%);
+  --gradient-purple-cyan: linear-gradient(135deg, var(--color-singularity-purple) 0%, var(--color-blackhole-cyan) 100%);
+  --gradient-dark: linear-gradient(135deg, var(--color-space-black) 0%, var(--color-deep-gray) 100%);
+
+  /* Purple variations for depth */
+  --color-purple-light: #8B7AE8;
+  --color-purple-dark: #5445C7;
+}
+
+/* Dark theme overrides (if needed) */
+[data-theme="dark"] {
+  --color-background: var(--color-space-black);
+  --color-text-primary: var(--color-pure-white);
+}
+
+/* Utility classes for quick color application */
+.bg-space-black { background-color: var(--color-space-black); }
+.bg-singularity-purple { background-color: var(--color-singularity-purple); }
+.bg-blackhole-cyan { background-color: var(--color-blackhole-cyan); }
+.bg-deep-gray { background-color: var(--color-deep-gray); }
+.bg-nebula-gray { background-color: var(--color-nebula-gray); }
+.bg-lunar-silver { background-color: var(--color-lunar-silver); }
+
+.text-space-black { color: var(--color-space-black); }
+.text-singularity-purple { color: var(--color-singularity-purple); }
+.text-blackhole-cyan { color: var(--color-blackhole-cyan); }
+.text-deep-gray { color: var(--color-deep-gray); }
+.text-lunar-silver { color: var(--color-lunar-silver); }
+.text-pure-white { color: var(--color-pure-white); }
+
+.border-singularity-purple { border-color: var(--color-singularity-purple); }
+.border-blackhole-cyan { border-color: var(--color-blackhole-cyan); }
+.border-nebula-gray { border-color: var(--color-nebula-gray); }
+
+/* Gradient utilities - PURPLE DOMINANT */
+.bg-gradient-primary { background: var(--gradient-purple-dominant); }
+.bg-gradient-purple-cyan { background: var(--gradient-purple-cyan); }
+.bg-gradient-dark { background: var(--gradient-dark); }
