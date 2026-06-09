@@ -3,52 +3,32 @@
  * Smooth, cinematic color transitions for Black Hole brand
  */
 
-/* Animated gradient background for hero */
-@keyframes purple-gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
+/* Hero gradient DISABLED - let original background show */
 .hero-section,
 .hero-7 {
-  background: linear-gradient(
-    270deg,
-    #0A0A0C 0%,
-    #1a1a2e 25%,
-    #6C5CE7 50%,
-    #1a1a2e 75%,
-    #0A0A0C 100%
-  );
-  background-size: 400% 400%;
-  animation: purple-gradient-shift 15s ease infinite;
+  background: none !important;
+  animation: none !important;
 }
 
-/* Pulsing glow effect for buttons */
+/* Pulsing glow effect for buttons - BRIGHTER */
 @keyframes purple-pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(108, 92, 231, 0.4),
-                0 0 40px rgba(108, 92, 231, 0.2);
+    box-shadow: 0 0 30px rgba(108, 92, 231, 0.6),
+                0 0 60px rgba(108, 92, 231, 0.3),
+                0 8px 30px rgba(108, 92, 231, 0.4);
   }
   50% {
-    box-shadow: 0 0 40px rgba(108, 92, 231, 0.8),
-                0 0 80px rgba(108, 92, 231, 0.4);
+    box-shadow: 0 0 50px rgba(108, 92, 231, 1),
+                0 0 100px rgba(108, 92, 231, 0.6),
+                0 8px 40px rgba(108, 92, 231, 0.6);
   }
 }
 
 .gt-theme-btn,
 .theme-btn,
 .gt-box {
-  animation: purple-pulse 3s ease-in-out infinite;
+  animation: purple-pulse 2s ease-in-out infinite;
 }
-
-/* Shimmer effect for text */
 @keyframes text-shimmer {
   0% {
     background-position: -500%;
@@ -62,16 +42,19 @@ h1, .hero-content h1 {
   background: linear-gradient(
     90deg,
     #FFFFFF 0%,
-    #8B7AE8 25%,
-    #FFFFFF 50%,
-    #8B7AE8 75%,
+    #E0E0FF 20%,
+    #FFFFFF 40%,
+    #C5BEFF 50%,
+    #FFFFFF 60%,
+    #E0E0FF 80%,
     #FFFFFF 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: text-shimmer 8s linear infinite;
+  animation: text-shimmer 6s linear infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
 }
 
 /* Floating particles effect */

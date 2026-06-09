@@ -1,13 +1,38 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+import { useEffect, useState } from 'react'
 
 export default function Header7() {
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <>
       {/* Header Section Start */}
-      <header id="header-sticky" className="header-2 header-4 header-7">
+      <header
+        id="header-sticky"
+        className={`header-2 header-4 header-7 bh-header ${isScrolled ? 'is-scrolled' : 'is-at-top'}`}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 999,
+          background: isScrolled ? 'rgba(6, 6, 10, 0.96)' : 'linear-gradient(180deg, rgba(6, 6, 10, 0.5) 0%, rgba(6, 6, 10, 0) 100%)',
+          backdropFilter: isScrolled ? 'blur(18px)' : 'blur(0)',
+          borderBottom: isScrolled ? '1px solid rgba(112, 90, 255, 0.28)' : '1px solid rgba(112, 90, 255, 0)',
+          transition: 'all 0.3s ease',
+          boxShadow: isScrolled ? '0 14px 42px rgba(0, 0, 0, 0.38)' : 'none',
+        }}
+      >
         <div className="container-fluid">
           <div className="mega-menu-wrapper">
             <div className="header-main">
@@ -159,6 +184,25 @@ export default function Header7() {
           </form>
         </div>
       </div>
+
+      <style jsx global>{`
+        #header-sticky.bh-header.is-at-top,
+        #header-sticky.bh-header.is-at-top.header-7,
+        #header-sticky.bh-header.is-at-top.header-2 {
+          background-color: transparent !important;
+          background-image: linear-gradient(180deg, rgba(6, 6, 10, 0.5) 0%, rgba(6, 6, 10, 0) 100%) !important;
+          border-bottom-color: transparent !important;
+          box-shadow: none !important;
+        }
+
+        #header-sticky.bh-header.is-scrolled,
+        #header-sticky.bh-header.is-scrolled.header-7,
+        #header-sticky.bh-header.is-scrolled.header-2 {
+          background-color: rgba(6, 6, 10, 0.96) !important;
+          background-image: none !important;
+          border-bottom-color: rgba(112, 90, 255, 0.28) !important;
+        }
+      `}</style>
     </>
   )
 }
