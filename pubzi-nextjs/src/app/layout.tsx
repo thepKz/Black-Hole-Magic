@@ -6,7 +6,6 @@ import "./brand-overrides.css";
 import "./force-brand-colors.css";
 import "./glow-effects.css";
 import "./gsap-animations.css";
-import Preloader from "@/components/shared/Preloader";
 import BackToTop from "@/components/shared/BackToTop";
 import MouseCursor from "@/components/shared/MouseCursor";
 import ClientInit from "@/components/ClientInit";
@@ -38,7 +37,6 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/main.css" />
       </head>
       <body>
-        <Preloader />
         <BackToTop />
         <MouseCursor />
         {children}
