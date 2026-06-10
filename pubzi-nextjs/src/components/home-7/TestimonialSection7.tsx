@@ -1,10 +1,12 @@
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
+import { Pagination, EffectFade } from 'swiper/modules';
 import Image from 'next/image';
+import { Quote, Play, Star } from 'lucide-react';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 interface Testimonial {
   id: number;
@@ -44,7 +46,7 @@ export default function TestimonialSection7() {
       <div className="container">
         <div className="gt-testimonial-wrapper-3">
           <div className="row g-4 align-items-center">
-            <div className="col-lg-6">
+            <div className="col-lg-6 wow fadeInUp" data-wow-delay=".3s">
               <div className="testimonial-content">
                 <div className="section-title-2">
                   <h6 className="wow fadeInUp">Our testimonials</h6>
@@ -53,12 +55,16 @@ export default function TestimonialSection7() {
                   </h2>
                 </div>
                 <Swiper
-                  modules={[Pagination]}
+                  modules={[Pagination, EffectFade]}
                   spaceBetween={30}
                   slidesPerView={1}
+                  effect="fade"
+                  fadeEffect={{ crossFade: true }}
                   pagination={{
-                    el: '.swiper-dot',
+                    el: '.testimonial-pagination',
                     clickable: true,
+                    bulletClass: 'testimonial-bullet',
+                    bulletActiveClass: 'testimonial-bullet-active',
                   }}
                   className="gt-testimonial-slider"
                 >
@@ -66,7 +72,7 @@ export default function TestimonialSection7() {
                     <SwiperSlide key={testimonial.id}>
                       <div className="gt-testimonial-card-item">
                         <div className="gt-client-info">
-                          <div className="image">
+                          <div className="testimonial-client-image">
                             <Image
                               src={testimonial.clientImage}
                               alt={testimonial.clientName}
@@ -80,13 +86,8 @@ export default function TestimonialSection7() {
                           </div>
                         </div>
                         <div className="gt-testi-content">
-                          <div className="icon">
-                            <Image
-                              src="/assets/img/home-3/icon/quate.svg"
-                              alt="quote"
-                              width={40}
-                              height={40}
-                            />
+                          <div className="testimonial-quote-icon">
+                            <Quote size={40} strokeWidth={2} color="#6C5CE7" />
                           </div>
                           <p>{testimonial.content}</p>
                         </div>
@@ -94,12 +95,10 @@ export default function TestimonialSection7() {
                     </SwiperSlide>
                   ))}
                 </Swiper>
-                <div className="swiper-dot mt-3">
-                  <div className="dot"></div>
-                </div>
+                <div className="testimonial-pagination mt-4"></div>
               </div>
             </div>
-            <div className="col-lg-6">
+            <div className="col-lg-6 wow fadeInUp" data-wow-delay=".3s">
               <div className="gt-testimonial-image">
                 <Image
                   src="/assets/img/home-3/testimonial-image.png"
@@ -109,18 +108,18 @@ export default function TestimonialSection7() {
                 />
                 <a
                   href="https://www.youtube.com/watch?v=Cn4G2lZ_g2I"
-                  className="video-btn ripple video-popup"
+                  className="testimonial-video-btn video-popup"
                 >
-                  <i className="fa-solid fa-play"></i>
+                  <Play size={32} strokeWidth={2} color="#FFFFFF" fill="#FFFFFF" />
                 </a>
-                <div className="gt-ratting-content">
+                <div className="testimonial-rating-badge">
                   <p>1200+ Clients Rating.</p>
                   <div className="gt-star">
-                    <i className="fa-solid fa-star-sharp"></i>
-                    <i className="fa-solid fa-star-sharp"></i>
-                    <i className="fa-solid fa-star-sharp"></i>
-                    <i className="fa-solid fa-star-sharp"></i>
-                    <i className="fa-solid fa-star-sharp"></i>
+                    <Star size={20} strokeWidth={2} color="#6C5CE7" fill="#6C5CE7" />
+                    <Star size={20} strokeWidth={2} color="#6C5CE7" fill="#6C5CE7" />
+                    <Star size={20} strokeWidth={2} color="#6C5CE7" fill="#6C5CE7" />
+                    <Star size={20} strokeWidth={2} color="#6C5CE7" fill="#6C5CE7" />
+                    <Star size={20} strokeWidth={2} color="#6C5CE7" fill="#6C5CE7" />
                   </div>
                 </div>
               </div>

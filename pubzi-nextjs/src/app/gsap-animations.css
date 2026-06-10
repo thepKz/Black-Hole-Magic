@@ -26,35 +26,35 @@
 
 .gt-theme-btn,
 .theme-btn,
-.gt-box {
+.gt-box,
+.hero-cta {
   animation: purple-pulse 2s ease-in-out infinite;
 }
+/* Hero heading shimmer */
 @keyframes text-shimmer {
-  0% {
-    background-position: -500%;
-  }
-  100% {
-    background-position: 500%;
-  }
+  0% { background-position: -500%; }
+  100% { background-position: 500%; }
 }
 
-h1, .hero-content h1 {
-  background: linear-gradient(
-    90deg,
-    #FFFFFF 0%,
-    #E0E0FF 20%,
-    #FFFFFF 40%,
-    #C5BEFF 50%,
-    #FFFFFF 60%,
-    #E0E0FF 80%,
-    #FFFFFF 100%
-  );
+.hero-title {
+  background: linear-gradient(90deg, #FFF 0%, #E0E0FF 20%, #FFF 40%, #C5BEFF 50%, #FFF 60%, #E0E0FF 80%, #FFF 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: text-shimmer 6s linear infinite;
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(108, 92, 231, 0.4);
+}
+
+.hero-kicker {
+  text-shadow: 0 0 20px rgba(108, 92, 231, 0.8), 0 0 40px rgba(108, 92, 231, 0.6);
+}
+
+/* SVG gradient rotation */
+@keyframes svg-gradient-rotate {
+  0% { stopColor: var(--bh-violet); }
+  50% { stopColor: var(--bh-cyan); }
+  100% { stopColor: var(--bh-violet); }
 }
 
 /* Floating particles effect */
@@ -201,6 +201,77 @@ h1, .hero-content h1 {
               box-shadow 0.3s ease;
 }
 
+/* About section image effects */
+.about-image-2.animated-image {
+  position: relative;
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.about-image-2 .ellipse-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.about-image-2 .ellipse-shape img {
+  filter: brightness(1.2) saturate(1.5);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    filter: brightness(1.2) saturate(1.5) drop-shadow(0 0 30px rgba(108, 92, 231, 0.6));
+  }
+  50% {
+    opacity: 0.9;
+    filter: brightness(1.4) saturate(1.8) drop-shadow(0 0 60px rgba(108, 92, 231, 0.9));
+  }
+}
+
+.about-image-2 .bg-shape::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(108, 92, 231, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* About section feature boxes */
+.about-box.bg-color {
+  background-color: var(--color-deep-gray) !important;
+}
+
+.about-box.border-none {
+  border: none !important;
+}
+
+.about-box .icon .mono-icon {
+  color: var(--color-blackhole-cyan);
+  font-size: 32px;
+  transition: all 0.3s ease;
+}
+
+.about-box:hover .icon .mono-icon {
+  color: var(--color-singularity-purple);
+  transform: scale(1.1);
+}
+
 /* Disable animations on mobile for performance */
 @media (max-width: 768px) {
   .hero-section,
@@ -218,4 +289,237 @@ h1, .hero-content h1 {
   .gt-icon:hover {
     animation: none;
   }
+
+  .about-image-2.animated-image {
+    animation: none;
+  }
+
+  .about-image-2 .ellipse-shape img {
+    animation: none;
+  }
+}
+
+/* ===== TEAM SECTION EFFECTS ===== */
+
+/* Team card backgrounds and borders with rotation animation */
+.gt-team-image-3.team-card {
+  background-color: var(--color-deep-gray) !important;
+  border: 2px solid;
+  border-image-source: linear-gradient(0deg, #6C5CE7, #00CEC9);
+  border-image-slice: 1;
+  animation: border-rotate 4s linear infinite;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Card hover: shadow increase and border glow amplification */
+.gt-team-image-3.team-card:hover {
+  box-shadow: 0 10px 40px rgba(108, 92, 231, 0.5),
+              0 0 60px rgba(108, 92, 231, 0.3);
+  transform: translateY(-5px);
+}
+
+/* Social icons default state: opacity 0 */
+.gt-team-image-3 .gt-social-icon {
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Social icons on card hover: opacity 1 */
+.gt-team-image-3.team-card:hover .gt-social-icon {
+  opacity: 1;
+}
+
+/* Social icons translateY effect on parent hover */
+.gt-team-image-3.team-card:hover .gt-social-icon a {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+}
+
+.gt-team-image-3 .gt-social-icon a {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.gt-team-image-3 .gt-social-icon a:hover {
+  transform: translateY(-8px);
+  color: var(--color-singularity-purple) !important;
+}
+
+/* Dot pagination (01-06) styling */
+.dot-number {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.dot-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-nebula-gray);
+  border-radius: 50%;
+  color: var(--color-lunar-silver);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Active dot: purple state */
+.dot-num.active,
+.dot-num:hover {
+  background-color: var(--color-singularity-purple);
+  border-color: var(--color-singularity-purple);
+  color: var(--color-pure-white);
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
+}
+
+/* Ellipse bg-shape decorative overlay */
+.ellipse-bg-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Ensure content above ellipse */
+.gt-team-section-3 .container,
+.gt-team-slider-3 {
+  position: relative;
+  z-index: 1;
+}
+
+/* Social icon monochrome system */
+.gt-team-image-3 .gt-social-icon a i {
+  color: var(--color-lunar-silver) !important;
+  transition: color 0.3s ease;
+}
+
+.gt-team-image-3 .gt-social-icon a:hover i {
+  color: var(--color-singularity-purple) !important;
+}
+
+/* ===== TESTIMONIALS SECTION EFFECTS ===== */
+
+/* Swiper pagination bullets - purple active */
+.testimonial-pagination {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.testimonial-bullet {
+  width: 12px;
+  height: 12px;
+  background: var(--color-nebula-gray) !important;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.5;
+}
+
+.testimonial-bullet-active {
+  background: var(--color-singularity-purple) !important;
+  opacity: 1;
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.8);
+}
+
+/* Quote icon with purple glow */
+.testimonial-quote-icon {
+  color: var(--color-singularity-purple) !important;
+  filter: drop-shadow(0 0 15px rgba(108, 92, 231, 0.6));
+}
+
+.testimonial-quote-icon svg,
+.testimonial-quote-icon i {
+  color: var(--color-singularity-purple) !important;
+  fill: var(--color-singularity-purple) !important;
+}
+
+/* Client image circular with purple border glow */
+.testimonial-client-image {
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--color-singularity-purple);
+  box-shadow: 0 0 25px rgba(108, 92, 231, 0.7);
+  animation: purple-pulse 2s ease-in-out infinite;
+}
+
+.testimonial-client-image img {
+  border-radius: 50%;
+  display: block;
+}
+
+/* Video button ripple animation on hover */
+@keyframes testimonial-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.testimonial-video-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--color-singularity-purple) !important;
+  border-radius: 50%;
+  color: var(--color-pure-white) !important;
+  animation: purple-pulse 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.testimonial-video-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: var(--color-singularity-purple);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.testimonial-video-btn:hover::before {
+  animation: testimonial-ripple 1s ease-out;
+}
+
+.testimonial-video-btn svg,
+.testimonial-video-btn i {
+  color: var(--color-pure-white) !important;
+  fill: var(--color-pure-white) !important;
+}
+
+/* Star rating badge with purple glow shadow */
+.testimonial-rating-badge {
+  background: var(--color-deep-gray);
+  border-radius: 12px;
+  padding: 15px 20px;
+  box-shadow: 0 0 30px rgba(108, 92, 231, 0.5);
+}
+
+.testimonial-rating-badge .gt-star svg,
+.testimonial-rating-badge .gt-star i {
+  color: var(--color-singularity-purple) !important;
+  fill: var(--color-singularity-purple) !important;
+  filter: drop-shadow(0 0 8px rgba(108, 92, 231, 0.6));
+}
+
+/* Testimonial text lunar-silver with line-height 1.8 */
+.gt-testi-content p {
+  color: var(--color-lunar-silver) !important;
+  line-height: 1.8 !important;
 }

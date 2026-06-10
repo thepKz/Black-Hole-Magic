@@ -1,4 +1,6 @@
 'use client';
+import { ShieldCheck, Zap, Globe, CheckCircle } from 'lucide-react';
+import Icon from '@/components/Icon';
 
 export default function AboutSection7() {
   return (
@@ -7,7 +9,7 @@ export default function AboutSection7() {
         <div className="about-wrapper-7">
           <div className="row g-4 align-items-center">
             <div className="col-lg-5">
-              <div className="about-image-2 wow animated-image">
+              <div className="about-image-2 wow fadeInUp animated-image" data-wow-delay=".4s">
                 <img src="assets/img/home-7/about/about-01.png" alt="img" />
                 <div className="bg-shape">
                   <img src="assets/img/home-7/about/bg-shape.png" alt="img" />
@@ -20,7 +22,7 @@ export default function AboutSection7() {
             <div className="col-lg-7">
               <div className="about-content">
                 <div className="section-title mb-0">
-                  <h6 className="wow fadeInUp">ABOUT BLACK HOLE</h6>
+                  <h6 className="wow fadeInUp" data-wow-delay=".2s">ABOUT BLACK HOLE</h6>
                   <h2 className="wow fadeInUp" data-wow-delay=".3s">
                     Converging Digital Worlds<br />Into One Ecosystem
                   </h2>
@@ -30,11 +32,11 @@ export default function AboutSection7() {
                   fintech infrastructure, platform solutions, and enterprise technology under one unified framework.
                   We empower businesses to thrive in the digital economy.
                 </p>
-                <div className="about-box-wrapper wow fadeInUp" data-wow-delay=".3s">
+                <div className="about-box-wrapper wow fadeInUp" data-wow-delay=".6s">
                   <div className="about-box-item">
-                    <div className="about-box bg-color">
+                    <div className="about-box bg-color border-none">
                       <div className="icon">
-                        <span style={{ fontSize: '32px' }}>🛡️</span>
+                        <Icon icon={ShieldCheck} size={32} variant="cyan" className="mono-icon" />
                       </div>
                       <div className="content">
                         <h5>Enterprise Security</h5>
@@ -43,9 +45,9 @@ export default function AboutSection7() {
                         </p>
                       </div>
                     </div>
-                    <div className="about-box border-none">
+                    <div className="about-box bg-color border-none">
                       <div className="icon">
-                        <span style={{ fontSize: '32px' }}>⚡</span>
+                        <Icon icon={Zap} size={32} variant="cyan" className="mono-icon" />
                       </div>
                       <div className="content">
                         <h5>Lightning Fast</h5>
@@ -56,9 +58,9 @@ export default function AboutSection7() {
                     </div>
                   </div>
                   <div className="about-box-item">
-                    <div className="about-box">
+                    <div className="about-box bg-color border-none">
                       <div className="icon">
-                        <span style={{ fontSize: '32px' }}>🌍</span>
+                        <Icon icon={Globe} size={32} variant="cyan" className="mono-icon" />
                       </div>
                       <div className="content">
                         <h5>Global Reach</h5>
@@ -67,9 +69,9 @@ export default function AboutSection7() {
                         </p>
                       </div>
                     </div>
-                    <div className="about-box border-none bg-color">
+                    <div className="about-box bg-color border-none">
                       <div className="icon">
-                        <span style={{ fontSize: '32px' }}>✓</span>
+                        <Icon icon={CheckCircle} size={32} variant="cyan" className="mono-icon" />
                       </div>
                       <div className="content">
                         <h5>Compliance Ready</h5>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSAP Animation Performance Check</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0A0A0C;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    :root {
+      --color-singularity-purple: #6C5CE7;
+      --color-purple-light: #8B7AE8;
+      --color-space-black: #0A0A0C;
+      --color-deep-gray: #1A1A1F;
+      --color-nebula-gray: #2A2A32;
+      --color-pure-white: #FFFFFF;
+      --color-lunar-silver: #B8B8C0;
+      --color-blackhole-cyan: #00CEC9;
+    }
+
+    #fps-counter {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 10000;
+      font-family: monospace;
+      min-width: 250px;
+      box-shadow: 0 0 30px rgba(108, 92, 231, 0.5);
+      border: 2px solid var(--color-singularity-purple);
+    }
+
+    #fps-counter h3 {
+      margin-bottom: 10px;
+      color: var(--color-singularity-purple);
+    }
+
+    #fps-counter div {
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .metric-label {
+      color: var(--color-lunar-silver);
+    }
+
+    .metric-value {
+      font-weight: bold;
+      color: var(--color-pure-white);
+    }
+
+    .good { color: #00ff00 !important; }
+    .warning { color: #ffff00 !important; }
+    .bad { color: #ff0000 !important; }
+
+    .test-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 40px;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, #0A0A0C 0%, #1a1a2e 50%, #0A0A0C 100%);
+    }
+
+    h1 {
+      font-size: 72px;
+      margin-bottom: 20px;
+    }
+
+    @keyframes purple-pulse {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(108, 92, 231, 0.6),
+                    0 0 60px rgba(108, 92, 231, 0.3),
+                    0 8px 30px rgba(108, 92, 231, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(108, 92, 231, 1),
+                    0 0 100px rgba(108, 92, 231, 0.6),
+                    0 8px 40px rgba(108, 92, 231, 0.6);
+      }
+    }
+
+    @keyframes text-shimmer {
+      0% { background-position: -500%; }
+      100% { background-position: 500%; }
+    }
+
+    @keyframes border-rotate {
+      0% {
+        border-image-source: linear-gradient(0deg, #6C5CE7, #00CEC9);
+      }
+      25% {
+        border-image-source: linear-gradient(90deg, #6C5CE7, #00CEC9);
+      }
+      50% {
+        border-image-source: linear-gradient(180deg, #6C5CE7, #00CEC9);
+      }
+      75% {
+        border-image-source: linear-gradient(270deg, #6C5CE7, #00CEC9);
+      }
+      100% {
+        border-image-source: linear-gradient(360deg, #6C5CE7, #00CEC9);
+      }
+    }
+
+    @keyframes float-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% {
+        opacity: 0.6;
+        filter: brightness(1.2) saturate(1.5) drop-shadow(0 0 30px rgba(108, 92, 231, 0.6));
+      }
+      50% {
+        opacity: 0.9;
+        filter: brightness(1.4) saturate(1.8) drop-shadow(0 0 60px rgba(108, 92, 231, 0.9));
+      }
+    }
+
+    .hero-title {
+      background: linear-gradient(90deg, #FFF 0%, #E0E0FF 20%, #FFF 40%, #C5BEFF 50%, #FFF 60%, #E0E0FF 80%, #FFF 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: text-shimmer 6s linear infinite;
+    }
+
+    .pulse-button {
+      padding: 20px 40px;
+      background: var(--color-singularity-purple);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      animation: purple-pulse 2s ease-in-out infinite;
+      margin: 10px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 40px;
+    }
+
+    .animated-card {
+      background: var(--color-deep-gray);
+      padding: 30px;
+      border-radius: 12px;
+      border: 2px solid;
+      border-image-slice: 1;
+      animation: border-rotate 4s linear infinite;
+      transition: transform 0.3s ease;
+    }
+
+    .animated-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .float-image {
+      width: 200px;
+      height: 200px;
+      background: var(--color-singularity-purple);
+      border-radius: 50%;
+      animation: float-gentle 6s ease-in-out infinite, glow-pulse 3s ease-in-out infinite;
+    }
+
+    .smooth-scroll-content {
+      padding: 40px;
+      background: var(--color-deep-gray);
+      margin: 20px;
+      border-radius: 12px;
+    }
+
+    #scroll-test {
+      background: linear-gradient(180deg, #0A0A0C 0%, #1a1a2e 50%, #0A0A0C 100%);
+    }
+  </style>
+</head>
+<body>
+  <div id="fps-counter">
+    <h3>Performance Monitor</h3>
+    <div><span class="metric-label">FPS:</span> <span id="fps" class="metric-value">--</span></div>
+    <div><span class="metric-label">Frame Time:</span> <span id="frame-time" class="metric-value">--</span></div>
+    <div><span class="metric-label">Jank Events:</span> <span id="jank" class="metric-value">0</span></div>
+    <div><span class="metric-label">Long Tasks:</span> <span id="long-tasks" class="metric-value">0</span></div>
+    <div><span class="metric-label">Memory:</span> <span id="memory" class="metric-value">--</span></div>
+    <div><span class="metric-label">Scroll Perf:</span> <span id="scroll-perf" class="metric-value">--</span></div>
+  </div>
+
+  <section class="test-section hero-section">
+    <h1 class="hero-title">GSAP Performance Test</h1>
+    <p style="font-size: 20px; color: var(--color-lunar-silver); margin-bottom: 30px;">
+      Testing CSS animations with FPS monitoring
+    </p>
+    <div>
+      <button class="pulse-button">Pulsing Button 1</button>
+      <button class="pulse-button">Pulsing Button 2</button>
+      <button class="pulse-button">Pulsing Button 3</button>
+    </div>
+  </section>
+
+  <section class="test-section" style="background: var(--color-space-black);">
+    <h2 style="margin-bottom: 40px; color: var(--color-singularity-purple);">Animated Cards Test</h2>
+    <div class="card-grid">
+      <div class="animated-card"><h3>Card 1</h3><p>Border rotation animation</p></div>
+      <div class="animated-card"><h3>Card 2</h3><p>Border rotation animation</p></div>
+      <div class="animated-card"><h3>Card 3</h3><p>Border rotation animation</p></div>
+      <div class="animated-card"><h3>Card 4</h3><p>Border rotation animation</p></div>
+      <div class="animated-card"><h3>Card 5</h3><p>Border rotation animation</p></div>
+      <div class="animated-card"><h3>Card 6</h3><p>Border rotation animation</p></div>
+    </div>
+  </section>
+
+  <section class="test-section" style="background: var(--color-deep-gray);">
+    <h2 style="margin-bottom: 40px; color: var(--color-singularity-purple);">Float & Glow Test</h2>
+    <div style="display: flex; gap: 50px; flex-wrap: wrap; justify-content: center;">
+      <div class="float-image"></div>
+      <div class="float-image"></div>
+      <div class="float-image"></div>
+    </div>
+  </section>
+
+  <section id="scroll-test" class="test-section">
+    <h2 style="margin-bottom: 40px; color: var(--color-singularity-purple);">Scroll Performance Test</h2>
+    <div class="smooth-scroll-content">
+      <p style="line-height: 2;">Scroll up and down to test smooth scrolling performance. The FPS counter should remain stable above 55 FPS for good performance.</p>
+    </div>
+    <div class="smooth-scroll-content">
+      <p style="line-height: 2;">Multiple sections with content to enable scrolling. Monitor the "Scroll Perf" metric in the top-right corner.</p>
+    </div>
+    <div class="smooth-scroll-content">
+      <p style="line-height: 2;">CSS animations are hardware-accelerated and should maintain 60 FPS on most devices.</p>
+    </div>
+  </section>
+
+  <script>
+    let fps = 0;
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let jankCount = 0;
+    let longTaskCount = 0;
+    let scrollPerf = 'Idle';
+    let lastFrameTime = 0;
+
+    const fpsElement = document.getElementById('fps');
+    const frameTimeElement = document.getElementById('frame-time');
+    const jankElement = document.getElementById('jank');
+    const longTaskElement = document.getElementById('long-tasks');
+    const memoryElement = document.getElementById('memory');
+    const scrollPerfElement = document.getElementById('scroll-perf');
+
+    function updateFPS() {
+      const currentTime = performance.now();
+      const delta = currentTime - lastTime;
+      frameCount++;
+
+      if (delta >= 1000) {
+        fps = Math.round((frameCount * 1000) / delta);
+        frameCount = 0;
+        lastTime = currentTime;
+
+        fpsElement.textContent = fps + ' fps';
+        fpsElement.className = 'metric-value ' + (fps >= 55 ? 'good' : fps >= 30 ? 'warning' : 'bad');
+
+        if (performance.memory) {
+          const memoryMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(1);
+          memoryElement.textContent = memoryMB + ' MB';
+        }
+      }
+
+      const frameTime = currentTime - lastFrameTime;
+      if (lastFrameTime > 0) {
+        frameTimeElement.textContent = frameTime.toFixed(1) + ' ms';
+
+        if (frameTime > 50) {
+          jankCount++;
+          jankElement.textContent = jankCount;
+          jankElement.className = 'metric-value bad';
+        }
+
+        if (frameTime > 100) {
+          longTaskCount++;
+          longTaskElement.textContent = longTaskCount;
+          longTaskElement.className = 'metric-value bad';
+        }
+
+        frameTimeElement.className = 'metric-value ' + (frameTime <= 16.67 ? 'good' : frameTime <= 33 ? 'warning' : 'bad');
+      }
+      lastFrameTime = currentTime;
+
+      requestAnimationFrame(updateFPS);
+    }
+
+    requestAnimationFrame(updateFPS);
+
+    let scrollStartTime = 0;
+    let isScrolling = false;
+    let scrollFrames = 0;
+    let scrollFPS = 0;
+
+    window.addEventListener('scroll', () => {
+      if (!isScrolling) {
+        scrollStartTime = performance.now();
+        scrollFrames = 0;
+        isScrolling = true;
+        scrollPerf = 'Scrolling';
+        scrollPerfElement.textContent = scrollPerf;
+        scrollPerfElement.className = 'metric-value warning';
+      }
+
+      scrollFrames++;
+
+      clearTimeout(window.scrollEndTimer);
+      window.scrollEndTimer = setTimeout(() => {
+        const scrollDuration = performance.now() - scrollStartTime;
+        scrollFPS = Math.round((scrollFrames * 1000) / scrollDuration);
+        scrollPerf = scrollFPS + ' fps';
+        scrollPerfElement.textContent = scrollPerf;
+        scrollPerfElement.className = 'metric-value ' + (scrollFPS >= 55 ? 'good' : scrollFPS >= 30 ? 'warning' : 'bad');
+        isScrolling = false;
+      }, 150);
+    });
+
+    if ('PerformanceObserver' in window) {
+      try {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.duration > 50) {
+              console.warn('Long task detected:', entry.duration + 'ms', entry);
+            }
+          }
+        });
+        observer.observe({ entryTypes: ['longtask'] });
+      } catch (e) {
+        console.log('PerformanceObserver for longtask not supported');
+      }
+    }
+
+    console.log('%c Performance Test Started', 'background: #6C5CE7; color: white; padding: 10px; font-size: 16px; font-weight: bold;');
+    console.log('Monitor the top-right corner for real-time metrics');
+    console.log('Target: 60 FPS (16.67ms frame time)');
+    console.log('Good: 55+ FPS | Warning: 30-55 FPS | Bad: <30 FPS');
+  </script>
+</body>
+</html>

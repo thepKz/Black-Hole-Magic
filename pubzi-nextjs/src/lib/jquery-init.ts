@@ -27,7 +27,7 @@ export function initJQueryPlugins() {
   });
 
   // Mobile Menu Dropdown Toggle (for offcanvas)
-  $(document).on('click', '.mean-expand', function(e: any) {
+  $(document).on('click', '.mean-expand', function(this: HTMLElement, e: any) {
     e.preventDefault();
     $(this).toggleClass('mean-clicked');
     $(this).prev('a').next('.submenu, .mean-nav ul').slideToggle(300);

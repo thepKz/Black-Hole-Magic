@@ -98,21 +98,18 @@ const teamMembers: TeamMember[] = [
 
 const TeamSection7: React.FC = () => {
   return (
-    <section
-      className="gt-team-section-3 fix section-padding bg-cover"
-      style={{ backgroundImage: "url('/assets/img/home-3/team/team-bg.jpg')" }}
-    >
+    <section className="gt-team-section-3 fix section-padding bg-cover">
       <div className="container">
         <div className="section-title-area">
           <div className="section-title">
-            <h6 className="wow fadeInUp">great team</h6>
-            <h2 className="wow fadeInUp" data-wow-delay=".3s">
+            <h6>great team</h6>
+            <h2>
               great team player
             </h2>
           </div>
           <div className="dot-number">
             {[1, 2, 3, 4, 5, 6].map((num) => (
-              <span key={num} className="dot-num">
+              <span key={num} className={`dot-num ${num === 1 ? 'active' : ''}`}>
                 <span>{num.toString().padStart(2, '0')}</span>
               </span>
             ))}
@@ -133,25 +130,26 @@ const TeamSection7: React.FC = () => {
         spaceBetween={0}
         slidesPerView={1}
         loop={true}
+        speed={1000}
         autoplay={{
           delay: 3000,
           disableOnInteraction: false,
         }}
         breakpoints={{
-          640: {
+          576: {
             slidesPerView: 2,
           },
           768: {
             slidesPerView: 3,
           },
-          1024: {
+          992: {
             slidesPerView: 4,
           },
         }}
       >
         {teamMembers.map((member) => (
           <SwiperSlide key={member.id}>
-            <div className="gt-team-image-3">
+            <div className="gt-team-image-3 team-card">
               <Image
                 src={member.image}
                 alt={member.name}
