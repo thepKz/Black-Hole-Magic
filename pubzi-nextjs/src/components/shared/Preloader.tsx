@@ -10,6 +10,8 @@ export default function Preloader() {
   const particlesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.body.dataset.preloaderDone = 'false';
+
     // Progress counter animation
     const progressInterval = setInterval(() => {
       setProgress(prev => {
@@ -88,6 +90,8 @@ export default function Preloader() {
           duration: 0.8,
           ease: 'power2.inOut',
           onComplete: () => {
+            document.body.dataset.preloaderDone = 'true';
+            window.dispatchEvent(new Event('black-hole:preloader-complete'));
             setIsLoaded(true);
           },
         });
@@ -106,6 +110,7 @@ export default function Preloader() {
   return (
     <div
       ref={preloaderRef}
+      data-preloader="black-hole"
       style={{
         position: 'fixed',
         top: 0,
@@ -156,7 +161,16 @@ export default function Preloader() {
       />
 
       {/* Content wrapper */}
-      <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{
+        position: 'relative',
+        zIndex: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: 'min(92vw, 720px)',
+        padding: '0 20px',
+        overflow: 'visible',
+      }}>
         {/* Particles */}
         <div ref={particlesRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           {[...Array(30)].map((_, i) => (
@@ -178,25 +192,33 @@ export default function Preloader() {
         {/* Brand Text */}
       <div className="brand-text" style={{
         display: 'flex',
-        gap: '4px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 'clamp(2px, 0.8vw, 6px)',
+        width: '100%',
+        maxWidth: '100%',
         marginBottom: '20px',
         perspective: '1000px',
+        overflow: 'visible',
+        whiteSpace: 'nowrap',
       }}>
         {['B', 'L', 'A', 'C', 'K', ' ', 'H', 'O', 'L', 'E'].map((letter, i) => (
           <span
             key={i}
             className="letter"
             style={{
-              fontSize: '48px',
+              fontSize: 'clamp(28px, 7.6vw, 52px)',
               fontWeight: 900,
               fontFamily: 'Orbitron, sans-serif',
+              lineHeight: 1.15,
               background: 'linear-gradient(135deg, #ffffff 0%, #6C5CE7 50%, #00CEC9 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               textShadow: '0 0 20px rgba(108, 92, 231, 0.6)',
               display: 'inline-block',
-              marginRight: letter === ' ' ? '12px' : '0',
+              marginRight: letter === ' ' ? 'clamp(8px, 2vw, 18px)' : '0',
+              padding: '0 1px 4px',
             }}
           >
             {letter}
@@ -204,28 +226,20 @@ export default function Preloader() {
         ))}
       </div>
 
-      {/* Loading Text */}
-      <div style={{
-        fontSize: '14px',
-        fontFamily: 'Inter, sans-serif',
-        fontWeight: 600,
-        color: '#00CEC9',
-        letterSpacing: '4px',
-        textTransform: 'uppercase',
-        marginBottom: '30px',
-        textShadow: '0 0 10px #00CEC9',
-      }}>
+      {/* Loading Text - HIDDEN */}
+      <div style={{ display: 'none' }}>
         LOADING
       </div>
 
       {/* Progress Bar */}
       <div style={{
-        width: '300px',
+        width: 'min(300px, 76vw)',
         height: '4px',
         background: 'rgba(108, 92, 231, 0.2)',
         borderRadius: '2px',
         overflow: 'hidden',
         position: 'relative',
+        boxShadow: '0 0 18px rgba(0, 206, 201, 0.22)',
       }}>
         <div style={{
           width: `${Math.min(progress, 100)}%`,
@@ -239,27 +253,28 @@ export default function Preloader() {
 
       {/* Progress Counter */}
       <div style={{
-        marginTop: '15px',
-        fontSize: '24px',
+        marginTop: '16px',
+        minWidth: '76px',
+        padding: '6px 12px',
+        fontSize: 'clamp(20px, 5vw, 28px)',
         fontFamily: 'Orbitron, sans-serif',
-        fontWeight: 700,
-        color: '#6C5CE7',
-        textShadow: '0 0 20px #6C5CE7',
+        fontWeight: 800,
+        color: '#AFA2FF',
+        textAlign: 'center',
+        lineHeight: 1,
+        borderRadius: '8px',
+        background: 'rgba(6, 6, 10, 0.42)',
+        border: '1px solid rgba(108, 92, 231, 0.32)',
+        textShadow: '0 0 16px rgba(175, 162, 255, 0.95), 0 0 28px rgba(0, 206, 201, 0.45)',
+        boxShadow: '0 0 22px rgba(108, 92, 231, 0.26)',
+        position: 'relative',
+        zIndex: 3,
       }}>
         {Math.min(Math.round(progress), 100)}%
       </div>
 
-      {/* Tagline */}
-      <div style={{
-        position: 'absolute',
-        bottom: '60px',
-        fontSize: '11px',
-        fontFamily: 'Inter, sans-serif',
-        fontWeight: 500,
-        color: 'rgba(255, 255, 255, 0.4)',
-        letterSpacing: '2px',
-        textTransform: 'uppercase',
-      }}>
+      {/* Tagline - HIDDEN */}
+      <div style={{ display: 'none' }}>
         WHERE DIGITAL WORLDS CONVERGE
       </div>
       </div>
