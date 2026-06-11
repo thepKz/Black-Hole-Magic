@@ -49,21 +49,24 @@ export default function HeroSection7() {
 
         playIntro();
 
-        gsap.to('.iphone-stage', {
-          y: -16,
-          rotation: -4.2,
-          duration: 3.4,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        });
+        gsap.fromTo(
+          '.iphone-stage',
+          { x: -10, rotation: -9.4 },
+          {
+            x: 16,
+            rotation: -2.8,
+            duration: 2.8,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut',
+          }
+        );
 
         gsap.to('.hero-character-art', {
-          x: 8,
-          y: -14,
-          rotation: 0.8,
-          scale: 1.018,
-          duration: 4.2,
+          x: -24,
+          rotation: -0.6,
+          scale: 1.012,
+          duration: 3.4,
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
@@ -177,7 +180,7 @@ export default function HeroSection7() {
       </div>
 
       {/* Phone and CTA are locked together to avoid resize drift. */}
-      <div className="hero-action-cluster">
+      <div className="hero-action-cluster" style={{ transform: 'translateX(-76px) scale(0.96)', opacity: 0 }}>
         <div className="iphone-stage">
           <img
             src="/assets/img/landing-page/iphone_2.png"
@@ -258,6 +261,7 @@ export default function HeroSection7() {
 
         .hero-character {
           isolation: isolate;
+          pointer-events: auto !important;
         }
 
         .hero-character::before {
@@ -273,6 +277,8 @@ export default function HeroSection7() {
           filter: blur(30px);
           opacity: 1;
           mix-blend-mode: screen;
+          transform: scale(1);
+          transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
         }
 
         .hero-character::after {
@@ -285,7 +291,20 @@ export default function HeroSection7() {
           border-radius: 50%;
           filter: blur(28px);
           opacity: 0.88;
-          transform: rotate(-10deg);
+          transform: rotate(-10deg) scale(1);
+          transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+        }
+
+        .hero-character:hover::before {
+          opacity: 1;
+          filter: blur(34px);
+          transform: scale(1.06);
+        }
+
+        .hero-character:hover::after {
+          opacity: 1;
+          filter: blur(30px);
+          transform: rotate(-10deg) scale(1.08);
         }
 
         .hero-character-art {
@@ -297,7 +316,18 @@ export default function HeroSection7() {
             drop-shadow(0 0 74px rgba(112, 66, 255, 0.62))
             drop-shadow(0 0 118px rgba(72, 28, 196, 0.42));
           transform-origin: 50% 78%;
-          will-change: transform;
+          transition: filter 0.28s ease;
+          will-change: transform, filter;
+        }
+
+        .hero-character:hover .hero-character-art {
+          filter:
+            hue-rotate(10deg)
+            saturate(1.18)
+            drop-shadow(0 26px 36px rgba(0, 0, 0, 0.66))
+            drop-shadow(0 0 36px rgba(216, 194, 255, 0.86))
+            drop-shadow(0 0 92px rgba(126, 72, 255, 0.74))
+            drop-shadow(0 0 132px rgba(0, 216, 255, 0.32));
         }
 
         .iphone-stage {
@@ -347,6 +377,7 @@ export default function HeroSection7() {
         }
 
         .hero-cta {
+          --cta-border-angle: 0deg;
           pointer-events: auto;
           position: absolute;
           left: 50%;
@@ -354,9 +385,10 @@ export default function HeroSection7() {
           transform: translate(-50%);
           z-index: 4;
           background:
-            radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.28), transparent 34%),
-            linear-gradient(135deg, #19084f 0%, #4f24e7 52%, #00c8ff 145%);
-          border: 2px solid #c2b7ff;
+            linear-gradient(90deg, rgba(255, 255, 255, 0.16), transparent 18% 78%, rgba(0, 224, 255, 0.2)),
+            radial-gradient(circle at 18% 0%, rgba(188, 152, 255, 0.34), transparent 34%),
+            linear-gradient(135deg, #10002f 0%, #2a087f 44%, #5a23ff 88%, #00d8ff 160%);
+          border: 1px solid rgba(214, 198, 255, 0.76);
           padding: 12px 24px;
           min-width: 160px;
           min-height: 50px;
@@ -373,15 +405,15 @@ export default function HeroSection7() {
           gap: 12px;
           white-space: nowrap;
           clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
-          transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+          transition: transform 0.28s ease, background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
           overflow: hidden;
           box-shadow:
-            0 0 20px rgba(194, 183, 255, 0.74),
-            0 0 52px rgba(75, 36, 231, 0.82),
-            0 0 74px rgba(0, 200, 255, 0.28),
-            0 16px 42px rgba(18, 6, 80, 0.72),
+            0 0 18px rgba(151, 92, 255, 0.78),
+            0 0 48px rgba(62, 16, 194, 0.86),
+            0 0 72px rgba(0, 216, 255, 0.24),
+            0 16px 42px rgba(12, 2, 58, 0.8),
             inset 0 1px 0 rgba(255, 255, 255, 0.22),
-            inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+            inset 0 -4px 14px rgba(4, 0, 24, 0.54);
         }
 
         .hero-cta::before {
@@ -394,6 +426,27 @@ export default function HeroSection7() {
           pointer-events: none;
         }
 
+        .hero-cta::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          padding: 2px;
+          background: conic-gradient(from var(--cta-border-angle), #8a5cff, #ffffff, #00e0ff, #ff39f8, #6d28ff, #8a5cff);
+          clip-path: inherit;
+          pointer-events: none;
+          opacity: 0.82;
+          -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor;
+          mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+          mask-composite: exclude;
+          filter: drop-shadow(0 0 10px rgba(138, 92, 255, 0.78));
+        }
+
         .hero-cta span {
           position: relative;
           z-index: 1;
@@ -401,16 +454,19 @@ export default function HeroSection7() {
 
         .hero-cta:hover {
           background:
-            radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.36), transparent 34%),
-            linear-gradient(135deg, #21076d 0%, #6a45ff 54%, #00d9ff 142%);
-          border-color: #ffffff;
+            linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 18% 76%, rgba(0, 232, 255, 0.3)),
+            radial-gradient(circle at 18% 0%, rgba(235, 222, 255, 0.42), transparent 34%),
+            linear-gradient(135deg, #180047 0%, #3b08a8 42%, #782fff 88%, #00e5ff 155%);
+          border-color: rgba(255, 255, 255, 0.92);
+          filter: saturate(1.2) contrast(1.08);
+          transform: translate(-50%, -3px) skewX(-1.5deg);
           box-shadow:
-            0 0 28px rgba(255, 255, 255, 0.82),
-            0 0 70px rgba(108, 92, 231, 0.98),
-            0 0 92px rgba(0, 217, 255, 0.38),
-            0 18px 50px rgba(34, 12, 123, 0.72),
+            0 0 26px rgba(255, 255, 255, 0.78),
+            0 0 72px rgba(112, 42, 255, 1),
+            0 0 96px rgba(0, 229, 255, 0.46),
+            0 22px 54px rgba(20, 2, 94, 0.84),
             inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            inset 0 -3px 10px rgba(0, 0, 0, 0.28);
+            inset 0 -4px 14px rgba(4, 0, 24, 0.48);
         }
 
         .hero-cta:hover::before {
@@ -427,28 +483,73 @@ export default function HeroSection7() {
         }
 
         @media (prefers-reduced-motion: no-preference) {
+          @property --cta-border-angle {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+          }
+
           .hero-cta {
-            animation: ctaEnergy 3.2s ease-in-out infinite;
+            animation: ctaEnergy 3.2s ease-in-out infinite, ctaIdleDrift 2.2s ease-in-out infinite;
+          }
+
+          .hero-cta::after {
+            animation: ctaBorderSpin 2.4s linear infinite;
+          }
+
+          .hero-cta:hover {
+            animation: ctaEnergy 1.35s ease-in-out infinite, ctaHoverJitter 0.42s steps(2, end) infinite;
+          }
+
+          .hero-cta:hover::after {
+            animation-duration: 0.75s;
           }
 
           @keyframes ctaEnergy {
             0%, 100% {
               box-shadow:
-                0 0 20px rgba(194, 183, 255, 0.7),
-                0 0 52px rgba(75, 36, 231, 0.78),
-                0 0 74px rgba(0, 200, 255, 0.24),
-                0 16px 42px rgba(18, 6, 80, 0.72),
+                0 0 18px rgba(151, 92, 255, 0.74),
+                0 0 48px rgba(62, 16, 194, 0.82),
+                0 0 72px rgba(0, 216, 255, 0.22),
+                0 16px 42px rgba(12, 2, 58, 0.8),
                 inset 0 1px 0 rgba(255, 255, 255, 0.22),
-                inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+                inset 0 -4px 14px rgba(4, 0, 24, 0.54);
             }
             50% {
               box-shadow:
-                0 0 28px rgba(255, 255, 255, 0.86),
-                0 0 68px rgba(108, 92, 231, 0.96),
-                0 0 94px rgba(0, 217, 255, 0.34),
-                0 18px 50px rgba(18, 6, 80, 0.78),
+                0 0 26px rgba(235, 222, 255, 0.82),
+                0 0 72px rgba(112, 42, 255, 0.98),
+                0 0 94px rgba(0, 229, 255, 0.34),
+                0 18px 50px rgba(12, 2, 58, 0.84),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+                inset 0 -4px 14px rgba(4, 0, 24, 0.5);
+            }
+          }
+
+          @keyframes ctaBorderSpin {
+            to {
+              --cta-border-angle: 360deg;
+            }
+          }
+
+          @keyframes ctaIdleDrift {
+            0%, 100% {
+              transform: translate(-50%, 0) skewX(0deg);
+            }
+            35% {
+              transform: translate(calc(-50% - 2px), -1px) skewX(-0.8deg);
+            }
+            70% {
+              transform: translate(calc(-50% + 2px), 1px) skewX(0.8deg);
+            }
+          }
+
+          @keyframes ctaHoverJitter {
+            0%, 100% {
+              transform: translate(-50%, -3px) skewX(-1.5deg);
+            }
+            50% {
+              transform: translate(calc(-50% + 1px), -4px) skewX(1.5deg);
             }
           }
         }
