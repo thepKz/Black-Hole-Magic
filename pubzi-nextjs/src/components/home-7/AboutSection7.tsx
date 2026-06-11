@@ -227,7 +227,7 @@ function AboutGlbModel() {
     };
 
     const loader = new GLTFLoader();
-    loader.load('/assets/img/home-7/3d/3d_1.glb', (gltf) => {
+    loader.load('/assets/img/home-7/3d/3d_3.glb', (gltf) => {
       if (disposed) return;
 
       const model = gltf.scene;
