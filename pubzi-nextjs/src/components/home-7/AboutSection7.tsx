@@ -1,10 +1,9 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import { ShieldCheck, Zap, Globe, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import Icon from '@/components/Icon';
+import { useEffect, useRef } from 'react';
 
 export default function AboutSection7() {
   return (
@@ -13,7 +12,7 @@ export default function AboutSection7() {
         <div className="about-wrapper-7">
           <div className="row g-4 align-items-center">
             <div className="col-lg-5">
-              <div className="about-image-2 wow fadeInUp animated-image" data-wow-delay=".4s">
+              <div className="about-image-2 wow fadeInUp" data-wow-delay=".4s">
                 <div className="about-3d-stage" aria-label="Black Hole 3D model">
                   <AboutGlbModel />
                 </div>
@@ -27,66 +26,24 @@ export default function AboutSection7() {
             </div>
             <div className="col-lg-7">
               <div className="about-content">
-                <div className="section-title mb-0">
-                  <h6 className="wow fadeInUp" data-wow-delay=".2s">ABOUT BLACK HOLE</h6>
-                  <h2 className="wow fadeInUp" data-wow-delay=".3s">
-                    Converging Digital Worlds<br />Into One Ecosystem
+                <div className="section-title mb-4">
+                  <h6 className="wow fadeInUp text-purple" data-wow-delay=".2s" style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '20px' }}>
+                    VỀ BLACKHOLE GAME
+                  </h6>
+                  <h2 className="wow fadeInUp" data-wow-delay=".3s" style={{ fontSize: '32px', fontWeight: 800, lineHeight: 1.3, marginBottom: '16px', color: '#fff' }}>
+                    Tầm nhìn 2030
                   </h2>
+                  <p className="wow fadeInUp" data-wow-delay=".5s" style={{ fontSize: '16px', lineHeight: 1.7, marginBottom: '32px', color: 'rgba(255,255,255,0.85)' }}>
+                    Đến năm 2030, Blackhole Game định vị là Hệ sinh thái Đồng phát hành (Co-Publishing) tiêu chuẩn và là Local Partner được lựa chọn đầu tiên (Top-of-mind) bởi các nhà phát triển game quốc tế tại thị trường Đông Nam Á.
+                  </p>
                 </div>
-                <p className="about-text wow fadeInUp" data-wow-delay=".5s">
-                  Black Hole is a next-generation digital ecosystem that brings together game publishing,
-                  fintech infrastructure, platform solutions, and enterprise technology under one unified framework.
-                  We empower businesses to thrive in the digital economy.
-                </p>
-                <div className="about-box-wrapper wow fadeInUp" data-wow-delay=".6s">
-                  <div className="about-box-item">
-                    <div className="about-box bg-color border-none">
-                      <div className="icon">
-                        <Icon icon={ShieldCheck} size={32} variant="purple" className="mono-icon" />
-                      </div>
-                      <div className="content">
-                        <h5>Enterprise Security</h5>
-                        <p>
-                          Bank-grade security protocols protecting your digital assets
-                        </p>
-                      </div>
-                    </div>
-                    <div className="about-box bg-color border-none">
-                      <div className="icon">
-                        <Icon icon={Zap} size={32} variant="purple" className="mono-icon" />
-                      </div>
-                      <div className="content">
-                        <h5>Lightning Fast</h5>
-                        <p>
-                          Optimized performance at scale for global operations
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="about-box-item">
-                    <div className="about-box bg-color border-none">
-                      <div className="icon">
-                        <Icon icon={Globe} size={32} variant="purple" className="mono-icon" />
-                      </div>
-                      <div className="content">
-                        <h5>Global Reach</h5>
-                        <p>
-                          Operate seamlessly in 150+ countries worldwide
-                        </p>
-                      </div>
-                    </div>
-                    <div className="about-box bg-color border-none">
-                      <div className="icon">
-                        <Icon icon={CheckCircle} size={32} variant="purple" className="mono-icon" />
-                      </div>
-                      <div className="content">
-                        <h5>Compliance Ready</h5>
-                        <p>
-                          Meet international standards and regulatory requirements
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="section-title">
+                  <h2 className="wow fadeInUp" data-wow-delay=".6s" style={{ fontSize: '32px', fontWeight: 800, lineHeight: 1.3, marginBottom: '16px', color: '#fff' }}>
+                    Sứ mệnh
+                  </h2>
+                  <p className="wow fadeInUp" data-wow-delay=".7s" style={{ fontSize: '16px', lineHeight: 1.7, color: 'rgba(255,255,255,0.85)' }}>
+                    Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á — đặt Việt Nam lên bản đồ gaming toàn cầu.
+                  </p>
                 </div>
               </div>
             </div>
@@ -98,9 +55,13 @@ export default function AboutSection7() {
           position: relative;
           isolation: isolate;
           background:
-            radial-gradient(circle at 16% 8%, rgba(108, 92, 231, 0.18) 0%, transparent 30%),
-            linear-gradient(180deg, #120a32 0%, #0b071d 54%, #06060a 100%) !important;
-          background-color: #0b071d !important;
+            radial-gradient(circle at 16% 8%, rgba(108, 92, 231, 0.12) 0%, transparent 30%),
+            linear-gradient(180deg, rgba(18, 10, 50, 0.7) 0%, rgba(11, 7, 29, 0.5) 54%, rgba(6, 6, 10, 0.8) 100%) !important;
+          background-color: rgba(11, 7, 29, 0.4) !important;
+        }
+
+        .text-purple {
+          color: #8b7ae8;
         }
 
         .about-section-purple .about-image-2 .bg-shape img {
@@ -152,6 +113,47 @@ export default function AboutSection7() {
           width: 100% !important;
           height: 100% !important;
         }
+
+        .loading-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(6, 6, 10, 0.8);
+          backdrop-filter: blur(10px);
+          z-index: 10;
+        }
+
+        .loading-circle {
+          width: 100px;
+          height: 100px;
+          transform: rotate(-90deg);
+        }
+
+        .loading-bg {
+          fill: none;
+          stroke: rgba(108, 92, 231, 0.2);
+          stroke-width: 4;
+        }
+
+        .loading-progress {
+          fill: none;
+          stroke: #8b7ae8;
+          stroke-width: 4;
+          stroke-linecap: round;
+          transition: stroke-dasharray 0.3s ease;
+          filter: drop-shadow(0 0 8px rgba(139, 122, 232, 0.8));
+        }
+
+        .loading-text {
+          position: absolute;
+          font-size: 24px;
+          font-weight: 700;
+          color: #fff;
+          text-shadow: 0 0 20px rgba(139, 122, 232, 0.8);
+        }
       `}</style>
     </section>
   );
@@ -159,6 +161,7 @@ export default function AboutSection7() {
 
 function AboutGlbModel() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -227,32 +230,42 @@ function AboutGlbModel() {
     };
 
     const loader = new GLTFLoader();
-    loader.load('/assets/img/home-7/3d/3d_4.glb', (gltf) => {
-      if (disposed) return;
+    loader.load(
+      '/assets/img/home-7/3d/3d_4.glb',
+      (gltf) => {
+        if (disposed) return;
 
-      const model = gltf.scene;
-      model.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
+        const model = gltf.scene;
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        const box = new THREE.Box3().setFromObject(model);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+
+        model.position.sub(center);
+        const maxDimension = Math.max(size.x, size.y, size.z);
+        if (maxDimension > 0) {
+          model.scale.setScalar(2.75 / maxDimension);
         }
-      });
 
-      const box = new THREE.Box3().setFromObject(model);
-      const size = new THREE.Vector3();
-      const center = new THREE.Vector3();
-      box.getSize(size);
-      box.getCenter(center);
-
-      model.position.sub(center);
-      const maxDimension = Math.max(size.x, size.y, size.z);
-      if (maxDimension > 0) {
-        model.scale.setScalar(2.75 / maxDimension);
+        model.rotation.set(0.08, -0.28, 0);
+        modelGroup.add(model);
+        setLoadingProgress(100);
+      },
+      (xhr) => {
+        if (xhr.lengthComputable) {
+          const percent = Math.min((xhr.loaded / xhr.total) * 100, 95);
+          setLoadingProgress(Math.floor(percent));
+        }
       }
-
-      model.rotation.set(0.08, -0.28, 0);
-      modelGroup.add(model);
-    });
+    );
 
     resize();
     frame();
@@ -277,5 +290,24 @@ function AboutGlbModel() {
     };
   }, []);
 
-  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <>
+      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+      {loadingProgress < 100 && (
+        <div className="loading-overlay">
+          <svg className="loading-circle" viewBox="0 0 100 100">
+            <circle className="loading-bg" cx="50" cy="50" r="40" />
+            <circle
+              className="loading-progress"
+              cx="50"
+              cy="50"
+              r="40"
+              strokeDasharray={`${loadingProgress * 2.51} 251.2`}
+            />
+          </svg>
+          <div className="loading-text">{loadingProgress}%</div>
+        </div>
+      )}
+    </>
+  );
 }

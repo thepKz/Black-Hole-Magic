@@ -3,6 +3,81 @@
 import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 
+const HOME_PRELOAD_ASSETS = [
+  '/assets/video/background_1.webm',
+  '/assets/video/background_1.mp4',
+  '/assets/video/background_1_pingpong.webm',
+  '/assets/video/background_1_pingpong.mp4',
+  '/assets/img/landing-page/shape-2.png',
+  '/assets/img/landing-page/iphone_2.png',
+  '/assets/img/home-7/3d/3d_4.glb',
+  '/assets/img/home-7/about/bg-shape.png',
+  '/assets/img/home-7/about/ellipse.png',
+  '/assets/img/home-7/service-bg.jpg',
+  '/assets/img/home-7/dot.png',
+  '/assets/img/home-7/icon/01.svg',
+  '/assets/img/home-7/icon/02.svg',
+  '/assets/img/home-7/icon/03.svg',
+  '/assets/img/home-7/icon/04.svg',
+  '/assets/img/logo/white-logo.svg',
+  '/assets/img/logo/white-logo-3.svg',
+  '/assets/img/logo/dot.svg',
+  '/assets/img/header/home-7.jpg',
+  '/assets/img/home-3/game-case-study/game-01.jpg',
+  '/assets/img/home-3/game-case-study/game-02.jpg',
+  '/assets/img/home-3/game-case-study/game-03.jpg',
+  '/assets/img/home-3/game-case-study/game-04.jpg',
+  '/assets/img/home-3/game-case-study/game-05.jpg',
+  '/assets/img/home-3/game-case-study/game-06.jpg',
+  '/assets/img/home-3/top-feature.png',
+  '/assets/img/home-3/ellipse-bg.png',
+  '/assets/img/home-3/icon/12.svg',
+  '/assets/img/home-3/icon/13.svg',
+  '/assets/img/home-3/icon/14.svg',
+  '/assets/img/home-3/team/team-01.jpg',
+  '/assets/img/home-3/team/team-02.jpg',
+  '/assets/img/home-3/team/team-03.jpg',
+  '/assets/img/home-3/team/team-04.jpg',
+  '/assets/img/home-3/team/ellipse.png',
+  '/assets/img/home-3/testimonial/client-1.png',
+  '/assets/img/home-3/testimonial-image.png',
+  '/assets/img/home-3/counter-bg.jpg',
+  '/assets/img/home-3/news/news-01.jpg',
+  '/assets/img/home-3/news/news-02.jpg',
+  '/assets/img/home-3/news/news-03.jpg',
+  '/assets/img/home-5/Footer.png',
+];
+
+function preloadImage(src: string) {
+  return new Promise<void>((resolve) => {
+    const image = new Image();
+    image.decoding = 'async';
+    image.onload = () => {
+      image.decode?.().catch(() => undefined).finally(resolve);
+    };
+    image.onerror = () => resolve();
+    image.src = src;
+  });
+}
+
+function preloadFile(src: string) {
+  return fetch(src, { cache: 'force-cache' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Failed to preload ${src}`);
+      return response.arrayBuffer();
+    })
+    .then(() => undefined)
+    .catch(() => undefined);
+}
+
+function preloadAsset(src: string) {
+  if (/\.(png|jpe?g|webp|gif|svg)$/i.test(src)) {
+    return preloadImage(src);
+  }
+
+  return preloadFile(src);
+}
+
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -11,17 +86,55 @@ export default function Preloader() {
 
   useEffect(() => {
     document.body.dataset.preloaderDone = 'false';
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const startedAt = performance.now();
+    let cancelled = false;
 
-    // Progress counter animation
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
+    const completePreloader = () => {
+      if (cancelled) return;
+
+      setProgress(100);
+
+      const elapsed = performance.now() - startedAt;
+      const remainingMinimumTime = Math.max(0, 900 - elapsed);
+
+      window.setTimeout(() => {
+        if (cancelled || !preloaderRef.current) return;
+
+        gsap.to(preloaderRef.current, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.8,
+          ease: 'power2.inOut',
+          onComplete: () => {
+            document.body.dataset.preloaderDone = 'true';
+            document.body.style.overflow = originalOverflow;
+            window.dispatchEvent(new Event('black-hole:preloader-complete'));
+            setIsLoaded(true);
+          },
+        });
+      }, remainingMinimumTime);
+    };
+
+    const loadHomepageAssets = async () => {
+      const totalAssets = HOME_PRELOAD_ASSETS.length + 1;
+      let completedAssets = 0;
+
+      const markComplete = () => {
+        completedAssets += 1;
+        if (!cancelled) {
+          setProgress(Math.min(99, Math.round((completedAssets / totalAssets) * 100)));
         }
-        return prev + Math.random() * 15;
-      });
-    }, 150);
+      };
+
+      await Promise.all([
+        ...HOME_PRELOAD_ASSETS.map((asset) => preloadAsset(asset).finally(markComplete)),
+        document.fonts.ready.then(markComplete).catch(markComplete),
+      ]);
+
+      completePreloader();
+    };
 
     // GSAP animations
     const ctx = gsap.context(() => {
@@ -81,26 +194,11 @@ export default function Preloader() {
       });
     });
 
-    // Exit animation when loaded
-    const exitTimer = setTimeout(() => {
-      if (preloaderRef.current) {
-        gsap.to(preloaderRef.current, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.8,
-          ease: 'power2.inOut',
-          onComplete: () => {
-            document.body.dataset.preloaderDone = 'true';
-            window.dispatchEvent(new Event('black-hole:preloader-complete'));
-            setIsLoaded(true);
-          },
-        });
-      }
-    }, 3000);
+    loadHomepageAssets();
 
     return () => {
-      clearInterval(progressInterval);
-      clearTimeout(exitTimer);
+      cancelled = true;
+      document.body.style.overflow = originalOverflow;
       ctx.revert();
     };
   }, []);
