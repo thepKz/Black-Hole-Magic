@@ -349,18 +349,18 @@ export default function HeroSection7() {
         .hero-cta {
           pointer-events: auto;
           position: absolute;
-          right: -122px;
-          top: 63%;
-          transform: translateY(-50%);
+          left: 50%;
+          top: 75%;
+          transform: translate(-50%);
           z-index: 4;
           background:
             radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.28), transparent 34%),
             linear-gradient(135deg, #19084f 0%, #4f24e7 52%, #00c8ff 145%);
           border: 2px solid #c2b7ff;
-          padding: 18px 40px;
-          min-width: 226px;
-          min-height: 72px;
-          font-size: 15px;
+          padding: 12px 24px;
+          min-width: 160px;
+          min-height: 50px;
+          font-size: 12px;
           font-weight: 700;
           letter-spacing: 2px;
           line-height: 1;
@@ -404,7 +404,6 @@ export default function HeroSection7() {
             radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.36), transparent 34%),
             linear-gradient(135deg, #21076d 0%, #6a45ff 54%, #00d9ff 142%);
           border-color: #ffffff;
-          transform: translateY(calc(-50% - 3px));
           box-shadow:
             0 0 28px rgba(255, 255, 255, 0.82),
             0 0 70px rgba(108, 92, 231, 0.98),
@@ -419,7 +418,7 @@ export default function HeroSection7() {
         }
 
         .hero-cta:active {
-          transform: translateY(calc(-50% - 1px)) scale(0.99);
+          transform: translate(-50%, 1px) scale(0.99);
         }
 
         .hero-cta-arrow {
@@ -534,7 +533,7 @@ export default function HeroSection7() {
           }
 
           .hero-cta {
-            right: -132px;
+            left: 50%;
           }
 
           .hero-copy-container {
@@ -573,11 +572,12 @@ export default function HeroSection7() {
           }
 
           .hero-cta {
-            min-width: 204px;
-            min-height: 62px;
-            right: -96px;
-            top: 68%;
-            padding: 15px 28px;
+            min-width: 140px;
+            min-height: 46px;
+            left: 50%;
+            top: 64%;
+            padding: 10px 20px;
+            font-size: 11px;
           }
 
           .hero-main-title {
