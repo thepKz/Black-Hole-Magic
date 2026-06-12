@@ -75,7 +75,7 @@ export default function HeroSection7() {
             trigger: heroRef.current,
             start: 'top top',
             end: '+=70%',
-            scrub: 0.6,
+            scrub: 1,
             invalidateOnRefresh: true,
           },
           defaults: {
@@ -86,7 +86,9 @@ export default function HeroSection7() {
           },
         })
           .to('.hero-video-bg', { scale: 1.085, duration: 1 }, 0)
-          .to('.hero-contrast-layer', { autoAlpha: 0.25, duration: 1 }, 0)
+          // fully invisible — anything left at >0 opacity becomes a dark veil
+          // that visibly scrolls away when the sticky hero releases
+          .to('.hero-contrast-layer', { autoAlpha: 0, duration: 1 }, 0)
           .to('.hero-action-cluster', { xPercent: -116, rotation: -14, autoAlpha: 0 }, 0)
           .to('.hero-main-title', { xPercent: -42, autoAlpha: 0 }, 0)
           .to('.hero-kicker-text', { xPercent: -30, autoAlpha: 0 }, 0)
@@ -142,9 +144,12 @@ export default function HeroSection7() {
         // Frost the video only once the About glass panel actually starts
         // entering the screen (after the hero pieces finish their exit) —
         // never during the first stretch of scrolling.
+        // Frost only when the panel already covers ~75% of the screen — the
+        // blur transition then happens mostly BEHIND the panel, so there is
+        // no visible "background suddenly blurs" jolt.
         ScrollTrigger.create({
           trigger: '.about-story',
-          start: 'top 78%',
+          start: 'top 25%',
           end: 'bottom top',
           invalidateOnRefresh: true,
           toggleClass: { targets: '.hero-video-bg', className: 'is-frosted' },

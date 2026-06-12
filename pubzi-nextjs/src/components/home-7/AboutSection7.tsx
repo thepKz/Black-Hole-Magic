@@ -311,9 +311,10 @@ export default function AboutSection7() {
             /* Glass panel: the video behind is blurred by the hero-exit tween
                (see HeroSection7) — this layer only tints. No backdrop-filter:
                re-sampling the whole stack each frame is what melted the GPU. */
-            /* transparent top fade — the panel must never read as a hard-edged
-               dark block sliding over the video */
-            background: linear-gradient(180deg, rgba(8, 5, 20, 0) 0%, rgba(8, 5, 20, 0.38) 14%, rgba(8, 5, 20, 0.26) 46%, rgba(8, 5, 20, 0.48) 100%);
+            /* Uniform tint with a small FIXED-SIZE soft top edge (90px) —
+               soft enough that the rising panel has no hard line, small
+               enough that it reads as an edge, not a traveling gradient */
+            background: linear-gradient(180deg, rgba(8, 5, 20, 0) 0, rgba(8, 5, 20, 0.4) 90px, rgba(8, 5, 20, 0.4) 100%);
           }
 
           .about-model-track {

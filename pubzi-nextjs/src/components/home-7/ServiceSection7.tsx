@@ -29,6 +29,20 @@ const VALUES = [
   },
 ];
 
+// Splits a string into word spans so GSAP can scrub them one by one.
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="sw">
+          {w}
+          {' '}
+        </span>
+      ))}
+    </>
+  );
+}
+
 export default function ServiceSection7() {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -50,17 +64,21 @@ export default function ServiceSection7() {
         }
       );
 
-      gsap.fromTo(
-        '.values-title',
-        { clipPath: 'inset(0 0 100% 0)', y: 34 },
-        {
-          clipPath: 'inset(0 0 -12% 0)',
-          y: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: '.values-head', start: 'top 78%', toggleActions: 'play none none reverse' },
-        }
-      );
+      // Words light up as you scroll (scrubbed — runs forward and backward).
+      gsap.utils.toArray<HTMLElement>('.values-title, .vrow-title, .vrow-body').forEach((el) => {
+        const words = el.querySelectorAll('.sw');
+        if (!words.length) return;
+        gsap.fromTo(
+          words,
+          { opacity: 0.14 },
+          {
+            opacity: 1,
+            stagger: 0.06,
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 42%', scrub: 0.6 },
+          }
+        );
+      });
 
       gsap.fromTo(
         '.values-lede',
@@ -79,30 +97,18 @@ export default function ServiceSection7() {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: row, start: 'top 82%', toggleActions: 'play none none reverse' },
         });
+        // hairline + ghost number play once; the text itself is scrubbed above
         tl.fromTo(
           row.querySelector('.vrow-line'),
           { scaleX: 0 },
           { scaleX: 1, duration: 0.85, ease: 'power3.inOut' },
           0
-        )
-          .fromTo(
-            row.querySelector('.vrow-num'),
-            { yPercent: 55, autoAlpha: 0 },
-            { yPercent: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out' },
-            0.15
-          )
-          .fromTo(
-            row.querySelector('.vrow-title'),
-            { clipPath: 'inset(0 0 100% 0)', y: 26 },
-            { clipPath: 'inset(0 0 -12% 0)', y: 0, duration: 0.7, ease: 'power3.out' },
-            0.22
-          )
-          .fromTo(
-            row.querySelector('.vrow-body'),
-            { autoAlpha: 0, y: 20 },
-            { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
-            0.38
-          );
+        ).fromTo(
+          row.querySelector('.vrow-num'),
+          { yPercent: 55, autoAlpha: 0 },
+          { yPercent: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out' },
+          0.15
+        );
       });
     }, section);
 
@@ -116,9 +122,9 @@ export default function ServiceSection7() {
           <h6 className="values-kicker">LỢI THẾ CẠNH TRANH</h6>
           <div className="values-head-row">
             <h2 className="values-title">
-              Vì sao chọn
+              <Words text="Vì sao chọn" />
               <br />
-              Blackhole Game
+              <Words text="Blackhole Game" />
             </h2>
             <p className="values-lede">
               Bốn nguyên tắc vận hành đứng sau mọi sản phẩm chúng tôi đồng phát hành tại thị trường Việt Nam.
@@ -131,8 +137,12 @@ export default function ServiceSection7() {
             <article key={v.num} className="vrow">
               <span className="vrow-line" aria-hidden="true" />
               <span className="vrow-num">{v.num}</span>
-              <h3 className="vrow-title">{v.title}</h3>
-              <p className="vrow-body">{v.body}</p>
+              <h3 className="vrow-title">
+                <Words text={v.title} />
+              </h3>
+              <p className="vrow-body">
+                <Words text={v.body} />
+              </p>
             </article>
           ))}
           <span className="vrail-end" aria-hidden="true" />
@@ -145,6 +155,32 @@ export default function ServiceSection7() {
           z-index: 9;
           background: #080614;
           padding: 150px 0 160px;
+        }
+
+        /* Seam connecting the About glass story to this solid section:
+           a fade band reaching UP over the story's tail + a glow hairline. */
+        .values-section::before {
+          content: '';
+          position: absolute;
+          top: -160px;
+          left: 0;
+          right: 0;
+          height: 160px;
+          background: linear-gradient(180deg, rgba(8, 6, 20, 0) 0%, #080614 96%);
+          pointer-events: none;
+        }
+
+        .values-section::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: min(72vw, 1100px);
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.55) 50%, transparent);
+          box-shadow: 0 0 18px rgba(139, 122, 232, 0.35);
+          pointer-events: none;
         }
 
         .values-container {

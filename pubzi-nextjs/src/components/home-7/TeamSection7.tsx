@@ -1,195 +1,311 @@
 'use client';
 
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-import 'swiper/css';
+gsap.registerPlugin(ScrollTrigger);
 
-interface TeamMember {
-  id: number;
-  name: string;
-  role: string;
-  image: string;
-  socialLinks: {
-    facebook?: string;
-    twitter?: string;
-    linkedin?: string;
-    instagram?: string;
-  };
-}
-
-const teamMembers: TeamMember[] = [
+// NOTE: placeholder names + template images — swap with the real
+// streamer/creator roster (images in public/assets/img/home-4/team/).
+const PARTNERS = [
   {
-    id: 1,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-01.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
+    name: 'Linh Katy',
+    role: 'Creator · Võ Lâm Truyền Kỳ',
+    tag: '1.2M followers',
+    image: '/assets/img/home-4/team/team-01.png',
   },
   {
-    id: 2,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-02.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
+    name: 'Phong JX',
+    role: 'Caster · Giải đấu JX2',
+    tag: '860K followers',
+    image: '/assets/img/home-4/team/team-02.png',
   },
   {
-    id: 3,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-03.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
+    name: 'Đại Ca Mobile',
+    role: 'Streamer · Kiếm Thế Mobile',
+    tag: '640K followers',
+    image: '/assets/img/home-4/team/team-03.png',
   },
   {
-    id: 4,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-04.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
-  },
-  {
-    id: 5,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-02.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
-  },
-  {
-    id: 6,
-    name: 'Chun Qing',
-    role: 'gaming artist',
-    image: '/assets/img/home-3/team/team-04.jpg',
-    socialLinks: {
-      facebook: '#',
-      twitter: '#',
-      linkedin: '#',
-      instagram: '#',
-    },
+    name: 'Tơ Lụa TV',
+    role: 'Cộng đồng · Con Đường Tơ Lụa',
+    tag: '420K followers',
+    image: '/assets/img/home-4/team/team-04.png',
   },
 ];
 
-const TeamSection7: React.FC = () => {
+export default function TeamSection7() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.ptn-kicker',
+        { autoAlpha: 0, y: 18 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.ptn-head', start: 'top 80%', toggleActions: 'play none none reverse' },
+        }
+      );
+
+      gsap.fromTo(
+        '.ptn-title',
+        { clipPath: 'inset(0 0 100% 0)', y: 30 },
+        {
+          clipPath: 'inset(0 0 -12% 0)',
+          y: 0,
+          duration: 0.85,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.ptn-head', start: 'top 78%', toggleActions: 'play none none reverse' },
+        }
+      );
+
+      gsap.fromTo(
+        '.ptn-card',
+        { clipPath: 'inset(100% 0 0 0)', y: 26 },
+        {
+          clipPath: 'inset(0% 0 0 0)',
+          y: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.ptn-grid', start: 'top 80%', toggleActions: 'play none none reverse' },
+        }
+      );
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="gt-team-section-3 fix section-padding bg-cover">
-      <div className="container">
-        <div className="section-title-area">
-          <div className="section-title">
-            <h6>great team</h6>
-            <h2>
-              great team player
+    <section ref={sectionRef} className="ptn-section">
+      <div className="ptn-container">
+        <div className="ptn-head">
+          <h6 className="ptn-kicker">MẠNG LƯỚI SÁNG TẠO</h6>
+          <div className="ptn-head-row">
+            <h2 className="ptn-title">
+              Đối tác đồng hành
+              <br />
+              cùng Blackhole Game
             </h2>
-          </div>
-          <div className="dot-number">
-            {[1, 2, 3, 4, 5, 6].map((num) => (
-              <span key={num} className={`dot-num ${num === 1 ? 'active' : ''}`}>
-                <span>{num.toString().padStart(2, '0')}</span>
-              </span>
-            ))}
+            <p className="ptn-lede">
+              Streamer, caster và cộng đồng sáng tạo nội dung đưa từng tựa game đến gần hơn với người chơi Việt.
+            </p>
           </div>
         </div>
-      </div>
-      <div className="ellipse-bg-shape">
-        <Image
-          src="/assets/img/home-3/team/ellipse.png"
-          alt="img"
-          width={1920}
-          height={800}
-        />
-      </div>
-      <Swiper
-        className="gt-team-slider-3"
-        modules={[Autoplay]}
-        spaceBetween={0}
-        slidesPerView={1}
-        loop={true}
-        speed={1000}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
-        breakpoints={{
-          576: {
-            slidesPerView: 2,
-          },
-          768: {
-            slidesPerView: 3,
-          },
-          992: {
-            slidesPerView: 4,
-          },
-        }}
-      >
-        {teamMembers.map((member) => (
-          <SwiperSlide key={member.id}>
-            <div className="gt-team-image-3 team-card">
-              <Image
-                src={member.image}
-                alt={member.name}
-                width={400}
-                height={500}
-              />
-              <div className="gt-content">
-                <h3>
-                  <Link href="/team-details">{member.name}</Link>
-                </h3>
-                <p>{member.role}</p>
+
+        <div className="ptn-grid">
+          {PARTNERS.map((p) => (
+            <article key={p.name} className="ptn-card" tabIndex={0}>
+              <div className="ptn-photo">
+                <img src={p.image} alt={p.name} loading="lazy" />
               </div>
-              <div className="gt-social-icon d-flex align-items-center">
-                {member.socialLinks.facebook && (
-                  <Link href={member.socialLinks.facebook}>
-                    <i className="fab fa-facebook-f"></i>
-                  </Link>
-                )}
-                {member.socialLinks.twitter && (
-                  <Link href={member.socialLinks.twitter}>
-                    <i className="fab fa-twitter"></i>
-                  </Link>
-                )}
-                {member.socialLinks.linkedin && (
-                  <Link href={member.socialLinks.linkedin}>
-                    <i className="fa-brands fa-linkedin-in"></i>
-                  </Link>
-                )}
-                {member.socialLinks.instagram && (
-                  <Link href={member.socialLinks.instagram}>
-                    <i className="fa-brands fa-instagram"></i>
-                  </Link>
-                )}
+              <span className="ptn-tag">{p.tag}</span>
+              <div className="ptn-info">
+                <h3>{p.name}</h3>
+                <p>{p.role}</p>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+              <span className="ptn-edge" aria-hidden="true" />
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .ptn-section {
+          position: relative;
+          z-index: 9;
+          background: #080614;
+          padding: 140px 0 150px;
+        }
+
+        .ptn-container {
+          max-width: 1520px;
+          margin: 0 auto;
+          padding: 0 48px;
+        }
+
+        .ptn-head {
+          margin-bottom: 64px;
+        }
+
+        .ptn-kicker {
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #8b7ae8;
+          margin-bottom: 24px;
+        }
+
+        .ptn-head-row {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 48px;
+          align-items: end;
+        }
+
+        .ptn-title {
+          font-size: clamp(36px, 3.8vw, 56px);
+          font-weight: 800;
+          line-height: 1.1;
+          color: #fff;
+          margin: 0;
+          text-shadow:
+            0 0 22px rgba(255, 255, 255, 0.28),
+            0 0 56px rgba(139, 122, 232, 0.5);
+          will-change: clip-path, transform;
+        }
+
+        .ptn-lede {
+          font-size: 17px;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.62);
+          text-transform: none;
+          max-width: 44ch;
+          margin: 0 0 8px auto;
+          text-align: right;
+        }
+
+        .ptn-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 22px;
+        }
+
+        .ptn-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 14px;
+          border: 1px solid rgba(139, 122, 232, 0.18);
+          background: rgba(13, 9, 32, 0.55);
+          cursor: pointer;
+          outline: none;
+          transition: border-color 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: clip-path, transform;
+        }
+
+        .ptn-card:hover,
+        .ptn-card:focus-visible {
+          border-color: rgba(176, 156, 255, 0.55);
+          transform: translateY(-6px);
+        }
+
+        .ptn-photo {
+          aspect-ratio: 4 / 4.6;
+          overflow: hidden;
+        }
+
+        .ptn-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(0.55) brightness(0.82);
+          transform: scale(1.04);
+          transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ptn-card:hover .ptn-photo img,
+        .ptn-card:focus-visible .ptn-photo img {
+          filter: saturate(1) brightness(1);
+          transform: scale(1);
+        }
+
+        .ptn-tag {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          padding: 5px 12px;
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: #d9d0ff;
+          background: rgba(10, 6, 28, 0.72);
+          border: 1px solid rgba(139, 122, 232, 0.35);
+          backdrop-filter: blur(4px);
+        }
+
+        .ptn-info {
+          padding: 20px 22px 22px;
+        }
+
+        .ptn-info h3 {
+          font-size: 19px;
+          font-weight: 700;
+          color: #fff;
+          margin: 0 0 6px;
+        }
+
+        .ptn-info p {
+          font-size: 13px;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: rgba(196, 184, 255, 0.7);
+          margin: 0;
+        }
+
+        .ptn-edge {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #8b7ae8, rgba(108, 92, 231, 0.1));
+          transform: scaleX(0);
+          transform-origin: left center;
+          transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .ptn-card:hover .ptn-edge,
+        .ptn-card:focus-visible .ptn-edge {
+          transform: scaleX(1);
+        }
+
+        @media (max-width: 1199px) {
+          .ptn-head-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          .ptn-lede {
+            text-align: left;
+            margin-left: 0;
+          }
+
+          .ptn-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 600px) {
+          .ptn-section {
+            padding: 90px 0 100px;
+          }
+
+          .ptn-container {
+            padding: 0 24px;
+          }
+
+          .ptn-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .ptn-head {
+            margin-bottom: 44px;
+          }
+        }
+      `}</style>
     </section>
   );
-};
-
-export default TeamSection7;
+}

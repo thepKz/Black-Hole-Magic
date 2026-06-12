@@ -8,6 +8,7 @@ import "./glow-effects.css";
 import "./gsap-animations.css";
 import BackToTop from "@/components/shared/BackToTop";
 import MouseCursor from "@/components/shared/MouseCursor";
+import SmoothScroll from "@/components/shared/SmoothScroll";
 import ClientInit from "@/components/ClientInit";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/main.css" />
       </head>
       <body>
+        <SmoothScroll />
         <BackToTop />
         <MouseCursor />
         {children}
