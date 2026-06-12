@@ -6,6 +6,20 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Splits a string into word spans so GSAP can scrub them one by one.
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="sw">
+          {w}
+          {' '}
+        </span>
+      ))}
+    </>
+  );
+}
+
 // NOTE: placeholder names + template images — swap with the real
 // streamer/creator roster (images in public/assets/img/home-4/team/).
 const PARTNERS = [
@@ -56,17 +70,21 @@ export default function TeamSection7() {
         }
       );
 
-      gsap.fromTo(
-        '.ptn-title',
-        { clipPath: 'inset(0 0 100% 0)', y: 30 },
-        {
-          clipPath: 'inset(0 0 -12% 0)',
-          y: 0,
-          duration: 0.85,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: '.ptn-head', start: 'top 78%', toggleActions: 'play none none reverse' },
-        }
-      );
+      // Title + lede light up word by word with scroll, matching the other home-7 text sections.
+      gsap.utils.toArray<HTMLElement>('.ptn-title, .ptn-lede').forEach((el) => {
+        const words = el.querySelectorAll('.sw');
+        if (!words.length) return;
+        gsap.fromTo(
+          words,
+          { opacity: 0.14 },
+          {
+            opacity: 1,
+            stagger: 0.055,
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top 88%', end: 'top 42%', scrub: 0.6 },
+          }
+        );
+      });
 
       gsap.fromTo(
         '.ptn-card',
@@ -92,12 +110,12 @@ export default function TeamSection7() {
           <h6 className="ptn-kicker">MẠNG LƯỚI SÁNG TẠO</h6>
           <div className="ptn-head-row">
             <h2 className="ptn-title">
-              Đối tác đồng hành
+              <Words text="Đối tác đồng hành" />
               <br />
-              cùng Blackhole Game
+              <Words text="cùng Blackhole Game" />
             </h2>
             <p className="ptn-lede">
-              Streamer, caster và cộng đồng sáng tạo nội dung đưa từng tựa game đến gần hơn với người chơi Việt.
+              <Words text="Streamer, caster và cộng đồng sáng tạo nội dung đưa từng tựa game đến gần hơn với người chơi Việt." />
             </p>
           </div>
         </div>
@@ -130,7 +148,7 @@ export default function TeamSection7() {
         .ptn-container {
           max-width: 1520px;
           margin: 0 auto;
-          padding: 0 48px;
+          padding: 0 clamp(24px, 4vw, 64px);
         }
 
         .ptn-head {
@@ -148,13 +166,14 @@ export default function TeamSection7() {
 
         .ptn-head-row {
           display: grid;
-          grid-template-columns: 1.2fr 1fr;
-          gap: 48px;
+          grid-template-columns: minmax(0, 0.95fr) minmax(360px, 520px);
+          gap: clamp(32px, 5vw, 84px);
           align-items: end;
         }
 
         .ptn-title {
-          font-size: clamp(36px, 3.8vw, 56px);
+          max-width: 780px;
+          font-size: clamp(40px, 3.8vw, 58px);
           font-weight: 800;
           line-height: 1.1;
           color: #fff;
@@ -162,15 +181,14 @@ export default function TeamSection7() {
           text-shadow:
             0 0 22px rgba(255, 255, 255, 0.28),
             0 0 56px rgba(139, 122, 232, 0.5);
-          will-change: clip-path, transform;
         }
 
         .ptn-lede {
-          font-size: 17px;
-          line-height: 1.7;
+          font-size: clamp(15px, 1vw, 17px);
+          line-height: 1.65;
           color: rgba(255, 255, 255, 0.62);
           text-transform: none;
-          max-width: 44ch;
+          max-width: 46ch;
           margin: 0 0 8px auto;
           text-align: right;
         }
@@ -271,15 +289,27 @@ export default function TeamSection7() {
           transform: scaleX(1);
         }
 
-        @media (max-width: 1199px) {
+        @media (max-width: 1399px) {
           .ptn-head-row {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 22px;
+            align-items: start;
+          }
+
+          .ptn-title {
+            max-width: 860px;
           }
 
           .ptn-lede {
+            max-width: 64ch;
             text-align: left;
-            margin-left: 0;
+            margin: 0;
+          }
+        }
+
+        @media (max-width: 1199px) {
+          .ptn-head-row {
+            grid-template-columns: 1fr;
           }
 
           .ptn-grid {
@@ -303,6 +333,20 @@ export default function TeamSection7() {
 
           .ptn-head {
             margin-bottom: 44px;
+          }
+
+          .ptn-title {
+            font-size: clamp(34px, 10vw, 48px);
+          }
+
+          .ptn-kicker {
+            font-size: 11px;
+            letter-spacing: 2.4px;
+          }
+
+          .ptn-lede {
+            font-size: 14px;
+            line-height: 1.65;
           }
         }
       `}</style>

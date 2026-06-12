@@ -12,6 +12,22 @@ interface GameItem {
   genre: string;
   platform: string;
   image: string;
+  code: string;
+  accent: string;
+}
+
+// Splits a string into word spans so GSAP can scrub them one by one.
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="sw">
+          {w}
+          {' '}
+        </span>
+      ))}
+    </>
+  );
 }
 
 // NOTE: images are template placeholders — drop the real key-art into
@@ -19,6 +35,8 @@ interface GameItem {
 const GAMES: GameItem[] = [
   {
     num: '01',
+    code: 'VL2',
+    accent: '#8b7ae8',
     title: 'Võ Lâm Truyền Kỳ 2',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'PC',
@@ -26,6 +44,8 @@ const GAMES: GameItem[] = [
   },
   {
     num: '02',
+    code: 'JX2',
+    accent: '#6fa8ff',
     title: 'Võ Lâm JX2 Global',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'Global',
@@ -33,6 +53,8 @@ const GAMES: GameItem[] = [
   },
   {
     num: '03',
+    code: 'KT',
+    accent: '#b07ae8',
     title: 'Kiếm Thế Mobile',
     genre: 'MMORPG',
     platform: 'Mobile',
@@ -40,6 +62,8 @@ const GAMES: GameItem[] = [
   },
   {
     num: '04',
+    code: 'TL',
+    accent: '#7adcff',
     title: 'Con Đường Tơ Lụa',
     genre: 'MMORPG',
     platform: 'PC',
@@ -47,6 +71,8 @@ const GAMES: GameItem[] = [
   },
   {
     num: '05',
+    code: 'TLBB',
+    accent: '#9d7aff',
     title: 'Thiên Long Bát Bộ',
     genre: 'MMORPG',
     platform: 'PC & Mobile',
@@ -75,17 +101,28 @@ export default function GameCaseStudySection() {
         }
       );
 
-      gsap.fromTo(
-        '.games-title',
-        { clipPath: 'inset(0 0 100% 0)', y: 34 },
-        {
-          clipPath: 'inset(0 0 -12% 0)',
-          y: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: '.games-head', start: 'top 78%', toggleActions: 'play none none reverse' },
-        }
-      );
+      // Title lights up word by word with the scroll.
+      const titleWords = document.querySelectorAll('.games-title .sw');
+      if (titleWords.length) {
+        gsap.fromTo(
+          titleWords,
+          { opacity: 0.14 },
+          {
+            opacity: 1,
+            stagger: 0.06,
+            ease: 'none',
+            scrollTrigger: { trigger: '.games-head', start: 'top 88%', end: 'top 40%', scrub: 0.6 },
+          }
+        );
+      }
+
+      // Kinetic marquee band — one seamless loop, transform-only.
+      gsap.to('.games-marquee-track', {
+        xPercent: -50,
+        duration: 30,
+        ease: 'none',
+        repeat: -1,
+      });
 
       gsap.fromTo(
         '.games-lede',
@@ -124,9 +161,9 @@ export default function GameCaseStudySection() {
           <h6 className="games-kicker">DANH MỤC PHÁT HÀNH</h6>
           <div className="games-head-row">
             <h2 className="games-title">
-              Những tựa game
+              <Words text="Những tựa game" />
               <br />
-              chúng tôi đồng hành
+              <Words text="chúng tôi đồng hành" />
             </h2>
             <p className="games-lede">
               Các IP đã và đang được Blackhole Game đồng phát hành, vận hành và tăng trưởng tại thị trường Việt Nam.
@@ -134,14 +171,36 @@ export default function GameCaseStudySection() {
           </div>
         </div>
 
+        <div className="games-marquee" aria-hidden="true">
+          <div className="games-marquee-track">
+            {[0, 1].map((dup) => (
+              <span key={dup} className="games-marquee-seg">
+                {GAMES.map((g) => (
+                  <span key={g.num} className="games-marquee-item">
+                    {g.title}
+                    <i />
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <div className="games-strip">
           {GAMES.map((g) => (
-            <article key={g.num} className="game-panel" tabIndex={0}>
+            <article
+              key={g.num}
+              className="game-panel"
+              tabIndex={0}
+              style={{ ['--gp-accent' as string]: g.accent }}
+            >
               <div
                 className="game-panel-art"
                 style={{ backgroundImage: `url('${g.image}')` }}
               />
               <div className="game-panel-tint" />
+              <span className="game-panel-ghost" aria-hidden="true">{g.code}</span>
+              <span className="game-panel-sheen" aria-hidden="true" />
               <span className="game-panel-num">{g.num}</span>
               <div className="game-panel-info">
                 <h3 className="game-panel-title">{g.title}</h3>
@@ -211,11 +270,101 @@ export default function GameCaseStudySection() {
           text-align: right;
         }
 
+        .games-marquee {
+          overflow: hidden;
+          margin-bottom: 26px;
+          -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        }
+
+        .games-marquee-track {
+          display: flex;
+          width: max-content;
+          will-change: transform;
+        }
+
+        .games-marquee-seg {
+          display: flex;
+          flex: 0 0 auto;
+        }
+
+        .games-marquee-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 26px;
+          padding-right: 26px;
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          white-space: nowrap;
+          color: rgba(196, 184, 255, 0.34);
+        }
+
+        .games-marquee-item i {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: rgba(139, 122, 232, 0.55);
+        }
+
         .games-strip {
           display: flex;
           gap: 12px;
           height: min(62vh, 600px);
           min-height: 460px;
+        }
+
+        /* one featured panel by default so the strip never looks flat */
+        @media (min-width: 992px) {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child {
+            flex: 2.6;
+          }
+
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-meta {
+            opacity: 1;
+            transform: translateY(0);
+          }
+
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-edge {
+            transform: scaleX(1);
+          }
+        }
+
+        .game-panel-ghost {
+          position: absolute;
+          left: 50%;
+          top: 44%;
+          transform: translate(-50%, -50%);
+          font-size: clamp(64px, 7vw, 120px);
+          font-weight: 900;
+          letter-spacing: 2px;
+          color: transparent;
+          -webkit-text-stroke: 1px color-mix(in srgb, var(--gp-accent, #8b7ae8) 55%, transparent);
+          opacity: 0.7;
+          pointer-events: none;
+          user-select: none;
+          transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .game-panel:hover .game-panel-ghost,
+        .game-panel:focus-visible .game-panel-ghost {
+          opacity: 0.22;
+          transform: translate(-50%, -50%) scale(1.12);
+        }
+
+        .game-panel-sheen {
+          position: absolute;
+          inset: -40% -60%;
+          background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.09) 48%, color-mix(in srgb, var(--gp-accent, #8b7ae8) 16%, transparent) 54%, transparent 70%);
+          transform: translateX(-70%) rotate(6deg);
+          transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+          pointer-events: none;
+        }
+
+        .game-panel:hover .game-panel-sheen,
+        .game-panel:focus-visible .game-panel-sheen {
+          transform: translateX(70%) rotate(6deg);
         }
 
         .game-panel {
@@ -255,7 +404,7 @@ export default function GameCaseStudySection() {
           inset: 0;
           background:
             linear-gradient(180deg, rgba(13, 8, 34, 0.25) 0%, rgba(8, 5, 20, 0.05) 45%, rgba(8, 5, 20, 0.85) 100%),
-            linear-gradient(160deg, rgba(108, 92, 231, 0.22), transparent 55%);
+            linear-gradient(160deg, color-mix(in srgb, var(--gp-accent, #6c5ce7) 26%, transparent), transparent 55%);
           transition: opacity 0.5s ease;
         }
 
@@ -315,7 +464,7 @@ export default function GameCaseStudySection() {
           right: 0;
           bottom: 0;
           height: 2px;
-          background: linear-gradient(90deg, #8b7ae8, rgba(108, 92, 231, 0.1));
+          background: linear-gradient(90deg, var(--gp-accent, #8b7ae8), rgba(108, 92, 231, 0.1));
           transform: scaleX(0);
           transform-origin: left center;
           transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);

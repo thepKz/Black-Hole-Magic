@@ -232,9 +232,9 @@ export default function HeroSection7() {
         height: '100%',
         zIndex: 2,
         pointerEvents: 'none',
-      }}>
-        <path d="M 0,150 L 0,0 L 200,0" stroke="var(--bh-purple)" strokeWidth="2" fill="none" opacity="0.6" />
-        <path d="M 100%,calc(100% - 150) L 100%,100% L calc(100% - 200),100%" stroke="var(--bh-purple)" strokeWidth="2" fill="none" opacity="0.6" />
+      }} viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M 0 150 L 0 0 L 200 0" stroke="var(--bh-purple)" strokeWidth="2" vectorEffect="non-scaling-stroke" fill="none" opacity="0.6" />
+        <path d="M 1000 850 L 1000 1000 L 800 1000" stroke="var(--bh-purple)" strokeWidth="2" vectorEffect="non-scaling-stroke" fill="none" opacity="0.6" />
       </svg>
 
       {/* Person image - RIGHT SIDE */}

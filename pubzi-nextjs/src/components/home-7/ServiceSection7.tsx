@@ -36,7 +36,7 @@ function Words({ text }: { text: string }) {
       {text.split(' ').map((w, i) => (
         <span key={i} className="sw">
           {w}
-          {' '}
+          {' '}
         </span>
       ))}
     </>
@@ -186,7 +186,7 @@ export default function ServiceSection7() {
         .values-container {
           max-width: 1520px;
           margin: 0 auto;
-          padding: 0 48px;
+          padding: 0 clamp(24px, 4vw, 64px);
         }
 
         .values-head {
@@ -204,13 +204,14 @@ export default function ServiceSection7() {
 
         .values-head-row {
           display: grid;
-          grid-template-columns: 1.2fr 1fr;
-          gap: 48px;
+          grid-template-columns: minmax(0, 0.95fr) minmax(360px, 520px);
+          gap: clamp(32px, 5vw, 84px);
           align-items: end;
         }
 
         .values-title {
-          font-size: clamp(40px, 4.4vw, 64px);
+          max-width: 780px;
+          font-size: clamp(44px, 4.15vw, 68px);
           font-weight: 800;
           line-height: 1.08;
           color: #fff;
@@ -222,11 +223,11 @@ export default function ServiceSection7() {
         }
 
         .values-lede {
-          font-size: 17px;
-          line-height: 1.7;
+          font-size: clamp(15px, 1vw, 17px);
+          line-height: 1.65;
           color: rgba(255, 255, 255, 0.62);
           text-transform: none;
-          max-width: 42ch;
+          max-width: 46ch;
           margin: 0 0 8px auto;
           text-align: right;
         }
@@ -238,10 +239,10 @@ export default function ServiceSection7() {
         .vrow {
           position: relative;
           display: grid;
-          grid-template-columns: 170px 1fr 1.15fr;
+          grid-template-columns: minmax(96px, 150px) minmax(260px, 0.85fr) minmax(360px, 1.15fr);
           align-items: center;
-          gap: 40px;
-          padding: 46px 28px;
+          gap: clamp(24px, 3.4vw, 56px);
+          padding: 46px clamp(18px, 2vw, 30px);
           transition: background 0.45s ease;
         }
 
@@ -283,7 +284,7 @@ export default function ServiceSection7() {
         }
 
         .vrow-num {
-          font-size: 104px;
+          font-size: clamp(72px, 6.2vw, 104px);
           font-weight: 900;
           line-height: 0.9;
           color: transparent;
@@ -299,8 +300,9 @@ export default function ServiceSection7() {
         }
 
         .vrow-title {
-          font-size: clamp(24px, 2vw, 32px);
+          font-size: clamp(24px, 2vw, 34px);
           font-weight: 700;
+          line-height: 1.15;
           color: #fff;
           margin: 0;
           transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -312,7 +314,7 @@ export default function ServiceSection7() {
         }
 
         .vrow-body {
-          font-size: 16px;
+          font-size: clamp(14px, 0.95vw, 16px);
           line-height: 1.75;
           color: rgba(255, 255, 255, 0.7);
           text-transform: none;
@@ -320,17 +322,29 @@ export default function ServiceSection7() {
           margin: 0;
         }
 
-        @media (max-width: 1199px) {
+        @media (max-width: 1399px) {
           .values-head-row {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 22px;
+            align-items: start;
+          }
+
+          .values-title {
+            max-width: 860px;
           }
 
           .values-lede {
+            max-width: 64ch;
             text-align: left;
-            margin-left: 0;
+            margin: 0;
           }
 
+          .vrow {
+            grid-template-columns: minmax(82px, 120px) minmax(220px, 0.75fr) minmax(320px, 1fr);
+          }
+        }
+
+        @media (max-width: 1199px) {
           .vrow {
             grid-template-columns: 110px 1fr;
             grid-template-areas:
@@ -351,6 +365,18 @@ export default function ServiceSection7() {
 
           .vrow-body {
             grid-area: body;
+            max-width: 70ch;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .values-title {
+            font-size: clamp(36px, 10vw, 52px);
+          }
+
+          .values-kicker {
+            font-size: 11px;
+            letter-spacing: 2.4px;
           }
         }
 
@@ -367,6 +393,11 @@ export default function ServiceSection7() {
             margin-bottom: 52px;
           }
 
+          .values-lede {
+            font-size: 14px;
+            line-height: 1.65;
+          }
+
           .vrow {
             grid-template-columns: 1fr;
             grid-template-areas:
@@ -378,6 +409,10 @@ export default function ServiceSection7() {
 
           .vrow-num {
             font-size: 56px;
+          }
+
+          .vrow-title {
+            font-size: 25px;
           }
         }
       `}</style>

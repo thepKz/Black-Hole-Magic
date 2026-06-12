@@ -557,7 +557,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
 
     const loader = new GLTFLoader();
     loader.load(
-      '/assets/img/home-7/3d/3d_1.glb',
+      '/assets/img/home-7/3d/3d_4.glb',
       (gltf) => {
         if (disposed) return;
 
