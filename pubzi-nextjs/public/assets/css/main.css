@@ -353,7 +353,10 @@ body {
   background-color: var(--bg);
   padding: 0;
   margin: 0;
+  /* hidden makes body a scroll container and breaks position: sticky;
+     clip achieves the same clipping without that side effect */
   overflow-x: hidden;
+  overflow-x: clip;
   text-transform: uppercase;
 }
 

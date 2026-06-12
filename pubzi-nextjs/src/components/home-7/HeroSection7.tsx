@@ -2,9 +2,40 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import AnimatedText from '@/components/ui/animated-text';
 
 export default function HeroSection7() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // The video is a fixed layer shared with the About glass section below.
+  // Pause and hide it once both sections are out of view to free the GPU.
+  useEffect(() => {
+    const video = videoRef.current;
+    const hero = heroRef.current;
+    if (!video || !hero) return;
+
+    const visible = new Map<Element, boolean>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => visible.set(e.target, e.isIntersecting));
+        const anyVisible = [...visible.values()].some(Boolean);
+        if (anyVisible) {
+          video.style.visibility = 'visible';
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+          video.style.visibility = 'hidden';
+        }
+      },
+      { rootMargin: '10% 0px' }
+    );
+    io.observe(hero);
+    const about = document.querySelector('.about-story');
+    if (about) io.observe(about);
+
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!heroRef.current) return;
@@ -28,6 +59,7 @@ export default function HeroSection7() {
       gsap.set('.hero-main-title', { x: -74, opacity: 0, filter: 'blur(10px)' });
       gsap.set('.hero-character', { x: 92, opacity: 0, filter: 'blur(6px)' });
       gsap.set('.hero-action-cluster', { x: -76, opacity: 0, scale: 0.96 });
+      gsap.set('.hero-energy-rift', { opacity: 0.72, xPercent: -8 });
 
       const playIntro = () => {
         gsap.timeline({
@@ -51,26 +83,29 @@ export default function HeroSection7() {
 
         gsap.fromTo(
           '.iphone-stage',
-          { x: -10, rotation: -9.4 },
+          { x: -4, rotation: -6.8, force3D: true },
           {
-            x: 16,
-            rotation: -2.8,
-            duration: 2.8,
+            x: 6,
+            rotation: -4.8,
+            duration: 5.8,
             repeat: -1,
             yoyo: true,
-            ease: 'power1.inOut',
+            ease: 'sine.inOut',
+            force3D: true,
           }
         );
 
         gsap.to('.hero-character-art', {
-          x: -24,
-          rotation: -0.6,
-          scale: 1.012,
-          duration: 3.4,
+          x: -8,
+          rotation: -0.3,
+          scale: 1.006,
+          duration: 6.4,
           repeat: -1,
           yoyo: true,
           ease: 'sine.inOut',
+          force3D: true,
         });
+
 
         observer = new IntersectionObserver(
           ([entry]) => {
@@ -103,6 +138,32 @@ export default function HeroSection7() {
   }, []);
 
   return (
+    <>
+      {/* Fixed video layer shared by the hero and the About glass section.
+          Kept OUTSIDE the hero: .hero-section has z-index 9 (template), which
+          would trap the video above the About panel's z-index 1. */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          pointerEvents: 'none',
+          filter: 'contrast(1.2) brightness(0.85)',
+        }}
+      >
+        <source src="/assets/video/background_1_pingpong.webm" type="video/webm" />
+        <source src="/assets/video/background_1_pingpong.mp4" type="video/mp4" />
+      </video>
+
     <div ref={heroRef} className="hero-section hero-7" style={{
       ['--bh-purple' as string]: '#6C5CE7',
       ['--bh-ink' as string]: '#06060A',
@@ -114,28 +175,8 @@ export default function HeroSection7() {
       paddingTop: '140px',
       paddingBottom: '120px',
       marginBottom: '0',
+      background: 'transparent',
     }}>
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          zIndex: 0,
-          filter: 'contrast(1.2) brightness(0.85)',
-        }}
-      >
-        <source src="/assets/video/background_1_pingpong.webm" type="video/webm" />
-        <source src="/assets/video/background_1_pingpong.mp4" type="video/mp4" />
-      </video>
       <div className="hero-contrast-layer" />
 
       {/* Simple frame lines - purple only */}
@@ -214,39 +255,33 @@ export default function HeroSection7() {
               Digital Gaming Platform
             </div>
 
-            {/* Main heading - clean, no effects */}
-            <h1 className="hero-main-title" style={{
-              fontSize: '82px',
-              fontWeight: 900,
-              fontFamily: 'Orbitron, sans-serif',
-              lineHeight: 1.1,
-              marginBottom: '36px',
-              textTransform: 'uppercase',
-              letterSpacing: '0',
-            }}>
-              <span>
-                BLACK HOLE GAME
-              </span>
-
-            </h1>
+            <AnimatedText
+              text="BLACK HOLE GAME"
+              className="hero-main-title hero-title-stars"
+              animationType="letters"
+              staggerDelay={0.032}
+              duration={0.62}
+              initialY={24}
+            />
 
           </div>
         </div>
       </div>
 
       {/* Mobile responsive */}
-      <style jsx>{`
+      <style jsx global>{`
         .hero-contrast-layer {
           position: absolute;
           inset: 0;
           z-index: 1;
           pointer-events: none;
           background:
-            radial-gradient(circle at 28% 42%, rgba(122, 92, 255, 0.28), transparent 34%),
-            radial-gradient(circle at 82% 18%, rgba(86, 32, 210, 0.32), transparent 30%),
-            linear-gradient(90deg, rgba(8, 4, 22, 0.46) 0%, rgba(22, 8, 54, 0.14) 47%, rgba(5, 3, 14, 0.58) 100%),
-            linear-gradient(180deg, rgba(4, 2, 12, 0.2), rgba(4, 2, 12, 0.54));
+            radial-gradient(circle at 43% 42%, rgba(95, 42, 255, 0.38), rgba(40, 12, 118, 0.2) 22%, transparent 38%),
+            radial-gradient(circle at 82% 20%, rgba(76, 21, 190, 0.22), transparent 28%),
+            linear-gradient(90deg, rgba(3, 2, 10, 0.82) 0%, rgba(15, 5, 43, 0.38) 44%, rgba(4, 2, 12, 0.72) 100%),
+            linear-gradient(180deg, rgba(3, 2, 10, 0.46), rgba(3, 2, 10, 0.72));
         }
+
 
         .hero-action-cluster {
           position: absolute;
@@ -270,12 +305,9 @@ export default function HeroSection7() {
           inset: 5% 2% -4% -8%;
           z-index: -1;
           pointer-events: none;
-          background:
-            radial-gradient(circle at 48% 38%, rgba(180, 145, 255, 0.52), transparent 31%),
-            radial-gradient(circle at 58% 62%, rgba(98, 48, 255, 0.58), transparent 50%),
-            radial-gradient(circle at 20% 56%, rgba(0, 206, 201, 0.18), transparent 34%);
-          filter: blur(30px);
-          opacity: 1;
+          background: radial-gradient(circle at 54% 57%, rgba(80, 23, 220, 0.34), transparent 44%);
+          filter: blur(16px) contrast(1.18) saturate(1.1);
+          opacity: 0.46;
           mix-blend-mode: screen;
           transform: scale(1);
           transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
@@ -287,34 +319,35 @@ export default function HeroSection7() {
           inset: 9% 2% 2% 12%;
           z-index: -1;
           pointer-events: none;
-          background: conic-gradient(from 215deg at 50% 50%, transparent 0deg, rgba(132, 92, 255, 0.46) 72deg, transparent 145deg, rgba(0, 206, 201, 0.2) 222deg, transparent 310deg);
+          background: conic-gradient(from 215deg at 50% 50%, transparent 0deg, rgba(126, 65, 255, 0.38) 72deg, transparent 145deg, rgba(68, 17, 190, 0.28) 222deg, transparent 310deg);
           border-radius: 50%;
-          filter: blur(28px);
-          opacity: 0.88;
+          filter: blur(14px) contrast(1.16);
+          opacity: 0.34;
           transform: rotate(-10deg) scale(1);
           transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
         }
 
         .hero-character:hover::before {
-          opacity: 1;
-          filter: blur(34px);
-          transform: scale(1.06);
+          opacity: 0.6;
+          filter: blur(18px) contrast(1.22) saturate(1.18);
+          transform: scale(1.025);
         }
 
         .hero-character:hover::after {
-          opacity: 1;
-          filter: blur(30px);
-          transform: rotate(-10deg) scale(1.08);
+          opacity: 0.46;
+          filter: blur(16px) contrast(1.2);
+          transform: rotate(-10deg) scale(1.025);
         }
 
         .hero-character-art {
           filter:
             hue-rotate(8deg)
-            saturate(1.08)
+            saturate(1.04)
+            contrast(1.06)
             drop-shadow(0 24px 34px rgba(0, 0, 0, 0.66))
-            drop-shadow(0 0 28px rgba(184, 150, 255, 0.78))
-            drop-shadow(0 0 74px rgba(112, 66, 255, 0.62))
-            drop-shadow(0 0 118px rgba(72, 28, 196, 0.42));
+            drop-shadow(0 0 10px rgba(118, 62, 255, 0.38))
+            drop-shadow(0 0 26px rgba(62, 18, 184, 0.3));
+          mix-blend-mode: multiply;
           transform-origin: 50% 78%;
           transition: filter 0.28s ease;
           will-change: transform, filter;
@@ -323,11 +356,11 @@ export default function HeroSection7() {
         .hero-character:hover .hero-character-art {
           filter:
             hue-rotate(10deg)
-            saturate(1.18)
+            saturate(1.12)
+            contrast(1.08)
             drop-shadow(0 26px 36px rgba(0, 0, 0, 0.66))
-            drop-shadow(0 0 36px rgba(216, 194, 255, 0.86))
-            drop-shadow(0 0 92px rgba(126, 72, 255, 0.74))
-            drop-shadow(0 0 132px rgba(0, 216, 255, 0.32));
+            drop-shadow(0 0 14px rgba(140, 76, 255, 0.48))
+            drop-shadow(0 0 34px rgba(68, 20, 194, 0.38));
         }
 
         .iphone-stage {
@@ -337,9 +370,9 @@ export default function HeroSection7() {
           transform: rotate(-6deg);
           transform-origin: left bottom;
           filter:
-            drop-shadow(0 30px 70px rgba(122, 95, 255, 0.9))
-            drop-shadow(0 0 34px rgba(174, 138, 255, 0.68))
-            drop-shadow(0 0 82px rgba(92, 44, 238, 0.54));
+            drop-shadow(0 28px 54px rgba(20, 5, 74, 0.82))
+            drop-shadow(0 0 12px rgba(119, 58, 255, 0.36))
+            drop-shadow(0 0 30px rgba(56, 13, 170, 0.32));
           will-change: transform;
         }
 
@@ -349,16 +382,15 @@ export default function HeroSection7() {
           inset: 18% 4% -18% -6%;
           z-index: -1;
           background:
-            radial-gradient(circle at 45% 46%, rgba(184, 150, 255, 0.58) 0%, rgba(112, 90, 255, 0.38) 32%, transparent 70%),
-            radial-gradient(circle at 76% 52%, rgba(0, 206, 201, 0.16), transparent 38%);
-          filter: blur(50px);
+            radial-gradient(circle at 45% 46%, rgba(134, 69, 255, 0.38) 0%, rgba(70, 24, 204, 0.26) 34%, transparent 68%);
+          filter: blur(24px) contrast(1.18);
         }
 
         .iphone-stage::after {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(142, 118, 255, 0.42), rgba(108, 92, 231, 0.16) 44%, rgba(0, 206, 201, 0.1));
+          background: linear-gradient(135deg, rgba(142, 92, 255, 0.34), rgba(74, 22, 213, 0.18) 44%, rgba(16, 4, 64, 0.08));
           mix-blend-mode: soft-light;
           -webkit-mask-image: url('/assets/img/landing-page/iphone_2.png');
           mask-image: url('/assets/img/landing-page/iphone_2.png');
@@ -373,7 +405,7 @@ export default function HeroSection7() {
           display: block;
           width: 100%;
           height: auto;
-          filter: contrast(1.16) saturate(0.88) hue-rotate(18deg);
+          filter: contrast(1.22) saturate(0.92) hue-rotate(14deg);
         }
 
         .hero-cta {
@@ -408,9 +440,8 @@ export default function HeroSection7() {
           transition: transform 0.28s ease, background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
           overflow: hidden;
           box-shadow:
-            0 0 18px rgba(151, 92, 255, 0.78),
-            0 0 48px rgba(62, 16, 194, 0.86),
-            0 0 72px rgba(0, 216, 255, 0.24),
+            0 0 10px rgba(151, 92, 255, 0.46),
+            0 0 24px rgba(62, 16, 194, 0.48),
             0 16px 42px rgba(12, 2, 58, 0.8),
             inset 0 1px 0 rgba(255, 255, 255, 0.22),
             inset 0 -4px 14px rgba(4, 0, 24, 0.54);
@@ -420,7 +451,7 @@ export default function HeroSection7() {
           content: '';
           position: absolute;
           inset: -35% -45%;
-          background: linear-gradient(115deg, transparent 18%, rgba(255, 255, 255, 0.42) 42%, rgba(0, 206, 201, 0.28) 50%, transparent 68%);
+          background: linear-gradient(115deg, transparent 18%, rgba(255, 255, 255, 0.34) 42%, rgba(147, 92, 255, 0.34) 50%, transparent 68%);
           transform: translateX(-72%) rotate(8deg);
           transition: transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
           pointer-events: none;
@@ -432,7 +463,7 @@ export default function HeroSection7() {
           inset: 0;
           z-index: 0;
           padding: 2px;
-          background: conic-gradient(from var(--cta-border-angle), #8a5cff, #ffffff, #00e0ff, #ff39f8, #6d28ff, #8a5cff);
+          background: conic-gradient(from var(--cta-border-angle), #6d28ff, #ffffff, #9a5cff, #3a0ca3, #6d28ff);
           clip-path: inherit;
           pointer-events: none;
           opacity: 0.82;
@@ -444,7 +475,7 @@ export default function HeroSection7() {
             linear-gradient(#000 0 0) content-box,
             linear-gradient(#000 0 0);
           mask-composite: exclude;
-          filter: drop-shadow(0 0 10px rgba(138, 92, 255, 0.78));
+          filter: drop-shadow(0 0 8px rgba(120, 54, 255, 0.64));
         }
 
         .hero-cta span {
@@ -456,14 +487,13 @@ export default function HeroSection7() {
           background:
             linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent 18% 76%, rgba(0, 232, 255, 0.3)),
             radial-gradient(circle at 18% 0%, rgba(235, 222, 255, 0.42), transparent 34%),
-            linear-gradient(135deg, #180047 0%, #3b08a8 42%, #782fff 88%, #00e5ff 155%);
+            linear-gradient(135deg, #170044 0%, #3a08a4 42%, #6d28ff 88%, #9f6cff 155%);
           border-color: rgba(255, 255, 255, 0.92);
           filter: saturate(1.2) contrast(1.08);
           transform: translate(-50%, -3px) skewX(-1.5deg);
           box-shadow:
-            0 0 26px rgba(255, 255, 255, 0.78),
-            0 0 72px rgba(112, 42, 255, 1),
-            0 0 96px rgba(0, 229, 255, 0.46),
+            0 0 14px rgba(235, 222, 255, 0.46),
+            0 0 34px rgba(112, 42, 255, 0.62),
             0 22px 54px rgba(20, 2, 94, 0.84),
             inset 0 1px 0 rgba(255, 255, 255, 0.3),
             inset 0 -4px 14px rgba(4, 0, 24, 0.48);
@@ -508,18 +538,16 @@ export default function HeroSection7() {
           @keyframes ctaEnergy {
             0%, 100% {
               box-shadow:
-                0 0 18px rgba(151, 92, 255, 0.74),
-                0 0 48px rgba(62, 16, 194, 0.82),
-                0 0 72px rgba(0, 216, 255, 0.22),
+                0 0 10px rgba(151, 92, 255, 0.42),
+                0 0 24px rgba(62, 16, 194, 0.46),
                 0 16px 42px rgba(12, 2, 58, 0.8),
                 inset 0 1px 0 rgba(255, 255, 255, 0.22),
                 inset 0 -4px 14px rgba(4, 0, 24, 0.54);
             }
             50% {
               box-shadow:
-                0 0 26px rgba(235, 222, 255, 0.82),
-                0 0 72px rgba(112, 42, 255, 0.98),
-                0 0 94px rgba(0, 229, 255, 0.34),
+                0 0 14px rgba(218, 196, 255, 0.5),
+                0 0 32px rgba(112, 42, 255, 0.62),
                 0 18px 50px rgba(12, 2, 58, 0.84),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3),
                 inset 0 -4px 14px rgba(4, 0, 24, 0.5);
@@ -573,17 +601,47 @@ export default function HeroSection7() {
           will-change: transform, opacity, filter;
         }
 
-        .hero-main-title span {
-          display: block;
+        .hero-main-title {
+          font-size: 82px;
+          font-weight: 900;
+          font-family: Orbitron, sans-serif;
+          line-height: 1.1;
+          margin-bottom: 36px;
+          text-transform: uppercase;
+          letter-spacing: 0;
+          color: #ffffff;
+          max-width: 720px;
+          perspective: 900px;
+        }
+
+        .hero-title-stars span {
+          position: relative;
           color: #ffffff;
           -webkit-text-fill-color: #ffffff;
-          -webkit-text-stroke: 1px rgba(255, 255, 255, 0.28);
-          filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.58)) drop-shadow(0 0 34px rgba(108, 92, 231, 0.76));
+          -webkit-text-stroke: 1px rgba(255, 255, 255, 0.34);
+          filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.34)) drop-shadow(0 0 14px rgba(102, 42, 255, 0.46));
           text-shadow:
             0 2px 0 rgba(7, 4, 20, 0.92),
-            0 0 20px rgba(255, 255, 255, 0.55),
-            0 0 58px rgba(108, 92, 231, 0.9),
+            0 0 8px rgba(255, 255, 255, 0.34),
+            0 0 20px rgba(111, 42, 255, 0.58),
             0 10px 30px rgba(0, 0, 0, 0.86);
+          transform-origin: 50% 68%;
+          will-change: transform, opacity;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .hero-title-stars span {
+            animation: titleWhitePulse 4.8s ease-in-out infinite;
+          }
+
+          @keyframes titleWhitePulse {
+            0%, 100% {
+              filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 12px rgba(102, 42, 255, 0.4));
+            }
+            50% {
+              filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.44)) drop-shadow(0 0 18px rgba(102, 42, 255, 0.52));
+            }
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -750,5 +808,6 @@ export default function HeroSection7() {
         }
       `}</style>
     </div>
+    </>
   );
 }
