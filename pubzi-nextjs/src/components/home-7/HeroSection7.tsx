@@ -2,7 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/animated-text';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function HeroSection7() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -60,6 +63,35 @@ export default function HeroSection7() {
       gsap.set('.hero-character', { x: 92, opacity: 0, filter: 'blur(6px)' });
       gsap.set('.hero-action-cluster', { x: -76, opacity: 0, scale: 0.96 });
       gsap.set('.hero-energy-rift', { opacity: 0.72, xPercent: -8 });
+      gsap.set('.hero-video-bg', { scale: 1, transformOrigin: '50% 50%' });
+
+      // The scroll-exit timeline is created ONLY after the intro finishes:
+      // a scrubbed .to() captures its start values at first render, so if it
+      // is born while the intro still has pieces at opacity 0, the exit tween
+      // animates 0 → 0 and the phone/character stay invisible forever.
+      const createExitTimeline = () => {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: 'top top',
+            end: '+=70%',
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+          defaults: {
+            ease: 'none',
+            overwrite: 'auto',
+            force3D: true,
+            duration: 0.55,
+          },
+        })
+          .to('.hero-video-bg', { scale: 1.085, duration: 1 }, 0)
+          .to('.hero-contrast-layer', { autoAlpha: 0.25, duration: 1 }, 0)
+          .to('.hero-action-cluster', { xPercent: -116, rotation: -14, autoAlpha: 0 }, 0)
+          .to('.hero-main-title', { xPercent: -42, autoAlpha: 0 }, 0)
+          .to('.hero-kicker-text', { xPercent: -30, autoAlpha: 0 }, 0)
+          .to('.hero-character', { xPercent: 92, rotation: 3, autoAlpha: 0 }, 0);
+      };
 
       const playIntro = () => {
         gsap.timeline({
@@ -68,6 +100,7 @@ export default function HeroSection7() {
             ease: 'power3.out',
             overwrite: 'auto',
           },
+          onComplete: createExitTimeline,
         })
           .to('.hero-kicker-text', { x: 0, opacity: 1 }, 0)
           .to('.hero-main-title', { x: 0, opacity: 1, filter: 'blur(0px)' }, 0)
@@ -106,15 +139,16 @@ export default function HeroSection7() {
           force3D: true,
         });
 
-
-        observer = new IntersectionObserver(
-          ([entry]) => {
-            if (entry.isIntersecting) playIntro();
-          },
-          { threshold: 0.45 }
-        );
-
-        observer.observe(heroRef.current!);
+        // Frost the video only once the About glass panel actually starts
+        // entering the screen (after the hero pieces finish their exit) —
+        // never during the first stretch of scrolling.
+        ScrollTrigger.create({
+          trigger: '.about-story',
+          start: 'top 78%',
+          end: 'bottom top',
+          invalidateOnRefresh: true,
+          toggleClass: { targets: '.hero-video-bg', className: 'is-frosted' },
+        });
       };
     }, heroRef);
 
@@ -144,6 +178,7 @@ export default function HeroSection7() {
           would trap the video above the About panel's z-index 1. */}
       <video
         ref={videoRef}
+        className="hero-video-bg"
         autoPlay
         loop
         muted
@@ -157,7 +192,6 @@ export default function HeroSection7() {
           objectFit: 'cover',
           zIndex: 0,
           pointerEvents: 'none',
-          filter: 'contrast(1.2) brightness(0.85)',
         }}
       >
         <source src="/assets/video/background_1_pingpong.webm" type="video/webm" />
@@ -167,7 +201,13 @@ export default function HeroSection7() {
     <div ref={heroRef} className="hero-section hero-7" style={{
       ['--bh-purple' as string]: '#6C5CE7',
       ['--bh-ink' as string]: '#06060A',
-      position: 'relative',
+      // Curtain reveal (see home-7/page.tsx): pin at the top while the content
+      // block slides over. Negative top on screens shorter than 760px lets the
+      // hero bottom scroll into view before it pins. zIndex 0 overrides the
+      // template's .hero-section z-index 9 so the content can paint above.
+      position: 'sticky',
+      top: 'calc(100dvh - max(760px, 100dvh))',
+      zIndex: 0,
       minHeight: 'max(760px, 100dvh)',
       overflow: 'hidden',
       display: 'flex',
@@ -270,6 +310,18 @@ export default function HeroSection7() {
 
       {/* Mobile responsive */}
       <style jsx global>{`
+        .hero-video-bg {
+          filter: contrast(1.2) brightness(0.85);
+          /* frost via class toggle + transition — never scrub-animate filter */
+          transition: filter 0.7s ease;
+        }
+
+        .hero-video-bg.is-frosted {
+          /* darker than the hero state so the frosted gap above the rising
+             panel reads as "background receding", not a broken image */
+          filter: blur(16px) saturate(1.25) contrast(1.08) brightness(0.7);
+        }
+
         .hero-contrast-layer {
           position: absolute;
           inset: 0;
@@ -583,6 +635,10 @@ export default function HeroSection7() {
         }
 
         .hero-section.hero-7 {
+          /* force-brand-colors.css sets .hero-section { position: relative
+             !important }, which silently kills the inline sticky and with it
+             the whole curtain reveal. Re-assert sticky with higher specificity. */
+          position: sticky !important;
           width: 100vw !important;
           max-width: 100vw !important;
           min-height: max(760px, 100dvh) !important;
@@ -795,17 +851,6 @@ export default function HeroSection7() {
           }
         }
 
-        .hero-section::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 120px;
-          background: linear-gradient(to bottom, transparent 0%, var(--bh-ink) 100%);
-          pointer-events: none;
-          z-index: 10;
-        }
       `}</style>
     </div>
     </>

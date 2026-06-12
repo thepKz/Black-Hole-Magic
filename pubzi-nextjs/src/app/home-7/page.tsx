@@ -11,15 +11,25 @@ import NewsSection7 from '@/components/home-7/NewsSection7';
 export default function Home7Page() {
   return (
     <>
-      <HeroSection7 />
-      <AboutSection7 />
-      <ServiceSection7 />
-      <GameCaseStudySection />
-      <TopFeatureSection />
-      <TeamSection7 />
-      <TestimonialSection7 />
-      <CounterSection7 />
-      <NewsSection7 />
+      {/* Curtain reveal: the hero is position: sticky and pins at the top
+          while the content block below (pulled up by -100dvh) slides over it.
+          150dvh spacer = tight handoff: pieces exit over the first ~40vh,
+          the About panel starts rising at 50vh and has covered the screen
+          by 150vh — no long empty stretch in between. */}
+      <div>
+        <HeroSection7 />
+        <div style={{ height: '150dvh' }} aria-hidden="true" />
+      </div>
+      <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
+        <AboutSection7 />
+        <ServiceSection7 />
+        <GameCaseStudySection />
+        <TopFeatureSection />
+        <TeamSection7 />
+        <TestimonialSection7 />
+        <CounterSection7 />
+        <NewsSection7 />
+      </div>
     </>
   );
 }

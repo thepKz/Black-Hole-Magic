@@ -38,23 +38,71 @@ export default function ServiceSection7() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const ctx = gsap.context(() => {
-      gsap.from('.values-head', {
-        opacity: 0,
-        y: 30,
-        filter: 'blur(6px)',
-        duration: 0.7,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.values-head', start: 'top 85%' },
-      });
+      gsap.fromTo(
+        '.values-kicker',
+        { autoAlpha: 0, y: 18 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.values-head', start: 'top 80%', toggleActions: 'play none none reverse' },
+        }
+      );
 
-      gsap.from('.value-card', {
-        opacity: 0,
-        y: 44,
-        filter: 'blur(8px)',
-        duration: 0.7,
-        stagger: 0.14,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.values-grid', start: 'top 82%' },
+      gsap.fromTo(
+        '.values-title',
+        { clipPath: 'inset(0 0 100% 0)', y: 34 },
+        {
+          clipPath: 'inset(0 0 -12% 0)',
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.values-head', start: 'top 78%', toggleActions: 'play none none reverse' },
+        }
+      );
+
+      gsap.fromTo(
+        '.values-lede',
+        { autoAlpha: 0, y: 24 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.7,
+          delay: 0.25,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.values-head', start: 'top 78%', toggleActions: 'play none none reverse' },
+        }
+      );
+
+      gsap.utils.toArray<HTMLElement>('.vrow').forEach((row) => {
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: row, start: 'top 82%', toggleActions: 'play none none reverse' },
+        });
+        tl.fromTo(
+          row.querySelector('.vrow-line'),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.85, ease: 'power3.inOut' },
+          0
+        )
+          .fromTo(
+            row.querySelector('.vrow-num'),
+            { yPercent: 55, autoAlpha: 0 },
+            { yPercent: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out' },
+            0.15
+          )
+          .fromTo(
+            row.querySelector('.vrow-title'),
+            { clipPath: 'inset(0 0 100% 0)', y: 26 },
+            { clipPath: 'inset(0 0 -12% 0)', y: 0, duration: 0.7, ease: 'power3.out' },
+            0.22
+          )
+          .fromTo(
+            row.querySelector('.vrow-body'),
+            { autoAlpha: 0, y: 20 },
+            { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' },
+            0.38
+          );
       });
     }, section);
 
@@ -63,20 +111,31 @@ export default function ServiceSection7() {
 
   return (
     <section ref={sectionRef} className="values-section">
-      <div className="container">
+      <div className="values-container">
         <div className="values-head">
           <h6 className="values-kicker">LỢI THẾ CẠNH TRANH</h6>
-          <h2 className="values-title">Vì sao chọn Blackhole Game</h2>
+          <div className="values-head-row">
+            <h2 className="values-title">
+              Vì sao chọn
+              <br />
+              Blackhole Game
+            </h2>
+            <p className="values-lede">
+              Bốn nguyên tắc vận hành đứng sau mọi sản phẩm chúng tôi đồng phát hành tại thị trường Việt Nam.
+            </p>
+          </div>
         </div>
 
-        <div className="values-grid">
+        <div className="values-rail">
           {VALUES.map((v) => (
-            <article key={v.num} className="value-card">
-              <span className="value-num">{v.num}</span>
-              <h3 className="value-card-title">{v.title}</h3>
-              <p className="value-card-body">{v.body}</p>
+            <article key={v.num} className="vrow">
+              <span className="vrow-line" aria-hidden="true" />
+              <span className="vrow-num">{v.num}</span>
+              <h3 className="vrow-title">{v.title}</h3>
+              <p className="vrow-body">{v.body}</p>
             </article>
           ))}
+          <span className="vrail-end" aria-hidden="true" />
         </div>
       </div>
 
@@ -85,153 +144,204 @@ export default function ServiceSection7() {
           position: relative;
           z-index: 9;
           background: #080614;
-          padding: 110px 0 120px;
+          padding: 150px 0 160px;
         }
 
-        /* thin glow seam where this section slides over the About story */
-        .values-section::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent 6%, rgba(139, 122, 232, 0.65) 50%, transparent 94%);
-        }
-
-        .values-section::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 70vw;
-          height: 140px;
-          background: radial-gradient(ellipse at 50% 0%, rgba(108, 92, 231, 0.16), transparent 70%);
-          pointer-events: none;
+        .values-container {
+          max-width: 1520px;
+          margin: 0 auto;
+          padding: 0 48px;
         }
 
         .values-head {
-          text-align: center;
-          margin-bottom: 56px;
-          will-change: transform, filter, opacity;
+          margin-bottom: 84px;
         }
 
         .values-kicker {
           font-size: 13px;
           font-weight: 600;
-          letter-spacing: 3px;
+          letter-spacing: 4px;
           text-transform: uppercase;
           color: #8b7ae8;
-          margin-bottom: 18px;
+          margin-bottom: 26px;
+        }
+
+        .values-head-row {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 48px;
+          align-items: end;
         }
 
         .values-title {
-          font-size: 38px;
+          font-size: clamp(40px, 4.4vw, 64px);
           font-weight: 800;
-          line-height: 1.25;
+          line-height: 1.08;
           color: #fff;
+          margin: 0;
           text-shadow:
-            0 0 20px rgba(255, 255, 255, 0.4),
-            0 0 52px rgba(139, 122, 232, 0.7);
+            0 0 22px rgba(255, 255, 255, 0.28),
+            0 0 56px rgba(139, 122, 232, 0.5);
+          will-change: clip-path, transform;
         }
 
-        .values-grid {
+        .values-lede {
+          font-size: 17px;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.62);
+          text-transform: none;
+          max-width: 42ch;
+          margin: 0 0 8px auto;
+          text-align: right;
+        }
+
+        .values-rail {
+          position: relative;
+        }
+
+        .vrow {
+          position: relative;
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 22px;
+          grid-template-columns: 170px 1fr 1.15fr;
+          align-items: center;
+          gap: 40px;
+          padding: 46px 28px;
+          transition: background 0.45s ease;
         }
 
-        .value-card {
-          position: relative;
-          overflow: hidden;
-          padding: 34px 26px 30px;
-          border: 1px solid rgba(139, 122, 232, 0.22);
-          border-radius: 14px;
-          background:
-            radial-gradient(circle at 80% 0%, rgba(139, 122, 232, 0.14), transparent 52%),
-            linear-gradient(165deg, rgba(139, 122, 232, 0.09), rgba(16, 10, 38, 0.4) 58%);
-          transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-          will-change: transform, filter, opacity;
-        }
-
-        .value-card:hover {
-          transform: translateY(-6px);
-          border-color: rgba(176, 156, 255, 0.55);
-          box-shadow:
-            0 0 18px rgba(108, 92, 231, 0.3),
-            0 18px 44px rgba(8, 2, 34, 0.6);
-        }
-
-        .value-num {
+        .vrow-line,
+        .vrail-end {
           position: absolute;
-          top: 6px;
-          right: 14px;
-          font-size: 84px;
-          font-weight: 900;
-          line-height: 1;
-          color: rgba(139, 122, 232, 0.1);
-          pointer-events: none;
-          user-select: none;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(139, 122, 232, 0.45), rgba(139, 122, 232, 0.08) 70%, transparent);
+          transform-origin: left center;
         }
 
-        .value-card-title {
+        .vrail-end {
           position: relative;
-          font-size: 19px;
-          font-weight: 700;
-          color: #fff;
-          margin-bottom: 14px;
-          padding-bottom: 14px;
+          display: block;
         }
 
-        .value-card-title::after {
+        .vrow::before {
           content: '';
           position: absolute;
           left: 0;
-          bottom: 0;
-          width: 34px;
-          height: 2px;
-          background: linear-gradient(90deg, #8b7ae8, transparent);
-          transition: width 0.3s ease;
+          top: 18%;
+          bottom: 18%;
+          width: 2px;
+          background: linear-gradient(180deg, #8b7ae8, rgba(108, 92, 231, 0.2));
+          transform: scaleY(0);
+          transform-origin: top center;
+          transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        .value-card:hover .value-card-title::after {
-          width: 64px;
+        .vrow:hover {
+          background: linear-gradient(90deg, rgba(139, 122, 232, 0.07), rgba(139, 122, 232, 0.015) 55%, transparent);
         }
 
-        .value-card-body {
-          font-size: 14.5px;
-          line-height: 1.7;
-          color: rgba(255, 255, 255, 0.74);
+        .vrow:hover::before {
+          transform: scaleY(1);
+        }
+
+        .vrow-num {
+          font-size: 104px;
+          font-weight: 900;
+          line-height: 0.9;
+          color: transparent;
+          -webkit-text-stroke: 1px rgba(139, 122, 232, 0.34);
+          user-select: none;
+          transition: -webkit-text-stroke-color 0.4s ease, color 0.4s ease;
+          will-change: transform, opacity;
+        }
+
+        .vrow:hover .vrow-num {
+          -webkit-text-stroke-color: rgba(176, 156, 255, 0.85);
+          color: rgba(139, 122, 232, 0.12);
+        }
+
+        .vrow-title {
+          font-size: clamp(24px, 2vw, 32px);
+          font-weight: 700;
+          color: #fff;
+          margin: 0;
+          transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: clip-path, transform;
+        }
+
+        .vrow:hover .vrow-title {
+          transform: translateX(12px);
+        }
+
+        .vrow-body {
+          font-size: 16px;
+          line-height: 1.75;
+          color: rgba(255, 255, 255, 0.7);
           text-transform: none;
+          max-width: 58ch;
+          margin: 0;
         }
 
         @media (max-width: 1199px) {
-          .values-grid {
-            grid-template-columns: repeat(2, 1fr);
+          .values-head-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
           }
 
-          .values-title {
-            font-size: 32px;
+          .values-lede {
+            text-align: left;
+            margin-left: 0;
+          }
+
+          .vrow {
+            grid-template-columns: 110px 1fr;
+            grid-template-areas:
+              'num title'
+              'num body';
+            row-gap: 12px;
+            padding: 38px 18px;
+          }
+
+          .vrow-num {
+            grid-area: num;
+            font-size: 72px;
+          }
+
+          .vrow-title {
+            grid-area: title;
+          }
+
+          .vrow-body {
+            grid-area: body;
           }
         }
 
         @media (max-width: 600px) {
           .values-section {
-            padding: 80px 0 90px;
+            padding: 90px 0 100px;
           }
 
-          .values-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
-          }
-
-          .values-title {
-            font-size: 26px;
+          .values-container {
+            padding: 0 24px;
           }
 
           .values-head {
-            margin-bottom: 40px;
+            margin-bottom: 52px;
+          }
+
+          .vrow {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+              'num'
+              'title'
+              'body';
+            padding: 30px 6px;
+          }
+
+          .vrow-num {
+            font-size: 56px;
           }
         }
       `}</style>

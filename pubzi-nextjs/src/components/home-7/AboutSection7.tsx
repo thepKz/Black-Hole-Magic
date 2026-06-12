@@ -62,21 +62,21 @@ export default function AboutSection7() {
       }, 0);
       tl.to(track, {
         x: () => (window.innerWidth * driftVW) / 100,
-        duration: 2.0,
+        duration: 1.9,
         ease: 'none',
       }, 0);
       tl.to(track, {
         x: () => (window.innerWidth * travelVW) / 100,
-        duration: 0.9,
+        duration: 0.6,
         ease: 'power1.inOut',
-      }, 2.0);
+      }, 1.9);
 
-      fadeOut(0, 0.9);
-      fadeIn(1, 1.16);
-      fadeOut(1, 1.8); // text clears the floor before the sweep
-      fadeIn(2, 2.95); // model has landed on the right
-      fadeOut(2, 3.6);
-      fadeIn(3, 3.86);
+      fadeOut(0, 0.7);
+      fadeIn(1, 0.96);
+      fadeOut(1, 1.75); // text clears the floor before the sweep
+      fadeIn(2, 2.55); // model has landed on the right
+      fadeOut(2, 3.35);
+      fadeIn(3, 3.61); // fully in right as the next section starts its wipe
       tl.to({}, { duration: 0.4 }, 4.6);
     };
 
@@ -131,24 +131,15 @@ export default function AboutSection7() {
         <div className="about-stage about-stage--right stage-0">
           <div className="stage-inner">
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
-            <h2 className="glow-text stage-title">Tầm nhìn 2030</h2>
-            <p className="glow-text-subtle stage-body">
-              Đến năm 2030, Blackhole Game định vị là Hệ sinh thái Đồng phát hành (Co-Publishing) tiêu chuẩn và là Local Partner được lựa chọn đầu tiên (Top-of-mind) bởi các nhà phát triển game quốc tế tại thị trường Đông Nam Á.
-            </p>
+            <h2 className="glow-text stage-finale">
+              Local Partner chiến lược
+              <br />
+              cho thị trường game Việt Nam
+            </h2>
           </div>
         </div>
 
         <div className="about-stage about-stage--right stage-1">
-          <div className="stage-inner">
-            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
-            <h2 className="glow-text stage-title">Sứ mệnh</h2>
-            <p className="glow-text-subtle stage-body">
-              Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á — đặt Việt Nam lên bản đồ gaming toàn cầu.
-            </p>
-          </div>
-        </div>
-
-        <div className="about-stage about-stage--left stage-2">
           <div className="stage-inner">
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <p className="glow-text-subtle stage-statement">
@@ -157,14 +148,23 @@ export default function AboutSection7() {
           </div>
         </div>
 
+        <div className="about-stage about-stage--left stage-2">
+          <div className="stage-inner">
+            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
+            <h2 className="glow-text stage-title">Tầm nhìn 2030</h2>
+            <p className="glow-text-subtle stage-body">
+              Đến năm 2030, Blackhole Game định vị là Hệ sinh thái Đồng phát hành (Co-Publishing) tiêu chuẩn và là Local Partner được lựa chọn đầu tiên (Top-of-mind) bởi các nhà phát triển game quốc tế tại thị trường Đông Nam Á.
+            </p>
+          </div>
+        </div>
+
         <div className="about-stage about-stage--left stage-3">
           <div className="stage-inner">
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
-            <h2 className="glow-text stage-finale">
-              Local Partner chiến lược
-              <br />
-              cho thị trường game Việt Nam
-            </h2>
+            <h2 className="glow-text stage-title">Sứ mệnh</h2>
+            <p className="glow-text-subtle stage-body">
+              Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á — đặt Việt Nam lên bản đồ gaming toàn cầu.
+            </p>
           </div>
         </div>
       </div>
@@ -173,6 +173,13 @@ export default function AboutSection7() {
         .about-story {
           position: relative;
           z-index: 1;
+        }
+
+        /* Everything after the story must paint ABOVE its pinned panel,
+           otherwise the 3D model bleeds through later sections. */
+        .about-story ~ section {
+          position: relative;
+          z-index: 2;
         }
 
         .about-sticky {
@@ -287,8 +294,13 @@ export default function AboutSection7() {
         /* ===== Story mode: sticky + scroll-driven ===== */
         @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
           .about-story {
+            /* Overlap wipe DISABLED for now (was margin-bottom: -100vh) —
+               the next section's black panel crept up over the story and the
+               client wants it locked. The story now releases naturally and
+               the next section follows in normal flow. Height trimmed so the
+               final stage doesn't hold a long dead stretch before release. */
             height: 500vh;
-            margin-bottom: -50vh;
+            margin-bottom: 0;
           }
 
           .about-sticky {
@@ -296,10 +308,12 @@ export default function AboutSection7() {
             top: 0;
             height: 100vh;
             overflow: hidden;
-            /* Glass panel: the fixed hero video shows through, frosted */
-            background: linear-gradient(180deg, rgba(8, 5, 20, 0.52), rgba(8, 5, 20, 0.34) 42%, rgba(8, 5, 20, 0.56));
-            -webkit-backdrop-filter: blur(14px) saturate(1.3);
-            backdrop-filter: blur(14px) saturate(1.3);
+            /* Glass panel: the video behind is blurred by the hero-exit tween
+               (see HeroSection7) — this layer only tints. No backdrop-filter:
+               re-sampling the whole stack each frame is what melted the GPU. */
+            /* transparent top fade — the panel must never read as a hard-edged
+               dark block sliding over the video */
+            background: linear-gradient(180deg, rgba(8, 5, 20, 0) 0%, rgba(8, 5, 20, 0.38) 14%, rgba(8, 5, 20, 0.26) 46%, rgba(8, 5, 20, 0.48) 100%);
           }
 
           .about-model-track {
@@ -495,18 +509,30 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
     softFill.position.set(2.2, -1.2, 2.4);
     scene.add(softFill);
 
+    // Dirty-flag rendering: only re-render when the rotation actually changed.
+    // The stage has drop-shadow filters that get recomputed every time the
+    // canvas presents a frame, so idle frames are not free.
+    let lastRotation = NaN;
+    let needsRender = true;
+
     const resize = () => {
       const width = Math.max(mount.clientWidth, 1);
       const height = Math.max(mount.clientHeight, 1);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      needsRender = true;
     };
 
     const frame = () => {
       if (!running) return;
-      modelGroup.rotation.y = baseRotationY + rotationRef.current;
-      renderer.render(scene, camera);
+      const rotation = baseRotationY + rotationRef.current;
+      if (needsRender || rotation !== lastRotation) {
+        modelGroup.rotation.y = rotation;
+        renderer.render(scene, camera);
+        lastRotation = rotation;
+        needsRender = false;
+      }
       animationFrame = window.requestAnimationFrame(frame);
     };
 
@@ -530,7 +556,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
 
     const loader = new GLTFLoader();
     loader.load(
-      '/assets/img/home-7/3d/3d_4.glb',
+      '/assets/img/home-7/3d/3d_1.glb',
       (gltf) => {
         if (disposed) return;
 
@@ -556,6 +582,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
 
         model.rotation.set(0.08, 0, 0);
         modelGroup.add(model);
+        needsRender = true;
         setLoadingProgress(100);
 
         // "Materialize" reveal: fade in from blur instead of popping.

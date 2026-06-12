@@ -25,17 +25,27 @@ import NewsSection7 from '@/components/home-7/NewsSection7';
 export default function HomePage() {
   // Render home-2 or home-7 based on config
   if (HOME_VERSION === 'home-7') {
+    // Same curtain structure as app/home-7/page.tsx: the sticky hero needs the
+    // spacer + pulled-up block to release after one viewport — without it the
+    // hero stays pinned (and composited) for the entire page.
     return (
       <>
-        <HeroSection7 />
-        <AboutSection7 />
-        <ServiceSection7 />
-        <GameCaseStudySection />
-        <TopFeatureSection />
-        <TeamSection7 />
-        <TestimonialSection7 />
-        <CounterSection7 />
-        <NewsSection7 />
+        <div>
+          <HeroSection7 />
+          {/* 150dvh = tight handoff: pieces exit in ~40vh, the About panel
+              starts rising at 50vh — no long empty stretch in between */}
+          <div style={{ height: '150dvh' }} aria-hidden="true" />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
+          <AboutSection7 />
+          <ServiceSection7 />
+          <GameCaseStudySection />
+          <TopFeatureSection />
+          <TeamSection7 />
+          <TestimonialSection7 />
+          <CounterSection7 />
+          <NewsSection7 />
+        </div>
       </>
     );
   }

@@ -330,6 +330,15 @@ section {
   background-color: var(--color-space-black) !important;
 }
 
+/* Exception: the About scroll story is a glass panel — the fixed hero video
+   must show through it. Only in story mode; stacked/mobile keeps a solid bg. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  section.about-story {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+}
+
 .about-section,
 .service-section-7,
 .team-section,
