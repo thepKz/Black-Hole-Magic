@@ -1,11 +1,15 @@
 /**
  * Black Hole Typography System
- * Based on brand guidelines: Orbitron Bold, Montserrat Bold, Inter Regular
+ * Headlines: Chakra Petch (full Vietnamese diacritics — Orbitron has no
+ * vietnamese subset and silently falls back per-glyph, breaking VN text).
+ * Orbitron is reserved for ASCII-only brand moments ("BLACK HOLE GAME",
+ * preloader) via --font-brand.
  */
 
 :root {
   /* Font Families */
-  --font-headline: 'Orbitron', sans-serif;
+  --font-headline: 'Chakra Petch', 'Montserrat', sans-serif;
+  --font-brand: 'Orbitron', 'Chakra Petch', sans-serif;
   --font-headline-alt: 'Montserrat', sans-serif;
   --font-body: 'Inter', sans-serif;
 
@@ -38,7 +42,7 @@
   --leading-loose: 2;
 }
 
-/* Headline Typography - Orbitron */
+/* Headline Typography - Chakra Petch */
 h1, .h1 {
   font-family: var(--font-headline);
   font-size: var(--text-6xl);

@@ -15,9 +15,9 @@ export default function Home7Page() {
           150dvh spacer = tight handoff: pieces exit over the first ~40vh,
           the About panel starts rising at 50vh and has covered the screen
           by 150vh — no long empty stretch in between. */}
-      <div>
+      <div className="hero-pin-range">
         <HeroSection7 />
-        <div style={{ height: '150dvh' }} aria-hidden="true" />
+        <div className="hero-scroll-spacer" aria-hidden="true" />
       </div>
       <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
         <AboutSection7 />

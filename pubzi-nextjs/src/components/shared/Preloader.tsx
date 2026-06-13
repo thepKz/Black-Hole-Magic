@@ -8,7 +8,6 @@ const HOME_PRELOAD_ASSETS = [
   '/assets/video/background_1.mp4',
   '/assets/video/background_1_pingpong.webm',
   '/assets/video/background_1_pingpong.mp4',
-  '/assets/img/landing-page/shape-2.png',
   '/assets/img/landing-page/iphone_2.png',
   '/assets/img/home-7/3d/3d_4.glb',
   '/assets/img/home-7/about/bg-shape.png',

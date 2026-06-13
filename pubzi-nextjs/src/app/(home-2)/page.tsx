@@ -29,11 +29,11 @@ export default function HomePage() {
     // hero stays pinned (and composited) for the entire page.
     return (
       <>
-        <div>
+        <div className="hero-pin-range">
           <HeroSection7 />
           {/* 150dvh = tight handoff: pieces exit in ~40vh, the About panel
               starts rising at 50vh — no long empty stretch in between */}
-          <div style={{ height: '150dvh' }} aria-hidden="true" />
+          <div className="hero-scroll-spacer" aria-hidden="true" />
         </div>
         <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
           <AboutSection7 />
