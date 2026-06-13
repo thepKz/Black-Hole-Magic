@@ -4,47 +4,13 @@ import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 
 const HOME_PRELOAD_ASSETS = [
-  '/assets/video/background_1.webm',
-  '/assets/video/background_1.mp4',
-  '/assets/video/background_1_pingpong.webm',
-  '/assets/video/background_1_pingpong.mp4',
   '/assets/img/landing-page/iphone_2.png',
-  '/assets/img/home-7/3d/3d_4.glb',
   '/assets/img/home-7/about/bg-shape.png',
   '/assets/img/home-7/about/ellipse.png',
-  '/assets/img/home-7/service-bg.jpg',
-  '/assets/img/home-7/dot.png',
-  '/assets/img/home-7/icon/01.svg',
-  '/assets/img/home-7/icon/02.svg',
-  '/assets/img/home-7/icon/03.svg',
-  '/assets/img/home-7/icon/04.svg',
-  '/assets/img/logo/white-logo.svg',
+  '/assets/img/logo/white-logo-2.png',
   '/assets/img/logo/white-logo-3.svg',
   '/assets/img/logo/dot.svg',
   '/assets/img/header/home-7.jpg',
-  '/assets/img/home-3/game-case-study/game-01.jpg',
-  '/assets/img/home-3/game-case-study/game-02.jpg',
-  '/assets/img/home-3/game-case-study/game-03.jpg',
-  '/assets/img/home-3/game-case-study/game-04.jpg',
-  '/assets/img/home-3/game-case-study/game-05.jpg',
-  '/assets/img/home-3/game-case-study/game-06.jpg',
-  '/assets/img/home-3/top-feature.png',
-  '/assets/img/home-3/ellipse-bg.png',
-  '/assets/img/home-3/icon/12.svg',
-  '/assets/img/home-3/icon/13.svg',
-  '/assets/img/home-3/icon/14.svg',
-  '/assets/img/home-3/team/team-01.jpg',
-  '/assets/img/home-3/team/team-02.jpg',
-  '/assets/img/home-3/team/team-03.jpg',
-  '/assets/img/home-3/team/team-04.jpg',
-  '/assets/img/home-3/team/ellipse.png',
-  '/assets/img/home-3/testimonial/client-1.png',
-  '/assets/img/home-3/testimonial-image.png',
-  '/assets/img/home-3/counter-bg.jpg',
-  '/assets/img/home-3/news/news-01.jpg',
-  '/assets/img/home-3/news/news-02.jpg',
-  '/assets/img/home-3/news/news-03.jpg',
-  '/assets/img/home-5/Footer.png',
 ];
 
 function preloadImage(src: string) {
@@ -59,22 +25,12 @@ function preloadImage(src: string) {
   });
 }
 
-function preloadFile(src: string) {
-  return fetch(src, { cache: 'force-cache' })
-    .then((response) => {
-      if (!response.ok) throw new Error(`Failed to preload ${src}`);
-      return response.arrayBuffer();
-    })
-    .then(() => undefined)
-    .catch(() => undefined);
-}
-
 function preloadAsset(src: string) {
   if (/\.(png|jpe?g|webp|gif|svg)$/i.test(src)) {
     return preloadImage(src);
   }
 
-  return preloadFile(src);
+  return Promise.resolve();
 }
 
 export default function Preloader() {

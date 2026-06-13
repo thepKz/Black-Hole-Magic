@@ -2,8 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -143,7 +141,7 @@ export default function AboutSection7() {
           <div className="stage-inner">
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <p className="glow-text-subtle stage-statement">
-              Chúng tôi không chỉ phát hành game — chúng tôi tháo gỡ từng rào cản bản địa, tối ưu hóa ROI và nâng cao giá trị vòng đời người dùng (LTV) của từng sản phẩm.
+              Chúng tôi không chỉ phát hành game. Chúng tôi tháo gỡ từng rào cản bản địa, tối ưu hóa ROI và nâng cao giá trị vòng đời người dùng (LTV) của từng sản phẩm.
             </p>
           </div>
         </div>
@@ -163,7 +161,7 @@ export default function AboutSection7() {
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <h2 className="glow-text stage-title">Sứ mệnh</h2>
             <p className="glow-text-subtle stage-body">
-              Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á — đặt Việt Nam lên bản đồ gaming toàn cầu.
+              Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á, đặt Việt Nam lên bản đồ gaming toàn cầu.
             </p>
           </div>
         </div>
@@ -278,7 +276,6 @@ export default function AboutSection7() {
         .about-model-mount {
           width: 100%;
           height: 100%;
-          will-change: transform, filter, opacity;
         }
 
         .about-stage {
@@ -288,7 +285,6 @@ export default function AboutSection7() {
 
         .stage-inner {
           width: 100%;
-          will-change: transform, filter, opacity;
         }
 
         /* ===== Story mode: sticky + scroll-driven ===== */
@@ -326,6 +322,11 @@ export default function AboutSection7() {
             z-index: 3;
             pointer-events: none;
             will-change: transform;
+          }
+
+          .about-model-mount,
+          .stage-inner {
+            will-change: transform, filter, opacity;
           }
 
           .about-stage {
@@ -383,6 +384,20 @@ export default function AboutSection7() {
             height: 46vh;
             min-height: 320px;
             margin: 0 auto;
+          }
+
+          .about-ellipse {
+            width: min(92vw, 420px);
+            bottom: 8%;
+          }
+
+          .about-ellipse img {
+            opacity: 0.82;
+            filter: brightness(1.04) saturate(1.05) drop-shadow(0 0 34px rgba(108, 92, 231, 0.45));
+          }
+
+          .about-3d-stage {
+            display: none;
           }
 
           .about-stage {
@@ -456,9 +471,12 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
     const mount = mountRef.current;
     if (!mount) return;
 
+    const canInit3D = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)');
+    if (!canInit3D.matches) return;
+
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && canInit3D.matches) {
           setShouldInit(true);
           io.disconnect();
         }
@@ -474,153 +492,162 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
     const mount = mountRef.current;
     if (!mount) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    const modelGroup = new THREE.Group();
-    const baseRotationY = -0.28;
+    let disposed = false;
     let animationFrame = 0;
     let running = false;
-    let disposed = false;
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 768 ? 1.5 : 2));
-    renderer.setClearColor(0x000000, 0);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.28;
-    mount.appendChild(renderer.domElement);
-
-    camera.position.set(0, 0.16, 6.2);
-    scene.add(modelGroup);
-    scene.add(new THREE.AmbientLight(0xffffff, 1.75));
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.35);
-    keyLight.position.set(2.8, 4.6, 4.2);
-    scene.add(keyLight);
-
-    const haloLight = new THREE.PointLight(0x8b7ae8, 4.2, 7.5);
-    haloLight.position.set(0, 1.25, 2.3);
-    scene.add(haloLight);
-
-    const purpleRim = new THREE.PointLight(0x9b7cff, 4.4, 8);
-    purpleRim.position.set(-2.4, 1.8, 2.8);
-    scene.add(purpleRim);
-
-    const softFill = new THREE.PointLight(0x6c5ce7, 2.2, 7);
-    softFill.position.set(2.2, -1.2, 2.4);
-    scene.add(softFill);
-
-    // Dirty-flag rendering: only re-render when the rotation actually changed.
-    // The stage has drop-shadow filters that get recomputed every time the
-    // canvas presents a frame, so idle frames are not free.
-    let lastRotation = NaN;
-    let needsRender = true;
-
-    const resize = () => {
-      const width = Math.max(mount.clientWidth, 1);
-      const height = Math.max(mount.clientHeight, 1);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      needsRender = true;
-    };
-
-    const frame = () => {
-      if (!running) return;
-      const rotation = baseRotationY + rotationRef.current;
-      if (needsRender || rotation !== lastRotation) {
-        modelGroup.rotation.y = rotation;
-        renderer.render(scene, camera);
-        lastRotation = rotation;
-        needsRender = false;
-      }
-      animationFrame = window.requestAnimationFrame(frame);
-    };
-
-    const start = () => {
-      if (running || disposed) return;
-      running = true;
-      animationFrame = window.requestAnimationFrame(frame);
-    };
+    let resizeObserver: ResizeObserver | null = null;
+    let visibilityObserver: IntersectionObserver | null = null;
+    let disposeScene: (() => void) | null = null;
 
     const stop = () => {
       running = false;
       window.cancelAnimationFrame(animationFrame);
     };
 
-    // Sleep the render loop whenever the canvas is offscreen.
-    const visibility = new IntersectionObserver(
-      ([entry]) => (entry.isIntersecting ? start() : stop()),
-      { rootMargin: '15% 0px' }
-    );
-    visibility.observe(mount);
+    const boot = async () => {
+      const THREE = await import('three');
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      if (disposed || !mountRef.current) return;
 
-    const loader = new GLTFLoader();
-    loader.load(
-      '/assets/img/home-7/3d/3d_4.glb',
-      (gltf) => {
-        if (disposed) return;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      const modelGroup = new THREE.Group();
+      const baseRotationY = -0.28;
+      let lastRotation = NaN;
+      let needsRender = true;
 
-        const model = gltf.scene;
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.28;
+      mount.appendChild(renderer.domElement);
 
-        const box = new THREE.Box3().setFromObject(model);
-        const size = new THREE.Vector3();
-        const center = new THREE.Vector3();
-        box.getSize(size);
-        box.getCenter(center);
+      camera.position.set(0, 0.16, 6.2);
+      scene.add(modelGroup);
+      scene.add(new THREE.AmbientLight(0xffffff, 1.75));
 
-        model.position.sub(center);
-        const maxDimension = Math.max(size.x, size.y, size.z);
-        if (maxDimension > 0) {
-          model.scale.setScalar(2.75 / maxDimension);
-        }
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.35);
+      keyLight.position.set(2.8, 4.6, 4.2);
+      scene.add(keyLight);
 
-        model.rotation.set(0.08, 0, 0);
-        modelGroup.add(model);
+      const haloLight = new THREE.PointLight(0x8b7ae8, 4.2, 7.5);
+      haloLight.position.set(0, 1.25, 2.3);
+      scene.add(haloLight);
+
+      const purpleRim = new THREE.PointLight(0x9b7cff, 4.4, 8);
+      purpleRim.position.set(-2.4, 1.8, 2.8);
+      scene.add(purpleRim);
+
+      const softFill = new THREE.PointLight(0x6c5ce7, 2.2, 7);
+      softFill.position.set(2.2, -1.2, 2.4);
+      scene.add(softFill);
+
+      const resize = () => {
+        const width = Math.max(mount.clientWidth, 1);
+        const height = Math.max(mount.clientHeight, 1);
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
         needsRender = true;
-        setLoadingProgress(100);
+      };
 
-        // "Materialize" reveal: fade in from blur instead of popping.
-        gsap.fromTo(
-          mount,
-          { opacity: 0, scale: 0.92, filter: 'blur(8px)' },
-          { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.9, ease: 'power2.out', clearProps: 'filter,transform' }
-        );
-      },
-      (xhr) => {
-        if (xhr.lengthComputable) {
+      const frame = () => {
+        if (!running) return;
+        const rotation = baseRotationY + rotationRef.current;
+        if (needsRender || rotation !== lastRotation) {
+          modelGroup.rotation.y = rotation;
+          renderer.render(scene, camera);
+          lastRotation = rotation;
+          needsRender = false;
+        }
+        animationFrame = window.requestAnimationFrame(frame);
+      };
+
+      const start = () => {
+        if (running || disposed) return;
+        running = true;
+        animationFrame = window.requestAnimationFrame(frame);
+      };
+
+      visibilityObserver = new IntersectionObserver(
+        ([entry]) => (entry.isIntersecting ? start() : stop()),
+        { rootMargin: '15% 0px' }
+      );
+      visibilityObserver.observe(mount);
+
+      const loader = new GLTFLoader();
+      loader.load(
+        '/assets/img/home-7/3d/3d_4.glb',
+        (gltf) => {
+          if (disposed) return;
+
+          const model = gltf.scene;
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          const box = new THREE.Box3().setFromObject(model);
+          const size = new THREE.Vector3();
+          const center = new THREE.Vector3();
+          box.getSize(size);
+          box.getCenter(center);
+
+          model.position.sub(center);
+          const maxDimension = Math.max(size.x, size.y, size.z);
+          if (maxDimension > 0) {
+            model.scale.setScalar(2.75 / maxDimension);
+          }
+
+          model.rotation.set(0.08, 0, 0);
+          modelGroup.add(model);
+          needsRender = true;
+          setLoadingProgress(100);
+
+          gsap.fromTo(
+            mount,
+            { opacity: 0, scale: 0.92, filter: 'blur(8px)' },
+            { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.9, ease: 'power2.out', clearProps: 'filter,transform' }
+          );
+        },
+        (xhr) => {
+          if (disposed || !xhr.lengthComputable) return;
           const percent = Math.min((xhr.loaded / xhr.total) * 100, 95);
           setLoadingProgress(Math.floor(percent));
         }
-      }
-    );
+      );
 
-    resize();
-    start();
+      resize();
+      start();
 
-    const observer = new ResizeObserver(resize);
-    observer.observe(mount);
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(mount);
+
+      disposeScene = () => {
+        renderer.dispose();
+        scene.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            const materials = Array.isArray(child.material) ? child.material : [child.material];
+            materials.forEach((material) => material.dispose());
+          }
+        });
+        renderer.domElement.remove();
+      };
+    };
+
+    void boot();
 
     return () => {
       disposed = true;
       stop();
-      observer.disconnect();
-      visibility.disconnect();
-      renderer.dispose();
-      scene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry.dispose();
-          const materials = Array.isArray(child.material) ? child.material : [child.material];
-          materials.forEach((material) => material.dispose());
-        }
-      });
-      renderer.domElement.remove();
+      resizeObserver?.disconnect();
+      visibilityObserver?.disconnect();
+      disposeScene?.();
     };
   }, [shouldInit, rotationRef]);
 

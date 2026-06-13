@@ -44,9 +44,22 @@ export default function Footer7() {
     const canvas = canvasRef.current
     if (!footer || !canvas) return
 
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const isTouch = window.matchMedia('(hover: none)').matches
+    const isSmall = window.matchMedia('(max-width: 480px)').matches
+
     // Early return for reduced motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    if ((navigator as any).connection?.saveData === true) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      footer.classList.add('bhf-nogl')
+      return
+    }
+    const navWithConnection = navigator as Navigator & {
+      connection?: { saveData?: boolean }
+    }
+    if (isMobile || navWithConnection.connection?.saveData === true) {
+      footer.classList.add('bhf-nogl')
+      return
+    }
 
     const state = stateRef.current
     let ctx: CanvasRenderingContext2D | null = null
@@ -55,13 +68,22 @@ export default function Footer7() {
     let obsB: IntersectionObserver | null = null
     let resizeObs: ResizeObserver | null = null
     let tickerFn: gsap.TickerCallback | null = null
+    let tickerActive = false
     let lastT = 0
-    let frameAvg: number[] = []
+    const frameAvg: number[] = []
     let frame60Hz = true
 
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    const isTouch = window.matchMedia('(hover: none)').matches
-    const isSmall = window.matchMedia('(max-width: 480px)').matches
+    const addTicker = () => {
+      if (!tickerFn || tickerActive) return
+      gsap.ticker.add(tickerFn)
+      tickerActive = true
+    }
+
+    const removeTicker = () => {
+      if (!tickerFn || !tickerActive) return
+      gsap.ticker.remove(tickerFn)
+      tickerActive = false
+    }
 
     const DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75)
 
@@ -117,7 +139,9 @@ export default function Footer7() {
         }
 
         // GSAP context
+        if (!footer) return
         gsapCtx = gsap.context(() => {
+          if (!footer) return
           const proxy = { pull: 0, ignite: 0.9 }
           const tl = gsap.timeline({
             scrollTrigger: {
@@ -125,7 +149,7 @@ export default function Footer7() {
               start: 'top bottom',
               end: 'bottom bottom',
               scrub: 0.8,
-              onUpdate: (self) => {
+              onUpdate: () => {
                 state.pull = proxy.pull
                 state.ignite = proxy.ignite
               }
@@ -137,7 +161,7 @@ export default function Footer7() {
             .to(proxy, { ignite: 1, duration: 1, ease: 'none' }, 0)
 
           // Lens filter scrub
-          if (!isMobile && !isTouch) {
+          if (!isMobile && !isTouch && footer) {
             const filter = footer.querySelector('#bhf-lens feDisplacementMap')
             if (filter) {
               tl.fromTo(filter, { attr: { scale: 14 } }, { attr: { scale: 0 }, ease: 'none' }, 0)
@@ -146,6 +170,7 @@ export default function Footer7() {
 
           // Content capture vectors
           const onRefresh = () => {
+            if (!footer) return
             const pulls = footer.querySelectorAll('[data-bhf-pull]')
             pulls.forEach((el, i) => {
               const rect = el.getBoundingClientRect()
@@ -176,44 +201,48 @@ export default function Footer7() {
           })
 
           // Word light-up
-          const words = footer.querySelectorAll('.bhf-desc .sw')
-          if (words.length) {
-            gsap.fromTo(words,
-              { opacity: 0.14 },
-              {
-                opacity: 1,
-                stagger: 0.055,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: footer,
-                  start: 'top 92%',
-                  end: 'top 55%',
-                  scrub: 0.6
+          if (footer) {
+            const words = footer.querySelectorAll('.bhf-desc .sw')
+            if (words.length) {
+              gsap.fromTo(words,
+                { opacity: 0.14 },
+                {
+                  opacity: 1,
+                  stagger: 0.055,
+                  ease: 'none',
+                  scrollTrigger: {
+                    trigger: footer,
+                    start: 'top 92%',
+                    end: 'top 55%',
+                    scrub: 0.6
+                  }
                 }
-              }
-            )
+              )
+            }
           }
 
           // Magnetic links
           gsap.matchMedia().add('(hover: hover) and (pointer: fine)', () => {
+            if (!footer) return
             const inner = footer.querySelector('.bhf-inner')
             if (!inner) return
 
-            const handleMove = (e: PointerEvent) => {
+            const handleMove = (e: Event) => {
+              const pointerEvent = e as PointerEvent
               // Update pointer state for sim
               const canvasRect = canvas.getBoundingClientRect()
-              state.pointer.x = (e.clientX - canvasRect.left) * DPR
-              state.pointer.y = (e.clientY - canvasRect.top) * DPR
+              state.pointer.x = (pointerEvent.clientX - canvasRect.left) * DPR
+              state.pointer.y = (pointerEvent.clientY - canvasRect.top) * DPR
 
               // Compute speed for feed
               const now = Date.now()
               const dt = Math.max(1, now - state.pointer.lastT)
-              const dx = e.clientX - state.pointer.lastX
-              const dy = e.clientY - state.pointer.lastY
+              const dx = pointerEvent.clientX - state.pointer.lastX
+              const dy = pointerEvent.clientY - state.pointer.lastY
               const speed = Math.hypot(dx, dy) / (dt / 1000)
               state.feed = Math.min(1, speed / 2500)
-              state.pointer.lastX = e.clientX
-              state.pointer.lastY = e.clientY
+              state.pointer.lastX = pointerEvent.clientX
+              state.pointer.lastY = pointerEvent.clientY
               state.pointer.lastT = now
 
               // Magnetic displacement
@@ -222,11 +251,11 @@ export default function Footer7() {
                 const rect = el.getBoundingClientRect()
                 const cx = rect.left + rect.width * 0.5
                 const cy = rect.top + rect.height * 0.5
-                const dx = e.clientX - cx
-                const dy = e.clientY - cy
+                const dx = pointerEvent.clientX - cx
+                const dy = pointerEvent.clientY - cy
                 const dist = Math.hypot(dx, dy)
 
-                if (dist < 80) {
+                if (dist > 0 && dist < 80) {
                   if (!state.quickTos.has(el)) {
                     state.quickTos.set(el, {
                       x: gsap.quickTo(el, 'x', { duration: 0.4, ease: 'power3' }),
@@ -260,9 +289,11 @@ export default function Footer7() {
 
           // Social icon burst
           gsap.matchMedia().add('(hover: hover) and (pointer: fine)', () => {
+            if (!footer) return
             const socials = footer.querySelectorAll('.bhf-soc')
+            const cleanup: Array<() => void> = []
             socials.forEach((soc) => {
-              soc.addEventListener('pointerenter', (e) => {
+              const handleEnter = (e: Event) => {
                 if (!state.particles) return
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
                 const canvasRect = canvas.getBoundingClientRect()
@@ -278,14 +309,19 @@ export default function Footer7() {
                   state.particles[idx] = r + (Math.random() - 0.5) * 30
                   state.particles[idx + 1] = theta + (Math.random() - 0.5) * 0.4
                 }
-              }, { passive: true })
+              }
+              soc.addEventListener('pointerenter', handleEnter, { passive: true })
+              cleanup.push(() => soc.removeEventListener('pointerenter', handleEnter))
             })
+            return () => cleanup.forEach((fn) => fn())
           })
         }, footer)
 
         // Ticker
         tickerFn = () => {
           if (!ctx || !state.particles) return
+          const particles = state.particles
+          const context = ctx
 
           const now = performance.now()
           let dt = lastT > 0 ? Math.min((now - lastT) / 1000, 0.05) : 0.016
@@ -316,9 +352,9 @@ export default function Footer7() {
           // Physics
           for (let i = 0; i < state.N; i++) {
             const idx = i * 7
-            let r = state.particles[idx]
-            let theta = state.particles[idx + 1]
-            const omegaSeed = state.particles[idx + 2]
+            let r = particles[idx]
+            let theta = particles[idx + 1]
+            const omegaSeed = particles[idx + 2]
 
             const omega = (0.5 + omegaSeed) * k1 * Math.pow(r, -1.45)
             const dr = -(k2 + 2.2 * state.pull * k2 + 1.5 * state.feed * k2) * (1 / Math.max(r, state.horizonR)) * dt
@@ -351,14 +387,14 @@ export default function Footer7() {
               theta = Math.random() * Math.PI * 2
             }
 
-            state.particles[idx] = r
-            state.particles[idx + 1] = theta
+            particles[idx] = r
+            particles[idx + 1] = theta
           }
 
           // Render
-          ctx.globalCompositeOperation = 'source-over'
-          ctx.fillStyle = 'rgba(8,6,20,0.26)'
-          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          context.globalCompositeOperation = 'source-over'
+          context.fillStyle = 'rgba(8,6,20,0.26)'
+          context.fillRect(0, 0, canvas.width, canvas.height)
 
           // Bucket particles by radius
           const outer: number[] = []
@@ -367,13 +403,13 @@ export default function Footer7() {
 
           for (let i = 0; i < state.N; i++) {
             const idx = i * 7
-            const r = state.particles[idx]
-            const theta = state.particles[idx + 1]
+            const r = particles[idx]
+            const theta = particles[idx + 1]
             const x = state.C.x + r * Math.cos(theta)
             const y = state.C.y + r * Math.sin(theta)
 
-            state.particles[idx + 4] = x
-            state.particles[idx + 5] = y
+            particles[idx + 4] = x
+            particles[idx + 5] = y
 
             const ratio = r / state.maxR
             if (ratio > 0.6) outer.push(i)
@@ -381,75 +417,80 @@ export default function Footer7() {
             else inner.push(i)
           }
 
-          ctx.globalCompositeOperation = 'lighter'
+          context.globalCompositeOperation = 'lighter'
 
           // Outer band
-          ctx.strokeStyle = 'rgba(216,216,224,0.18)'
-          ctx.lineWidth = 1
-          ctx.beginPath()
+          context.strokeStyle = 'rgba(216,216,224,0.18)'
+          context.lineWidth = 1
+          context.beginPath()
           outer.forEach((i) => {
             const idx = i * 7
-            const prevX = state.particles[idx + 4]
-            const prevY = state.particles[idx + 5]
-            const x = state.C.x + state.particles[idx] * Math.cos(state.particles[idx + 1])
-            const y = state.C.y + state.particles[idx] * Math.sin(state.particles[idx + 1])
+            const prevX = particles[idx + 4]
+            const prevY = particles[idx + 5]
+            const x = state.C.x + particles[idx] * Math.cos(particles[idx + 1])
+            const y = state.C.y + particles[idx] * Math.sin(particles[idx + 1])
             if (prevX !== 0 || prevY !== 0) {
-              ctx.moveTo(prevX, prevY)
-              ctx.lineTo(x, y)
+              context.moveTo(prevX, prevY)
+              context.lineTo(x, y)
             }
           })
-          ctx.stroke()
+          context.stroke()
 
           // Mid band
-          ctx.strokeStyle = 'rgba(108,92,231,0.45)'
-          ctx.lineWidth = 1.25
-          ctx.beginPath()
+          context.strokeStyle = 'rgba(108,92,231,0.45)'
+          context.lineWidth = 1.25
+          context.beginPath()
           mid.forEach((i) => {
             const idx = i * 7
-            const prevX = state.particles[idx + 4]
-            const prevY = state.particles[idx + 5]
-            const x = state.C.x + state.particles[idx] * Math.cos(state.particles[idx + 1])
-            const y = state.C.y + state.particles[idx] * Math.sin(state.particles[idx + 1])
+            const prevX = particles[idx + 4]
+            const prevY = particles[idx + 5]
+            const x = state.C.x + particles[idx] * Math.cos(particles[idx + 1])
+            const y = state.C.y + particles[idx] * Math.sin(particles[idx + 1])
             if (prevX !== 0 || prevY !== 0) {
-              ctx.moveTo(prevX, prevY)
-              ctx.lineTo(x, y)
+              context.moveTo(prevX, prevY)
+              context.lineTo(x, y)
             }
           })
-          ctx.stroke()
+          context.stroke()
 
           // Inner band
-          ctx.strokeStyle = 'rgba(139,122,232,0.85)'
-          ctx.lineWidth = 1.6
-          ctx.beginPath()
+          context.strokeStyle = 'rgba(139,122,232,0.85)'
+          context.lineWidth = 1.6
+          context.beginPath()
           inner.forEach((i) => {
             const idx = i * 7
-            const prevX = state.particles[idx + 4]
-            const prevY = state.particles[idx + 5]
-            const x = state.C.x + state.particles[idx] * Math.cos(state.particles[idx + 1])
-            const y = state.C.y + state.particles[idx] * Math.sin(state.particles[idx + 1])
+            const prevX = particles[idx + 4]
+            const prevY = particles[idx + 5]
+            const x = state.C.x + particles[idx] * Math.cos(particles[idx + 1])
+            const y = state.C.y + particles[idx] * Math.sin(particles[idx + 1])
             if (prevX !== 0 || prevY !== 0) {
-              ctx.moveTo(prevX, prevY)
-              ctx.lineTo(x, y)
+              context.moveTo(prevX, prevY)
+              context.lineTo(x, y)
             }
           })
-          ctx.stroke()
+          context.stroke()
 
           // Horizon sprite
           if (state.horizonSprite) {
-            ctx.globalCompositeOperation = 'source-over'
+            context.globalCompositeOperation = 'source-over'
             const scale = state.ignite
             const feedFlicker = state.feed > 0.15 ? 0.25 * state.feed : 0
             const alpha = Math.min(1, (state.ignite - 0.9) / 0.1 * 0.75 + 0.25 + feedFlicker)
-            ctx.globalAlpha = alpha
-            ctx.drawImage(
+            context.globalAlpha = alpha
+            context.drawImage(
               state.horizonSprite,
               state.C.x - 256 * scale,
               state.C.y - 256 * scale,
               512 * scale,
               512 * scale
             )
-            ctx.globalAlpha = 1
+            context.globalAlpha = 1
           }
+        }
+
+        const footerRect = footer.getBoundingClientRect()
+        if (footerRect.bottom >= -200 && footerRect.top <= window.innerHeight + 200) {
+          addTicker()
         }
 
         // Resize observer
@@ -472,7 +513,7 @@ export default function Footer7() {
 
       } catch (err) {
         console.error('Footer init error:', err)
-        footer.classList.add('bhf-nogl')
+        if (footer) footer.classList.add('bhf-nogl')
       }
     }
 
@@ -481,7 +522,7 @@ export default function Footer7() {
       (entries) => {
         if (entries[0].isIntersecting) {
           obsA?.disconnect()
-          if (window.requestIdleCallback) {
+          if (typeof window.requestIdleCallback !== 'undefined') {
             requestIdleCallback(() => init())
           } else {
             setTimeout(init, 1)
@@ -496,9 +537,9 @@ export default function Footer7() {
     obsB = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          if (tickerFn) gsap.ticker.add(tickerFn)
+          addTicker()
         } else {
-          if (tickerFn) gsap.ticker.remove(tickerFn)
+          removeTicker()
         }
       },
       { threshold: 0, rootMargin: '200px 0px' }
@@ -508,9 +549,9 @@ export default function Footer7() {
     // Visibility change
     const handleVisibility = () => {
       if (document.hidden) {
-        if (tickerFn) gsap.ticker.remove(tickerFn)
+        removeTicker()
       } else {
-        if (tickerFn) gsap.ticker.add(tickerFn)
+        addTicker()
         lastT = 0
       }
     }
@@ -519,7 +560,7 @@ export default function Footer7() {
     // Cleanup
     return () => {
       gsapCtx?.revert()
-      if (tickerFn) gsap.ticker.remove(tickerFn)
+      removeTicker()
       obsA?.disconnect()
       obsB?.disconnect()
       resizeObs?.disconnect()
@@ -542,42 +583,54 @@ export default function Footer7() {
               <Image src="/assets/img/logo/white-logo-3.svg" alt="Black Hole Logo" width={150} height={50} />
             </Link>
             <p className="bhf-desc">
-              {Words('Black Hole unifies game publishing, fintech payments, digital platforms, and B2B tech solutions into one powerful ecosystem for global growth.')}
+              {Words('Black Hole kết nối giải đấu, cộng đồng, phát hành game và giải pháp công nghệ thành một hệ sinh thái esports sẵn sàng bứt tốc tại Việt Nam.')}
             </p>
+            <div className="bhf-command">
+              <span className="bhf-command-kicker">Trạm chỉ huy</span>
+              <strong>24/7</strong>
+              <p>Hỗ trợ đội tuyển, nhà phát hành và đối tác vận hành chiến dịch từ brief đến ngày lên sóng.</p>
+            </div>
           </div>
-          <nav className="bhf-col" data-bhf-pull aria-label="Ecosystem">
-            <h5 className="bhf-h">Ecosystem</h5>
+          <nav className="bhf-col" data-bhf-pull aria-label="Hệ sinh thái">
+            <h5 className="bhf-h">Hệ sinh thái</h5>
             <ul className="bhf-links">
-              <li><Link href="/game-publishing" className="bhf-link">Game Publishing</Link></li>
-              <li><Link href="/fintech" className="bhf-link">Fintech Payment</Link></li>
-              <li><Link href="/platform" className="bhf-link">Digital Platform</Link></li>
-              <li><Link href="/b2b-tech" className="bhf-link">B2B Tech Solutions</Link></li>
+              <li><Link href="/game-publishing" className="bhf-link">Phát hành game</Link></li>
+              <li><Link href="/match" className="bhf-link">Giải đấu esports</Link></li>
+              <li><Link href="/platform" className="bhf-link">Nền tảng cộng đồng</Link></li>
+              <li><Link href="/b2b-tech" className="bhf-link">Giải pháp B2B</Link></li>
             </ul>
           </nav>
-          <nav className="bhf-col" data-bhf-pull aria-label="Company">
-            <h5 className="bhf-h">Company</h5>
+          <nav className="bhf-col" data-bhf-pull aria-label="Công ty">
+            <h5 className="bhf-h">Black Hole</h5>
             <ul className="bhf-links">
-              <li><Link href="/about" className="bhf-link">About Us</Link></li>
-              <li><Link href="/partnerships" className="bhf-link">Partnerships</Link></li>
-              <li><Link href="/community" className="bhf-link">Community</Link></li>
-              <li><Link href="/contact" className="bhf-link">Contact</Link></li>
+              <li><Link href="/about" className="bhf-link">Về chúng tôi</Link></li>
+              <li><Link href="/team" className="bhf-link">Đội tuyển</Link></li>
+              <li><Link href="/gallery" className="bhf-link">Khoảnh khắc</Link></li>
+              <li><Link href="/contact" className="bhf-link">Liên hệ hợp tác</Link></li>
             </ul>
           </nav>
-          <nav className="bhf-col" data-bhf-pull aria-label="Resources">
-            <h5 className="bhf-h">Resources</h5>
+          <nav className="bhf-col" data-bhf-pull aria-label="Tài nguyên">
+            <h5 className="bhf-h">Tài nguyên</h5>
             <ul className="bhf-links">
-              <li><Link href="/documentation" className="bhf-link">Documentation</Link></li>
-              <li><Link href="/api" className="bhf-link">API Reference</Link></li>
-              <li><Link href="/support" className="bhf-link">Support Center</Link></li>
-              <li><Link href="/legal" className="bhf-link">Legal & Privacy</Link></li>
+              <li><Link href="/news" className="bhf-link">Bản tin esports</Link></li>
+              <li><Link href="/faq" className="bhf-link">Câu hỏi thường gặp</Link></li>
+              <li><Link href="/support" className="bhf-link">Trung tâm hỗ trợ</Link></li>
+              <li><Link href="/legal" className="bhf-link">Pháp lý & bảo mật</Link></li>
             </ul>
           </nav>
         </div>
+        <div className="bhf-cta" data-bhf-pull>
+          <div>
+            <span className="bhf-cta-kicker">Sẵn sàng mở cổng?</span>
+            <h3>Đưa giải đấu, cộng đồng hoặc tựa game của bạn lên sân khấu lớn.</h3>
+          </div>
+          <Link href="/contact" className="bhf-cta-btn">Gửi brief hợp tác</Link>
+        </div>
         <div className="bhf-bottom" data-bhf-pull>
-          <p className="bhf-copy">© 2025 Black Hole. All Rights Reserved.</p>
+          <p className="bhf-copy">© 2026 Black Hole. Bản quyền thuộc về Black Hole.</p>
           <div className="bhf-social">
             <a href="#" className="bhf-soc" aria-label="Facebook"><i className="fa-brands fa-facebook-f"></i></a>
-            <a href="#" className="bhf-soc" aria-label="Twitter"><i className="fa-brands fa-twitter"></i></a>
+            <a href="#" className="bhf-soc" aria-label="X"><i className="fa-brands fa-twitter"></i></a>
             <a href="#" className="bhf-soc" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></a>
             <a href="#" className="bhf-soc" aria-label="Instagram"><i className="fa-brands fa-instagram"></i></a>
           </div>
@@ -675,6 +728,9 @@ export default function Footer7() {
           .bhf-inner { padding: 80px 20px 0; }
         }
         .bhf-col { display: flex; flex-direction: column; gap: 18px; }
+        .bhf-brand {
+          max-width: 470px;
+        }
         .bhf-lens {
           display: inline-block;
           filter: url(#bhf-lens);
@@ -701,6 +757,42 @@ export default function Footer7() {
         }
         .bhf-desc .sw {
           opacity: 0.14;
+        }
+        .bhf-command {
+          width: min(100%, 360px);
+          padding: 18px 20px;
+          border: 1px solid rgba(139,122,232,0.24);
+          background:
+            linear-gradient(135deg, rgba(20,14,45,0.82), rgba(8,6,20,0.52)),
+            radial-gradient(circle at 12% 0%, rgba(155,124,255,0.18), transparent 42%);
+          clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 16px);
+          box-shadow: inset 0 0 28px rgba(75,34,216,0.12), 0 18px 44px rgba(0,0,0,0.24);
+        }
+        .bhf-command-kicker,
+        .bhf-cta-kicker {
+          display: block;
+          color: #9b7cff;
+          font-family: 'Chakra Petch', sans-serif;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+        .bhf-command strong {
+          display: block;
+          color: #ffffff;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 36px;
+          line-height: 1;
+          text-shadow: 0 0 18px rgba(155,124,255,0.5);
+        }
+        .bhf-command p {
+          color: rgba(216,216,224,0.78);
+          font-size: 14px;
+          line-height: 1.55;
+          margin: 10px 0 0;
+          text-transform: none;
         }
         .bhf-links {
           list-style: none;
@@ -731,13 +823,66 @@ export default function Footer7() {
           outline: 2px solid #8b7ae8;
           outline-offset: 3px;
         }
+        .bhf-cta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 28px;
+          margin-top: 58px;
+          padding: 28px 30px;
+          border: 1px solid rgba(139,122,232,0.25);
+          background:
+            linear-gradient(90deg, rgba(16,12,38,0.92), rgba(8,6,20,0.72)),
+            linear-gradient(135deg, rgba(139,122,232,0.14), transparent 55%);
+          clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px);
+          box-shadow: inset 0 0 38px rgba(75,34,216,0.14), 0 20px 60px rgba(0,0,0,0.24);
+        }
+        .bhf-cta h3 {
+          color: #ffffff !important;
+          font-family: 'Orbitron', sans-serif;
+          font-size: clamp(24px, 3vw, 42px);
+          line-height: 1.12;
+          letter-spacing: 0;
+          max-width: 850px;
+          margin: 0;
+          text-transform: none;
+        }
+        .bhf-cta-btn {
+          flex: 0 0 auto;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 54px;
+          padding: 0 24px;
+          color: #ffffff !important;
+          font-family: 'Chakra Petch', sans-serif;
+          font-size: 14px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          text-decoration: none;
+          border: 1px solid rgba(190,166,255,0.65);
+          background: linear-gradient(180deg, rgba(75,34,216,0.85), rgba(32,16,92,0.92));
+          clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+          box-shadow: 0 0 24px rgba(83,39,216,0.5), inset 0 0 20px rgba(255,255,255,0.08);
+          transition: transform 0.25s ease, filter 0.25s ease;
+        }
+        .bhf-cta-btn:hover,
+        .bhf-cta-btn:focus-visible {
+          transform: translateY(-2px);
+          filter: brightness(1.12);
+        }
+        .bhf-cta-btn:focus-visible {
+          outline: 2px solid #ffffff;
+          outline-offset: 4px;
+        }
         .bhf-bottom {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 28px 0 34px;
           border-top: 1px solid rgba(139,122,232,0.18);
-          margin-top: 48px;
+          margin-top: 36px;
           flex-wrap: wrap;
           gap: 20px;
         }
@@ -781,8 +926,17 @@ export default function Footer7() {
           height: 0;
           pointer-events: none;
         }
+        @media (max-width: 767px) {
+          .bhf-cta {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 24px 22px;
+          }
+          .bhf-cta-btn {
+            width: 100%;
+          }
+        }
       `}</style>
     </footer>
   )
 }
-

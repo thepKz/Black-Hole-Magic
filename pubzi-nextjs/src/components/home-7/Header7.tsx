@@ -19,7 +19,7 @@ export default function Header7() {
       {/* Header Section Start */}
       <header
         id="header-sticky"
-        className={`header-2 header-4 header-7 bh-header ${isScrolled ? 'is-scrolled' : 'is-at-top'}`}
+        className={`bh-header ${isScrolled ? 'is-scrolled' : 'is-at-top'}`}
         style={{
           position: 'fixed',
           top: 0,
@@ -37,8 +37,9 @@ export default function Header7() {
           <div className="mega-menu-wrapper">
             <div className="header-main">
               <div className="logo">
-                <Link href="/" className="header-logo">
-                  <img src="/assets/img/logo/white-logo.svg" alt="logo-img" />
+                <Link href="/" className="header-logo" aria-label="BlackHole Game">
+                  <img src="/assets/img/logo/white-logo-2.png" alt="logo-img" />
+                  <span className="header-wordmark">BlackHole</span>
                 </Link>
               </div>
               <div className="mean__menu-wrapper">
@@ -47,7 +48,7 @@ export default function Header7() {
                     <ul>
                       <li className="has-dropdown active menu-thumb">
                         <Link href="/">
-                          Home
+                          Trang chủ
                         </Link>
                         <ul className="submenu has-homemenu style-2">
                           <li>
@@ -57,7 +58,7 @@ export default function Header7() {
                                   <img src="/assets/img/header/home-7.jpg" alt="img" />
                                   <div className="demo-button">
                                     <Link href="/" className="gt-theme-btn">
-                                      View Home
+                                      Khám phá
                                     </Link>
                                   </div>
                                 </div>
@@ -73,78 +74,76 @@ export default function Header7() {
                       </li>
                       <li className="has-dropdown active d-xl-none">
                         <Link href="/" className="border-none">
-                          Home
+                          Trang chủ
                         </Link>
                         <ul className="submenu">
                           <li><Link href="/">Black Hole</Link></li>
                         </ul>
                       </li>
                       <li>
-                        <Link href="/about">About Us</Link>
+                        <Link href="/about">Về chúng tôi</Link>
                       </li>
                       <li>
                         <Link href="/match-details">
-                          matches
+                          Lịch đấu
                         </Link>
                         <ul className="submenu">
-                          <li><Link href="/match">matches Page</Link></li>
-                          <li><Link href="/match-details">matches Details</Link></li>
+                          <li><Link href="/match">Tất cả trận đấu</Link></li>
+                          <li><Link href="/match-details">Chi tiết trận đấu</Link></li>
                         </ul>
                       </li>
                       <li>
                         <Link href="/news-details">
-                          Pages
+                          Hệ sinh thái
                         </Link>
                         <ul className="submenu">
                           <li className="has-dropdown">
                             <Link href="/service-details">
-                              Our Service
+                              Dịch vụ
                               <i className="fas fa-angle-right"></i>
                             </Link>
                             <ul className="submenu">
-                              <li><Link href="/service">Our Services</Link></li>
-                              <li><Link href="/service-details">Service Details</Link></li>
+                              <li><Link href="/service">Giải pháp</Link></li>
+                              <li><Link href="/service-details">Chi tiết dịch vụ</Link></li>
                             </ul>
                           </li>
                           <li className="has-dropdown">
                             <Link href="/game-details">
-                              Our Games
+                              Game
                               <i className="fas fa-angle-right"></i>
                             </Link>
                             <ul className="submenu">
-                              <li><Link href="/game">Our Games</Link></li>
-                              <li><Link href="/game-details">Game Details</Link></li>
+                              <li><Link href="/game">Thư viện game</Link></li>
+                              <li><Link href="/game-details">Chi tiết game</Link></li>
                             </ul>
                           </li>
                           <li className="has-dropdown">
                             <Link href="/team-details">
-                              Our Team
+                              Đội tuyển
                               <i className="fas fa-angle-right"></i>
                             </Link>
                             <ul className="submenu">
-                              <li><Link href="/team">Our Team</Link></li>
-                              <li><Link href="/team-details">Team Details</Link></li>
+                              <li><Link href="/team">Roster</Link></li>
+                              <li><Link href="/team-details">Hồ sơ đội</Link></li>
                             </ul>
                           </li>
-                          <li><Link href="/gallery">epic gallery</Link></li>
-                          <li><Link href="/pricing">Our Pricing</Link></li>
-                          <li><Link href="/faq">Our Faq</Link></li>
-                          <li><Link href="/coming-soon">Coming Soon</Link></li>
-                          <li><Link href="/404">404 Page</Link></li>
+                          <li><Link href="/gallery">Khoảnh khắc</Link></li>
+                          <li><Link href="/pricing">Gói hợp tác</Link></li>
+                          <li><Link href="/faq">Câu hỏi thường gặp</Link></li>
                         </ul>
                       </li>
                       <li>
                         <Link href="/news-details">
-                          Blog
+                          Tin tức
                         </Link>
                         <ul className="submenu">
-                          <li><Link href="/news-grid">Blog Grid</Link></li>
-                          <li><Link href="/news">Blog Standard</Link></li>
-                          <li><Link href="/news-details">Blog Details</Link></li>
+                          <li><Link href="/news-grid">Tin nổi bật</Link></li>
+                          <li><Link href="/news">Bản tin esports</Link></li>
+                          <li><Link href="/news-details">Phân tích trận đấu</Link></li>
                         </ul>
                       </li>
                       <li>
-                        <Link href="/contact">Contact Us</Link>
+                        <Link href="/contact">Liên hệ</Link>
                       </li>
                     </ul>
                   </nav>
@@ -156,8 +155,8 @@ export default function Header7() {
                     <i className="fa-regular fa-magnifying-glass"></i>
                   </a>
                   <div className="header-button">
-                    <Link href="/contact" className="gt-theme-btn gt-style-border header-electric-btn">
-                      get in touch
+                    <Link href="/contact" className="header-electric-btn">
+                      Vào đấu trường
                     </Link>
                   </div>
                   <div className="header__hamburger d-xl-block my-auto">
@@ -177,8 +176,8 @@ export default function Header7() {
         <div className="search-popup__overlay search-toggler"></div>
         <div className="search-popup__content">
           <form role="search" method="get" className="search-popup__form" action="#">
-            <input type="text" id="search" name="search" placeholder="Search Here..." />
-            <button type="submit" aria-label="search submit" className="search-btn">
+            <input type="text" id="search" name="search" placeholder="Tìm trận đấu, đội tuyển, tin tức..." />
+            <button type="submit" aria-label="gửi tìm kiếm" className="search-btn">
               <span><i className="fa-regular fa-magnifying-glass"></i></span>
             </button>
           </form>
@@ -203,6 +202,110 @@ export default function Header7() {
           border-bottom-color: rgba(112, 90, 255, 0.28) !important;
         }
 
+        #header-sticky.bh-header .container-fluid {
+          padding-left: 42px !important;
+          padding-right: 42px !important;
+        }
+
+        #header-sticky.bh-header .header-main {
+          min-height: 76px;
+          padding: 8px 0 !important;
+        }
+
+        #header-sticky.bh-header .header-logo img {
+          width: 104px;
+          max-height: 62px;
+          object-fit: contain;
+        }
+
+        #header-sticky.bh-header .header-logo {
+          display: inline-flex !important;
+          align-items: center;
+          gap: 2px;
+          text-decoration: none;
+        }
+
+        #header-sticky.bh-header .header-wordmark {
+          font-family: var(--font-brand);
+          font-size: 24px;
+          font-weight: 700;
+          line-height: 1;
+          letter-spacing: 0;
+          color: #ffffff !important;
+          text-transform: none;
+          text-shadow:
+            0 0 14px rgba(255, 255, 255, 0.24),
+            0 0 24px rgba(108, 92, 231, 0.35);
+          white-space: nowrap;
+          transform: translateX(-12px);
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul {
+          gap: 18px;
+        }
+
+        #header-sticky.bh-header .main-menu ul li {
+          margin: 0 4px !important;
+        }
+
+        #header-sticky.bh-header .main-menu ul li a {
+          padding: 22px 0 !important;
+          font-size: 18px !important;
+          line-height: 1.1 !important;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li > a {
+          position: relative;
+          letter-spacing: 0.02em;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li > a::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 15px;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #9b7cff, transparent);
+          opacity: 0;
+          transform: scaleX(0.45);
+          transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li:hover > a::after,
+        #header-sticky.bh-header .main-menu > nav > ul > li.active > a::after {
+          opacity: 1;
+          transform: scaleX(1);
+        }
+
+        #header-sticky .header-live-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          height: 38px;
+          padding: 0 14px;
+          border: 1px solid rgba(155, 124, 255, 0.45);
+          background: rgba(14, 10, 32, 0.7);
+          color: #ffffff !important;
+          font-family: 'Chakra Petch', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          text-decoration: none;
+          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+          box-shadow: inset 0 0 20px rgba(75, 34, 216, 0.18);
+        }
+
+        #header-sticky .header-live-pill span {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #ff3b6b;
+          box-shadow: 0 0 0 5px rgba(255, 59, 107, 0.15), 0 0 16px rgba(255, 59, 107, 0.9);
+          animation: live-pulse 1.25s ease-in-out infinite;
+        }
+
         #header-sticky .header-electric-btn {
           --electric-purple: #4b22d8;
           --electric-purple-bright: #9b7cff;
@@ -210,11 +313,13 @@ export default function Header7() {
           position: relative !important;
           isolation: isolate;
           overflow: hidden !important;
-          min-width: 200px;
-          height: 60px;
+          min-width: 160px;
+          height: 48px;
           display: inline-flex !important;
           align-items: center;
           justify-content: center;
+          font-size: 15px !important;
+          letter-spacing: 1.2px !important;
           background:
             linear-gradient(180deg, rgba(34, 18, 78, 0.88), rgba(8, 6, 20, 0.9)) padding-box,
             linear-gradient(135deg, var(--electric-purple-bright), var(--electric-purple) 42%, #2d117e 72%, var(--electric-purple-bright)) border-box !important;
@@ -232,6 +337,15 @@ export default function Header7() {
             filter 0.28s ease,
             box-shadow 0.28s ease !important;
           animation: electric-frame-pulse 2.6s ease-in-out infinite;
+        }
+
+        #header-sticky.bh-header .header-right-icon {
+          gap: 16px !important;
+        }
+
+        #header-sticky.bh-header .sidebar__toggle img {
+          width: 42px;
+          height: auto;
         }
 
         #header-sticky .header-electric-btn::before {
@@ -304,10 +418,332 @@ export default function Header7() {
           }
         }
 
+        @keyframes live-pulse {
+          0%, 100% { transform: scale(0.9); opacity: 0.72; }
+          50% { transform: scale(1.18); opacity: 1; }
+        }
+
         @media (max-width: 1199px) {
-          #header-sticky .header-electric-btn {
+          #header-sticky .header-electric-btn,
+          #header-sticky .header-live-pill {
             display: none !important;
           }
+        }
+
+        @media (max-width: 1199px) {
+          #header-sticky.bh-header .container-fluid {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+          }
+
+          #header-sticky.bh-header .header-main {
+            min-height: 64px;
+            padding: 6px 0 !important;
+          }
+
+          #header-sticky.bh-header .header-logo img {
+            width: 82px;
+            max-height: 50px;
+          }
+
+          #header-sticky.bh-header .header-logo {
+            gap: 0;
+          }
+
+          #header-sticky.bh-header .header-wordmark {
+            font-size: 18px;
+            transform: translateX(-10px);
+          }
+        }
+
+        #header-sticky.bh-header {
+          height: 78px !important;
+          min-height: 78px !important;
+          padding: 0 !important;
+          overflow: visible;
+        }
+
+        #header-sticky.bh-header.is-at-top {
+          background:
+            linear-gradient(180deg, rgba(7, 6, 15, 0.86) 0%, rgba(7, 6, 15, 0.5) 68%, rgba(7, 6, 15, 0) 100%) !important;
+          border-bottom: 1px solid rgba(146, 118, 255, 0.14) !important;
+        }
+
+        #header-sticky.bh-header.is-scrolled {
+          background: rgba(6, 6, 10, 0.92) !important;
+          border-bottom: 1px solid rgba(146, 118, 255, 0.24) !important;
+          backdrop-filter: blur(14px);
+        }
+
+        #header-sticky.bh-header .container-fluid,
+        #header-sticky.bh-header .mega-menu-wrapper,
+        #header-sticky.bh-header .header-main {
+          height: 100%;
+        }
+
+        #header-sticky.bh-header .container-fluid {
+          padding-left: clamp(22px, 4vw, 72px) !important;
+          padding-right: clamp(22px, 4vw, 72px) !important;
+        }
+
+        #header-sticky.bh-header .header-main {
+          display: grid !important;
+          grid-template-columns: auto minmax(0, 1fr) auto;
+          align-items: center;
+          gap: clamp(22px, 2.6vw, 46px);
+          min-height: 0 !important;
+          padding: 0 !important;
+        }
+
+        #header-sticky.bh-header .logo {
+          width: auto;
+          min-width: 214px;
+        }
+
+        #header-sticky.bh-header .header-logo {
+          gap: 9px;
+          transform: none;
+        }
+
+        #header-sticky.bh-header .header-logo img {
+          width: 48px;
+          height: 48px;
+          max-height: 48px;
+          object-fit: contain;
+        }
+
+        #header-sticky.bh-header .header-wordmark {
+          transform: none;
+          font-size: 22px;
+          font-weight: 800;
+          letter-spacing: 0;
+          text-shadow: 0 0 18px rgba(255, 255, 255, 0.18);
+        }
+
+        #header-sticky.bh-header .mean__menu-wrapper {
+          min-width: 0;
+        }
+
+        #header-sticky.bh-header .main-menu {
+          display: flex;
+          justify-content: center;
+          min-width: 0;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(12px, 1.25vw, 24px);
+          flex-wrap: nowrap;
+        }
+
+        #header-sticky.bh-header .main-menu ul li {
+          margin: 0 !important;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li > a {
+          height: 78px;
+          display: inline-flex !important;
+          align-items: center;
+          padding: 0 !important;
+          color: rgba(243, 241, 255, 0.84) !important;
+          font-family: 'Chakra Petch', sans-serif;
+          font-size: clamp(13px, 0.78vw, 15px) !important;
+          font-weight: 800;
+          line-height: 1 !important;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li > a::after {
+          bottom: 18px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(156, 128, 255, 0.95), transparent);
+        }
+
+        #header-sticky.bh-header .main-menu > nav > ul > li:hover > a,
+        #header-sticky.bh-header .main-menu > nav > ul > li.active > a {
+          color: #9b7cff !important;
+        }
+
+        #header-sticky.bh-header .header-right-icon {
+          display: flex !important;
+          align-items: center;
+          gap: 12px !important;
+        }
+
+        #header-sticky .header-live-pill {
+          height: 34px;
+          padding: 0 12px;
+          border-color: rgba(155, 124, 255, 0.34);
+          background: rgba(14, 10, 32, 0.58);
+          font-size: 12px;
+          letter-spacing: 0.06em;
+          box-shadow: inset 0 0 14px rgba(75, 34, 216, 0.14);
+        }
+
+        #header-sticky .main-header__search {
+          width: 38px;
+          height: 38px;
+          display: inline-flex !important;
+          align-items: center;
+          justify-content: center;
+          color: rgba(229, 226, 255, 0.86) !important;
+          border: 1px solid rgba(155, 124, 255, 0.18);
+          background: rgba(12, 9, 26, 0.34);
+          text-decoration: none;
+        }
+
+        #header-sticky .main-header__search i {
+          font-size: 15px;
+        }
+
+        #header-sticky .header-electric-btn {
+          min-width: 144px;
+          height: 42px;
+          padding: 0 18px;
+          border: 1px solid rgba(155, 124, 255, 0.68) !important;
+          background:
+            linear-gradient(180deg, rgba(39, 22, 90, 0.72), rgba(9, 7, 22, 0.84)) !important;
+          clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+          color: #ffffff !important;
+          font-family: 'Chakra Petch', sans-serif;
+          font-size: 13px !important;
+          font-weight: 800;
+          letter-spacing: 0.06em !important;
+          line-height: 1;
+          text-transform: uppercase;
+          text-decoration: none;
+          text-shadow: none;
+          box-shadow:
+            0 0 0 1px rgba(88, 54, 214, 0.16),
+            inset 0 0 18px rgba(75, 34, 216, 0.16) !important;
+          animation: none !important;
+        }
+
+        #header-sticky .header-electric-btn::before {
+          display: none !important;
+        }
+
+        #header-sticky .header-electric-btn::after {
+          inset: 1px;
+          opacity: 0.26;
+          background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.18) 45%, transparent 62%);
+          transform: translateX(-34%);
+          animation: none !important;
+        }
+
+        #header-sticky .header-electric-btn:hover {
+          transform: translateY(-1px);
+          filter: none;
+          border-color: rgba(199, 181, 255, 0.9) !important;
+          box-shadow:
+            0 0 0 1px rgba(155, 124, 255, 0.32),
+            0 12px 30px rgba(44, 17, 145, 0.34),
+            inset 0 0 22px rgba(75, 34, 216, 0.22) !important;
+        }
+
+        #header-sticky .header-electric-btn:hover::after {
+          transform: translateX(34%);
+          opacity: 0.54;
+        }
+
+        #header-sticky.bh-header .sidebar__toggle {
+          width: 40px;
+          height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(155, 124, 255, 0.18);
+          background: rgba(12, 9, 26, 0.3);
+        }
+
+        #header-sticky.bh-header .sidebar__toggle img {
+          width: 25px;
+          opacity: 0.9;
+        }
+
+        @media (max-width: 1399px) {
+          #header-sticky .header-live-pill {
+            display: none !important;
+          }
+
+          #header-sticky.bh-header .logo {
+            min-width: 190px;
+          }
+        }
+
+        @media (max-width: 1199px) {
+          #header-sticky.bh-header {
+            height: 66px !important;
+            min-height: 66px !important;
+          }
+
+          #header-sticky.bh-header .container-fluid {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+          }
+
+          #header-sticky.bh-header .header-main {
+            grid-template-columns: auto auto;
+          }
+
+          #header-sticky.bh-header .logo {
+            min-width: 0;
+          }
+
+          #header-sticky.bh-header .header-logo img {
+            width: 40px;
+            height: 40px;
+            max-height: 40px;
+          }
+
+          #header-sticky.bh-header .header-wordmark {
+            font-size: 18px;
+          }
+
+          #header-sticky .header-electric-btn,
+          #header-sticky .header-live-pill,
+          #header-sticky .main-header__search {
+            display: none !important;
+          }
+
+          #header-sticky.bh-header .sidebar__toggle {
+            width: 38px;
+            height: 38px;
+          }
+        }
+
+        #header-sticky.bh-header,
+        #header-sticky.bh-header.is-at-top,
+        #header-sticky.bh-header.is-scrolled {
+          border: 0 !important;
+          border-bottom: 0 !important;
+          box-shadow: none !important;
+        }
+
+        #header-sticky .header-live-pill {
+          display: none !important;
+        }
+
+        #header-sticky .main-header__search,
+        #header-sticky.bh-header .sidebar__toggle {
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        #header-sticky .header-electric-btn {
+          border: 0 !important;
+          background: rgba(39, 22, 90, 0.76) !important;
+          box-shadow: inset 0 0 18px rgba(75, 34, 216, 0.18) !important;
+        }
+
+        #header-sticky .header-electric-btn:hover {
+          border: 0 !important;
+          box-shadow: 0 12px 30px rgba(44, 17, 145, 0.28), inset 0 0 22px rgba(75, 34, 216, 0.24) !important;
         }
       `}</style>
     </>

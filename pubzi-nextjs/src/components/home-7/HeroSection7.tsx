@@ -196,7 +196,8 @@ export default function HeroSection7() {
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate(self) {
-                const v = frostRef.current!;
+                const v = frostRef.current;
+                if (!v) return;
                 if (self.progress === 0) {
                   if (!v.paused) v.pause();
                 } else if (v.paused && document.body.dataset.preloaderDone === 'true') {
@@ -262,7 +263,12 @@ export default function HeroSection7() {
         );
       }
 
-      videoRef.current?.play().catch(() => {});
+      if (!isMobile && !isReducedMotion) {
+        videoRef.current?.play().catch(() => {});
+      } else {
+        videoRef.current?.pause();
+        frostRef.current?.pause();
+      }
       ScrollTrigger.refresh();
     };
 
@@ -290,11 +296,10 @@ export default function HeroSection7() {
       <video
         ref={videoRef}
         className="hero-video-bg"
-        autoPlay
         loop
         muted
         playsInline
-        preload="auto"
+        preload="none"
         style={{
           position: 'fixed',
           inset: 0,
@@ -313,11 +318,10 @@ export default function HeroSection7() {
       <video
         ref={frostRef}
         className="hero-video-frost"
-        autoPlay
         loop
         muted
         playsInline
-        preload="auto"
+        preload="none"
         aria-hidden="true"
         style={{
           position: 'fixed',
@@ -369,10 +373,7 @@ export default function HeroSection7() {
           <div className="iphone-stage">
             <div className="iphone-float" style={{ opacity: 0 }}>
               <img src="/assets/img/landing-page/iphone_2.png" alt="Trải nghiệm game trên iPhone" className="iphone-art" />
-              <a href="/contact" className="hero-cta">
-                <span>READ MORE</span>
-                <span className="hero-cta-arrow">→</span>
-              </a>
+             
             </div>
           </div>
         </div>
@@ -389,7 +390,7 @@ export default function HeroSection7() {
               marginBottom: '28px',
               textAlign: 'center',
             }}>
-              Digital Gaming Platform
+              Nền tảng gaming Việt
             </div>
             <TitleLetters text="BLACK HOLE GAME" />
           </div>
@@ -481,6 +482,9 @@ export default function HeroSection7() {
               opacity: 0;
               will-change: transform, opacity;
               text-align: center;
+            }
+            .hero-title-stars .ht-letter {
+              will-change: transform, opacity;
             }
           }
 
@@ -680,10 +684,9 @@ export default function HeroSection7() {
               0 0 20px rgba(111, 42, 255, 0.58),
               0 10px 30px rgba(0, 0, 0, 0.86);
             transform-origin: 50% 68%;
-            will-change: transform, opacity;
           }
 
-          @media (prefers-reduced-motion: no-preference) {
+          @media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
             @property --cta-border-angle {
               syntax: '<angle>';
               inherits: false;
@@ -785,4 +788,3 @@ export default function HeroSection7() {
     </>
   );
 }
-

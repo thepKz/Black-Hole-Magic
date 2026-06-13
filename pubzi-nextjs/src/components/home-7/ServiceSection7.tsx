@@ -15,7 +15,7 @@ const VALUES = [
   {
     num: '02',
     title: 'Hệ sinh thái khép kín',
-    body: 'Từ bản địa hóa đến thanh toán và pháp lý — mọi mắt xích đều nằm trong cùng một ecosystem tối ưu.',
+    body: 'Từ bản địa hóa đến thanh toán và pháp lý, mọi mắt xích đều nằm trong cùng một hệ sinh thái tối ưu.',
   },
   {
     num: '03',
@@ -64,7 +64,7 @@ export default function ServiceSection7() {
         }
       );
 
-      // Words light up as you scroll (scrubbed — runs forward and backward).
+      // Words light up as you scroll and reverse cleanly.
       gsap.utils.toArray<HTMLElement>('.values-title, .vrow-title, .vrow-body').forEach((el) => {
         const words = el.querySelectorAll('.sw');
         if (!words.length) return;
