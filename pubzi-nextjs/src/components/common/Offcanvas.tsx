@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 interface OffcanvasProps {
   variant?: 'default' | 'style-2';
@@ -8,6 +9,19 @@ interface OffcanvasProps {
 
 export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
   const styleClass = variant === 'style-2' ? 'style-2' : '';
+  const closeOffcanvas = () => {
+    document.querySelector('.offcanvas__info')?.classList.remove('info-open');
+    document.querySelector('.offcanvas__overlay')?.classList.remove('overlay-open');
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeOffcanvas();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -22,7 +36,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                   </Link>
                 </div>
                 <div className="offcanvas__close">
-                  <button>
+                  <button type="button" aria-label="Đóng menu" onClick={closeOffcanvas}>
                     <i className="fas fa-times"></i>
                   </button>
                 </div>
@@ -83,7 +97,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
           </div>
         </div>
       </div>
-      <div className="offcanvas__overlay"></div>
+      <div className="offcanvas__overlay" onClick={closeOffcanvas}></div>
     </>
   );
 }

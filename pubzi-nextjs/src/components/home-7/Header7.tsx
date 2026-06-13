@@ -6,6 +6,11 @@ import { useEffect, useState } from 'react'
 export default function Header7() {
   const [isScrolled, setIsScrolled] = useState(false)
 
+  const openOffcanvas = () => {
+    document.querySelector('.offcanvas__info')?.classList.add('info-open')
+    document.querySelector('.offcanvas__overlay')?.classList.add('overlay-open')
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
@@ -160,9 +165,9 @@ export default function Header7() {
                     </Link>
                   </div>
                   <div className="header__hamburger d-xl-block my-auto">
-                    <div className="sidebar__toggle">
+                    <button type="button" className="sidebar__toggle" aria-label="Mở menu" onClick={openOffcanvas}>
                       <img src="/assets/img/logo/dot.svg" alt="" />
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -656,6 +661,9 @@ export default function Header7() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
+          padding: 0;
+          cursor: pointer;
+          appearance: none;
           border: 1px solid rgba(155, 124, 255, 0.18);
           background: rgba(12, 9, 26, 0.3);
         }
