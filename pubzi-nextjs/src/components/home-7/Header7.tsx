@@ -51,101 +51,20 @@ export default function Header7() {
                 <div className="main-menu">
                   <nav id="mobile-menu">
                     <ul>
-                      <li className="has-dropdown active menu-thumb">
-                        <Link href="/">
-                          Trang chủ
-                        </Link>
-                        <ul className="submenu has-homemenu style-2">
-                          <li>
-                            <div className="homemenu-items">
-                              <div className="homemenu">
-                                <div className="homemenu-thumb mb-15">
-                                  <img src="/assets/img/header/home-7.jpg" alt="img" />
-                                  <div className="demo-button">
-                                    <Link href="/" className="gt-theme-btn">
-                                      Khám phá
-                                    </Link>
-                                  </div>
-                                </div>
-                                <div className="homemenu-content text-center">
-                                  <h4 className="homemenu-title">
-                                    Black Hole
-                                  </h4>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </li>
-                      <li className="has-dropdown active d-xl-none">
-                        <Link href="/" className="border-none">
-                          Trang chủ
-                        </Link>
-                        <ul className="submenu">
-                          <li><Link href="/">Black Hole</Link></li>
-                        </ul>
+                      <li className="active">
+                        <Link href="/">Trang chủ</Link>
                       </li>
                       <li>
                         <Link href="/about">Về chúng tôi</Link>
                       </li>
                       <li>
-                        <Link href="/match-details">
-                          Lịch đấu
-                        </Link>
-                        <ul className="submenu">
-                          <li><Link href="/match">Tất cả trận đấu</Link></li>
-                          <li><Link href="/match-details">Chi tiết trận đấu</Link></li>
-                        </ul>
+                        <Link href="/game">Danh sách game</Link>
                       </li>
                       <li>
-                        <Link href="/news-details">
-                          Hệ sinh thái
-                        </Link>
-                        <ul className="submenu">
-                          <li className="has-dropdown">
-                            <Link href="/service-details">
-                              Dịch vụ
-                              <i className="fas fa-angle-right"></i>
-                            </Link>
-                            <ul className="submenu">
-                              <li><Link href="/service">Giải pháp</Link></li>
-                              <li><Link href="/service-details">Chi tiết dịch vụ</Link></li>
-                            </ul>
-                          </li>
-                          <li className="has-dropdown">
-                            <Link href="/game-details">
-                              Game
-                              <i className="fas fa-angle-right"></i>
-                            </Link>
-                            <ul className="submenu">
-                              <li><Link href="/game">Thư viện game</Link></li>
-                              <li><Link href="/game-details">Chi tiết game</Link></li>
-                            </ul>
-                          </li>
-                          <li className="has-dropdown">
-                            <Link href="/team-details">
-                              Đội tuyển
-                              <i className="fas fa-angle-right"></i>
-                            </Link>
-                            <ul className="submenu">
-                              <li><Link href="/team">Roster</Link></li>
-                              <li><Link href="/team-details">Hồ sơ đội</Link></li>
-                            </ul>
-                          </li>
-                          <li><Link href="/gallery">Khoảnh khắc</Link></li>
-                          <li><Link href="/pricing">Gói hợp tác</Link></li>
-                          <li><Link href="/faq">Câu hỏi thường gặp</Link></li>
-                        </ul>
+                        <Link href="/service">ICS GROUP</Link>
                       </li>
                       <li>
-                        <Link href="/news-details">
-                          Tin tức
-                        </Link>
-                        <ul className="submenu">
-                          <li><Link href="/news-grid">Tin nổi bật</Link></li>
-                          <li><Link href="/news">Bản tin esports</Link></li>
-                          <li><Link href="/news-details">Phân tích trận đấu</Link></li>
-                        </ul>
+                        <Link href="/news">Tin tức</Link>
                       </li>
                       <li>
                         <Link href="/contact">Liên hệ</Link>

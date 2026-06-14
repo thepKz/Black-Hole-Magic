@@ -27,55 +27,10 @@ export default function Header2() {
                                     <div className="main-menu">
                                         <nav id="mobile-menu">
                                             <ul>
-                                                <li className="has-dropdown active menu-thumb">
+                                                <li className="active">
                                                     <Link href="/">
                                                         Home
                                                     </Link>
-                                                    <ul className="submenu has-homemenu">
-                                                        <li>
-                                                            <div className="homemenu-items">
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-2.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/" className="gt-theme-btn">
-                                                                                View Demo
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Esport
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="homemenu">
-                                                                    <div className="homemenu-thumb mb-15">
-                                                                        <img src="/assets/img/header/home-7.jpg" alt="img" />
-                                                                        <div className="demo-button">
-                                                                            <Link href="/home-7" className="gt-theme-btn">
-                                                                                View Demo
-                                                                            </Link>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="homemenu-content text-center">
-                                                                        <h4 className="homemenu-title">
-                                                                            Gaming Studio
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </li>
-                                                <li className="has-dropdown active d-xl-none">
-                                                    <Link href="/" className="border-none">
-                                                        Home
-                                                    </Link>
-                                                    <ul className="submenu">
-                                                        <li><Link href="/">Esport</Link></li>
-                                                        <li><Link href="/home-7">Gaming Studio</Link></li>
-                                                    </ul>
                                                 </li>
                                                 <li>
                                                     <Link href="/about">About Us</Link>
