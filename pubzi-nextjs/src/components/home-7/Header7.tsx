@@ -1,10 +1,25 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
+const NAV = [
+  { href: '/', label: 'Trang chủ' },
+  { href: '/about', label: 'Về chúng tôi' },
+  { href: '/game', label: 'Danh sách game' },
+  { href: '/service', label: 'ICS GROUP' },
+  { href: '/news', label: 'Tin tức' },
+  { href: '/contact', label: 'Liên hệ' },
+]
 
 export default function Header7() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const pathname = usePathname()
+
+  // "/" chỉ active khi đúng trang chủ; các mục khác active khi pathname bắt đầu bằng href
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   const openOffcanvas = () => {
     document.querySelector('.offcanvas__info')?.classList.add('info-open')
@@ -51,24 +66,11 @@ export default function Header7() {
                 <div className="main-menu">
                   <nav id="mobile-menu">
                     <ul>
-                      <li className="active">
-                        <Link href="/">Trang chủ</Link>
-                      </li>
-                      <li>
-                        <Link href="/about">Về chúng tôi</Link>
-                      </li>
-                      <li>
-                        <Link href="/game">Danh sách game</Link>
-                      </li>
-                      <li>
-                        <Link href="/service">ICS GROUP</Link>
-                      </li>
-                      <li>
-                        <Link href="/news">Tin tức</Link>
-                      </li>
-                      <li>
-                        <Link href="/contact">Liên hệ</Link>
-                      </li>
+                      {NAV.map((item) => (
+                        <li key={item.href} className={isActive(item.href) ? 'active' : ''}>
+                          <Link href={item.href}>{item.label}</Link>
+                        </li>
+                      ))}
                     </ul>
                   </nav>
                 </div>
@@ -83,9 +85,13 @@ export default function Header7() {
                       Liên hệ
                     </Link>
                   </div>
-                  <div className="header__hamburger d-xl-block my-auto">
+                  <div className="header__hamburger bh-burger my-auto">
                     <button type="button" className="sidebar__toggle" aria-label="Mở menu" onClick={openOffcanvas}>
-                      <img src="/assets/img/logo/dot.svg" alt="" />
+                      <span className="bh-burger-bars" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -574,23 +580,7 @@ export default function Header7() {
           opacity: 0.54;
         }
 
-        #header-sticky.bh-header .sidebar__toggle {
-          width: 40px;
-          height: 40px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          cursor: pointer;
-          appearance: none;
-          border: 1px solid rgba(155, 124, 255, 0.18);
-          background: rgba(12, 9, 26, 0.3);
-        }
-
-        #header-sticky.bh-header .sidebar__toggle img {
-          width: 25px;
-          opacity: 0.9;
-        }
+        /* Hamburger button styling lives in the .bh-burger rules above. */
 
         @media (max-width: 1399px) {
           #header-sticky .header-live-pill {
@@ -600,6 +590,52 @@ export default function Header7() {
           #header-sticky.bh-header .logo {
             min-width: 190px;
           }
+        }
+
+        /* ── Hamburger: a real 3-bar icon, DESKTOP-HIDDEN / MOBILE-SHOWN ── */
+        #header-sticky.bh-header .bh-burger {
+          display: none; /* hidden by default; shown via the <=1199px block */
+        }
+
+        #header-sticky.bh-header .bh-burger .sidebar__toggle {
+          width: 44px;
+          height: 44px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          cursor: pointer;
+          appearance: none;
+          border: 1px solid rgba(155, 124, 255, 0.28) !important;
+          border-radius: 8px;
+          background: rgba(20, 14, 40, 0.55) !important;
+          transition: border-color 0.25s ease, background 0.25s ease;
+        }
+
+        #header-sticky.bh-header .bh-burger .sidebar__toggle:hover {
+          border-color: rgba(155, 124, 255, 0.6) !important;
+          background: rgba(30, 20, 60, 0.7) !important;
+        }
+
+        #header-sticky.bh-header .bh-burger-bars {
+          display: inline-flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4px;
+          width: 20px;
+        }
+
+        #header-sticky.bh-header .bh-burger-bars span {
+          display: block;
+          height: 2px;
+          width: 100%;
+          border-radius: 2px;
+          background: #c7b5ff;
+          box-shadow: 0 0 8px rgba(155, 124, 255, 0.6);
+        }
+
+        #header-sticky.bh-header .bh-burger-bars span:nth-child(2) {
+          width: 70%;
         }
 
         @media (max-width: 1199px) {
@@ -613,8 +649,18 @@ export default function Header7() {
             padding-right: 18px !important;
           }
 
+          /* logo | (nav hidden) | right cluster -> two real tracks */
           #header-sticky.bh-header .header-main {
-            grid-template-columns: auto auto;
+            grid-template-columns: auto 1fr;
+          }
+
+          /* the desktop nav must NOT render on mobile — the hamburger owns it */
+          #header-sticky.bh-header .mean__menu-wrapper {
+            display: none !important;
+          }
+
+          #header-sticky.bh-header .header-right {
+            justify-self: end;
           }
 
           #header-sticky.bh-header .logo {
@@ -637,9 +683,9 @@ export default function Header7() {
             display: none !important;
           }
 
-          #header-sticky.bh-header .sidebar__toggle {
-            width: 38px;
-            height: 38px;
+          /* show the hamburger on mobile/tablet */
+          #header-sticky.bh-header .bh-burger {
+            display: inline-flex !important;
           }
         }
 
@@ -655,8 +701,7 @@ export default function Header7() {
           display: none !important;
         }
 
-        #header-sticky .main-header__search,
-        #header-sticky.bh-header .sidebar__toggle {
+        #header-sticky .main-header__search {
           border: 0 !important;
           background: transparent !important;
           box-shadow: none !important;
