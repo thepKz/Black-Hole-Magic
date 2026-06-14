@@ -7,6 +7,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Shared so route changes can reset scroll through Lenis instead of fighting it.
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 /**
  * Site-wide smooth scrolling. Lenis eases the NATIVE window scroll position
  * (no transform-virtualized container), so position: sticky / fixed keep
@@ -23,6 +30,7 @@ export default function SmoothScroll() {
       duration: 1.1,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
+    window.__lenis = lenis;
 
     lenis.on('scroll', ScrollTrigger.update);
 
@@ -56,6 +64,7 @@ export default function SmoothScroll() {
       window.removeEventListener('pointerup', onPointerUp);
       gsap.ticker.remove(tick);
       lenis.destroy();
+      if (window.__lenis === lenis) delete window.__lenis;
     };
   }, []);
 
