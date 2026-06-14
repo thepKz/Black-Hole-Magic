@@ -1,332 +1,641 @@
-import Image from 'next/image';
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function ServicePage() {
-  const services = [
-    {
-      id: 1,
-      title: 'PC Game Development',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="31" height="31" viewBox="0 0 31 31" fill="none">
-          <g clipPath="url(#clip0_106_311)">
-            <path d="M21.7439 0.626953H9.25561C8.0519 0.626953 7.07178 1.60708 7.07178 2.81079V28.1884C7.07178 29.3926 8.0519 30.3727 9.25561 30.3727H21.7434C22.9476 30.3727 23.9277 29.3926 23.9277 28.1889V2.81079C23.9277 1.60708 22.9476 0.626953 21.7439 0.626953ZM8.0633 4.59305H22.9362V23.432H8.0633V4.59305ZM9.25561 1.61848H21.7434C22.4013 1.61848 22.9362 2.15341 22.9362 2.81079V3.60153H8.0633V2.81079C8.0633 2.15341 8.59823 1.61848 9.25561 1.61848ZM21.7439 29.3812H9.25561C8.59823 29.3812 8.0633 28.8463 8.0633 28.1889V24.4236H22.9362V28.1889C22.9362 28.8463 22.4013 29.3812 21.7439 29.3812Z" fill="#6C5CE7"/>
-            <path d="M15.4999 24.9189C14.4062 24.9189 13.5168 25.8083 13.5168 26.902C13.5168 27.9956 14.4062 28.885 15.4999 28.885C16.5935 28.885 17.4829 27.9956 17.4829 26.902C17.4829 25.8083 16.5935 24.9189 15.4999 24.9189ZM15.4999 27.8935C14.9531 27.8935 14.5084 27.4488 14.5084 26.902C14.5084 26.3552 14.9531 25.9105 15.4999 25.9105C16.0467 25.9105 16.4914 26.3552 16.4914 26.902C16.4914 27.4488 16.0467 27.8935 15.4999 27.8935Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_311">
-              <rect width="29.7458" height="29.7458" fill="white" transform="translate(0.626953 0.626953)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    },
-    {
-      id: 2,
-      title: 'Mobile Game Development',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <g clipPath="url(#clip0_106_330)">
-            <path d="M2.66253 12.7801C2.80406 12.7809 2.9401 12.7254 3.04059 12.6257L5.17054 10.4957C5.37934 10.2869 5.37934 9.94841 5.17054 9.73961C4.96174 9.53081 4.62321 9.53081 4.41441 9.73961L2.28446 11.8696C2.18366 11.9695 2.12695 12.1056 2.12695 12.2476C2.12695 12.3896 2.18366 12.5257 2.28446 12.6257C2.38495 12.7254 2.52099 12.7809 2.66253 12.7801Z" fill="#6C5CE7"/>
-            <path d="M30.3517 0H16.5071C15.6248 0 14.9096 0.715206 14.9096 1.59746V7.4548H2.66243C1.19201 7.4548 0 8.64681 0 10.1172V23.9619C0 25.4323 1.19201 26.6243 2.66243 26.6243H8.51977V28.7542H6.92232C6.04006 28.7542 5.32486 29.4694 5.32486 30.3517C5.32486 31.2339 6.04006 31.9492 6.92232 31.9492H30.3517C31.2339 31.9492 31.9492 31.2339 31.9492 30.3517V1.59746C31.9492 0.715206 31.2339 0 30.3517 0Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_330">
-              <rect width="31.9492" height="31.9492" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    },
-    {
-      id: 3,
-      title: 'AR/VR Solutions',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <g clipPath="url(#clip0_106_372)">
-            <path d="M18.5671 23.9052C16.8811 24.4678 15.0213 24.4677 13.3305 23.9049C12.8567 23.7472 12.3452 24.0034 12.1876 24.477C12.03 24.9506 12.2861 25.4623 12.7597 25.6199C13.7894 25.9626 14.8703 26.1339 15.9509 26.1339C17.0316 26.1339 18.1119 25.9624 19.1392 25.6197C19.6126 25.4617 19.8684 24.9498 19.7103 24.4763C19.5524 24.003 19.0406 23.7473 18.5671 23.9052Z" fill="#6C5CE7"/>
-            <path d="M26.4768 6.53129C26.0921 3.77249 23.7232 1.59497 20.7892 1.59497H19.7568V1.53069C19.7568 1.03158 19.3522 0.626953 18.8531 0.626953H13.0451C12.546 0.626953 12.1414 1.03158 12.1414 1.53069V1.59491H11.1091C8.19966 1.59491 5.82747 3.74206 5.42405 6.53063C3.72997 6.91616 2.46143 8.43353 2.46143 10.2426V17.9867C2.46143 20.4633 4.47874 21.4726 5.39507 21.6904C5.80886 27.2658 10.4904 31.4744 15.9491 31.4744C21.5159 31.4744 26.0925 27.1543 26.5027 21.6906C28.878 21.1267 29.4368 18.9717 29.4368 17.9867V10.2427C29.4369 8.43449 28.1695 6.91773 26.4768 6.53129Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_372">
-              <rect width="30.8475" height="30.8475" fill="white" transform="translate(0.525391 0.626953)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    },
-    {
-      id: 4,
-      title: 'AR/ VR design',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
-          <g clipPath="url(#clip0_106_386)">
-            <path d="M29.7203 2.17773H4.38132C2.25276 2.18016 0.527819 3.9051 0.525391 6.03367V28.0676C0.527819 30.1961 2.25276 31.9211 4.38132 31.9235H29.7203C31.8489 31.9211 33.5738 30.1961 33.5762 28.0676V6.03367C33.5738 3.9051 31.8489 2.18016 29.7203 2.17773Z" fill="#6C5CE7"/>
-            <path d="M29.7203 6.58496H4.3813C3.46863 6.58496 2.72876 7.32483 2.72876 8.2375V28.068C2.72876 28.9807 3.46863 29.7206 4.3813 29.7206H29.7203C30.633 29.7206 31.3728 28.9807 31.3728 28.068V8.2375C31.3728 7.32483 30.633 6.58496 29.7203 6.58496Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_386">
-              <rect width="33.0508" height="33.0508" fill="white" transform="translate(0.525391 0.525391)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    },
-    {
-      id: 5,
-      title: 'PS4 Game Development',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <g clipPath="url(#clip0_106_353)">
-            <path d="M8.40549 14.2412H0.220215V16.5651H8.40549C9.04619 16.5651 9.56743 17.0863 9.56743 17.727C9.56743 18.3677 9.04619 18.889 8.40549 18.889H3.70605C1.78396 18.889 0.220215 20.4527 0.220215 22.3748V25.8606H2.5441V22.3748C2.5441 21.7341 3.06535 21.2129 3.70605 21.2129H8.40549C10.3276 21.2129 11.8913 19.6491 11.8913 17.727C11.8913 15.805 10.3276 14.2412 8.40549 14.2412Z" fill="#6C5CE7"/>
-            <path d="M20.6316 14.2412C18.7095 14.2412 17.1457 15.805 17.1457 17.727V22.3748C17.1457 23.0155 16.6245 23.5368 15.9838 23.5368H10.7292V25.8606H15.9838C17.9059 25.8606 19.4696 24.2969 19.4696 22.3748V17.727C19.4696 17.0863 19.9909 16.5651 20.6316 16.5651H25.8861V14.2412H20.6316Z" fill="#6C5CE7"/>
-            <path d="M37.5573 21.2127V16.5651C37.5573 15.2837 36.5148 14.2412 35.2334 14.2412C34.7933 14.2412 34.3645 14.3652 33.9933 14.5996L26.6344 19.2473C25.9557 19.6759 25.5505 20.4107 25.5505 21.2129C25.5505 22.4943 26.593 23.5368 27.8744 23.5368H35.2334V25.8606H37.5573V23.5368H39.8812V21.2129L37.5573 21.2127Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_353">
-              <rect width="39.661" height="39.661" fill="white" transform="translate(0.220215 0.220703)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    },
-    {
-      id: 6,
-      title: '3D Modelings',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <g clipPath="url(#clip0_106_404)">
-            <path d="M31.3522 27.4493L30.6906 24.9802C30.6045 24.6588 30.274 24.4678 29.9527 24.5542C29.6312 24.6403 29.4405 24.9707 29.5266 25.2921L29.8163 26.373L25.5885 23.9614V13.9382C25.5885 13.7225 25.4732 13.5233 25.2863 13.4158L16.5507 8.39345V3.62075L17.3297 4.39976C17.565 4.63504 17.9465 4.63504 18.1818 4.39976C18.4171 4.16447 18.4171 3.78295 18.1818 3.54761L16.3742 1.74004C16.1387 1.50355 15.753 1.50831 15.5221 1.74004L13.7145 3.54761C13.4792 3.78289 13.4792 4.16441 13.7145 4.39976C13.9498 4.63498 14.3313 4.63498 14.5667 4.39976L15.3457 3.62075V8.39454L6.66869 13.4167C6.48258 13.5244 6.36798 13.7232 6.36798 13.9382V23.864L2.08073 26.3002L2.37084 25.2173C2.45694 24.8959 2.26618 24.5655 1.94474 24.4794C1.62323 24.3931 1.29293 24.584 1.20683 24.9055L0.545259 27.3752C0.461508 27.6879 0.648772 28.0359 0.989378 28.1179L3.4405 28.7747C3.76454 28.8615 4.09303 28.6674 4.17847 28.3486C4.26463 28.0272 4.07387 27.6969 3.75243 27.6107L2.70687 27.3306L6.96194 24.9126L15.6804 30.0465C15.867 30.1564 16.0988 30.1579 16.2871 30.0493L18.4973 28.7752C18.7856 28.609 18.8845 28.2405 18.7184 27.9523C18.5522 27.664 18.1837 27.5651 17.8954 27.7312L15.9894 28.83L8.1706 24.2259L15.9102 19.8278L23.799 24.3279L22.5921 25.0237C22.3038 25.1898 22.2049 25.5583 22.371 25.8465C22.5373 26.1349 22.9058 26.2339 23.194 26.0676L25.0118 25.0196L29.1922 27.4044L28.1452 27.6849C27.8238 27.771 27.633 28.1014 27.7192 28.4228C27.8049 28.7426 28.1342 28.9355 28.4571 28.8488L30.8719 28.2019C31.2167 28.141 31.4447 27.7944 31.3522 27.4493Z" fill="#6C5CE7"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_106_404">
-              <rect width="30.8475" height="30.8475" fill="white" transform="translate(0.525391 0.423828)"/>
-            </clipPath>
-          </defs>
-        </svg>
-      ),
-      link: '/service-details'
-    }
-  ];
+gsap.registerPlugin(ScrollTrigger);
 
-  const testimonials = [
-    {
-      id: 1,
-      text: 'This digital agency completely transformed our online presence. Their expertise, creativity, and attention to detail exceeded all our expectations. We highly rtheir...',
-      author: 'Daniel Smith',
-      role: 'Senior engineer',
-      image: '/assets/img/home-2/client1.png',
-      rating: 5
-    }
-  ];
+/* Word-span split for the scrubbed text reveal. */
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="sv-sw">
+          {w}
+          {' '}
+        </span>
+      ))}
+    </>
+  );
+}
+
+const STATS = [
+  { value: '50+', label: 'Khách hàng doanh nghiệp' },
+  { value: '4+', label: 'Năm kinh nghiệm' },
+  { value: '99.9%', label: 'Uptime cam kết' },
+  { value: '24/7', label: 'Giám sát & hỗ trợ' },
+];
+
+type Product = {
+  code: string;
+  name: string;
+  tagline: string;
+  desc: string;
+  accent: string;
+  icon: 'shield' | 'soc' | 'endpoint' | 'pentest' | 'agent';
+};
+
+const PRODUCTS: Product[] = [
+  {
+    code: 'VG', name: 'Vietguard', tagline: 'Bảo mật ứng dụng di động', accent: '#8b7ae8', icon: 'shield',
+    desc: 'Quét và phát hiện lỗ hổng cho ứng dụng mobile — phân tích mã nguồn, kiểm thử động và cảnh báo rủi ro trước khi kẻ tấn công kịp khai thác.',
+  },
+  {
+    code: 'SOC', name: 'AI SOC', tagline: 'Trung tâm vận hành an ninh', accent: '#6fa8ff', icon: 'soc',
+    desc: 'Trung tâm điều hành an ninh thế hệ mới ứng dụng trí tuệ nhân tạo — phát hiện, phân loại và phản ứng sự cố theo thời gian thực, giảm thời gian xử lý xuống vài phút.',
+  },
+  {
+    code: 'CSA', name: 'CSA-Endpoint', tagline: 'Bảo vệ điểm cuối & chống thất thoát', accent: '#b07ae8', icon: 'endpoint',
+    desc: 'Bảo vệ toàn diện thiết bị đầu cuối và ngăn rò rỉ dữ liệu (DLP) — kiểm soát mọi luồng dữ liệu rời khỏi tổ chức của bạn.',
+  },
+  {
+    code: 'PT', name: 'Pentest Services', tagline: 'Kiểm thử xâm nhập', accent: '#7adcff', icon: 'pentest',
+    desc: 'Đội ngũ chuyên gia mô phỏng tấn công thực chiến vào hệ thống của bạn, tìm ra điểm yếu trước khi tin tặc làm điều đó — kèm báo cáo và lộ trình khắc phục.',
+  },
+  {
+    code: 'VAI', name: 'V AI Agent', tagline: 'Nền tảng chatbot bảo mật', accent: '#9d7aff', icon: 'agent',
+    desc: 'Nền tảng trợ lý AI cho doanh nghiệp — tích hợp an toàn vào quy trình, kiểm soát dữ liệu nhạy cảm và tuân thủ chuẩn bảo mật ngay từ thiết kế.',
+  },
+];
+
+const PROCESS = [
+  { k: '01', t: 'Đánh giá', d: 'Khảo sát toàn diện bề mặt tấn công, lập bản đồ tài sản số và xác định rủi ro ưu tiên.' },
+  { k: '02', t: 'Triển khai', d: 'Tích hợp giải pháp phù hợp — từ giám sát SOC đến bảo vệ điểm cuối — không gián đoạn vận hành.' },
+  { k: '03', t: 'Giám sát', d: 'Theo dõi 24/7, phát hiện bất thường bằng AI và phản ứng sự cố theo thời gian thực.' },
+  { k: '04', t: 'Đồng hành', d: 'Báo cáo minh bạch, diễn tập định kỳ và tinh chỉnh liên tục theo bối cảnh mối đe dọa mới.' },
+];
+
+const PARTNERS = ['Oracle', 'Gurucul', 'HyperG', 'RAR Center'];
+const COMPLIANCE = ['ISO 27001', 'SOC 2'];
+
+function Icon({ name }: { name: Product['icon'] }) {
+  const common = { width: 26, height: 26, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  switch (name) {
+    case 'shield': return (<svg {...common}><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z" /><path d="m9 12 2 2 4-4" /></svg>);
+    case 'soc': return (<svg {...common}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" /></svg>);
+    case 'endpoint': return (<svg {...common}><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /><path d="m9 9 1.5 1.5L9 12" /><path d="M13 12h2" /></svg>);
+    case 'pentest': return (<svg {...common}><path d="m14.5 4.5 5 5L8 21H3v-5L14.5 4.5Z" /><path d="m12 7 5 5" /></svg>);
+    case 'agent': return (<svg {...common}><rect x="4" y="7" width="16" height="11" rx="3" /><path d="M12 7V4M9 12h.01M15 12h.01M9 15.5s1 1 3 1 3-1 3-1" /></svg>);
+  }
+}
+
+/* 3D-tilt product card. */
+function ProductCard({ p, index }: { p: Product; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const card = ref.current;
+    if (!card) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const inner = card.querySelector<HTMLElement>('.sv-card-inner');
+    const glow = card.querySelector<HTMLElement>('.sv-card-glow');
+    if (!inner || !glow) return;
+    const rotX = gsap.quickTo(inner, 'rotationX', { duration: 0.5, ease: 'power3' });
+    const rotY = gsap.quickTo(inner, 'rotationY', { duration: 0.5, ease: 'power3' });
+    const gx = gsap.quickTo(glow, 'x', { duration: 0.4, ease: 'power3' });
+    const gy = gsap.quickTo(glow, 'y', { duration: 0.4, ease: 'power3' });
+    const onMove = (e: PointerEvent) => {
+      const r = card.getBoundingClientRect();
+      rotY(gsap.utils.clamp(-7, 7, ((e.clientX - r.left) / r.width - 0.5) * 14));
+      rotX(gsap.utils.clamp(-7, 7, (0.5 - (e.clientY - r.top) / r.height) * 14));
+      gx(e.clientX - r.left); gy(e.clientY - r.top);
+    };
+    const onEnter = () => gsap.to(glow, { autoAlpha: 1, duration: 0.3 });
+    const onLeave = () => { rotX(0); rotY(0); gsap.to(glow, { autoAlpha: 0, duration: 0.4 }); };
+    card.addEventListener('pointermove', onMove);
+    card.addEventListener('pointerenter', onEnter);
+    card.addEventListener('pointerleave', onLeave);
+    return () => {
+      card.removeEventListener('pointermove', onMove);
+      card.removeEventListener('pointerenter', onEnter);
+      card.removeEventListener('pointerleave', onLeave);
+    };
+  }, []);
 
   return (
-    <div className="service-page">
-      {/* Breadcrumb Section */}
-      <div className="gt-breadcrumb-wrapper bg-cover" style={{ backgroundImage: "url('/assets/img/breadcrumb.png')" }}>
-        <div className="gt-left-shape">
-          <Image src="/assets/img/shape-1.png" alt="shape" width={200} height={200} />
+    <div className="sv-card" ref={ref} style={{ ['--sv-accent' as string]: p.accent }} data-feat={index === 0 ? 'true' : undefined}>
+      <div className="sv-card-inner">
+        <div className="sv-card-glow" aria-hidden="true" />
+        <div className="sv-card-top">
+          <span className="sv-card-icon"><Icon name={p.icon} /></span>
+          <span className="sv-card-code">{p.code}</span>
         </div>
-        <div className="gt-right-shape">
-          <Image src="/assets/img/shape-2.png" alt="shape" width={200} height={200} />
-        </div>
-        <div className="gt-blur-shape">
-          <Image src="/assets/img/breadcrumb-shape.png" alt="shape" width={800} height={400} />
-        </div>
-        <div className="container">
-          <div className="gt-page-heading">
-            <div className="gt-breadcrumb-sub-title">
-              <h1 className="wow fadeInUp" data-wow-delay=".3s">our services</h1>
-            </div>
-            <ul className="gt-breadcrumb-items wow fadeInUp" data-wow-delay=".5s">
-              <li>
-                <i className="fa-solid fa-house"></i>
-              </li>
-              <li>
-                <Link href="/">home :</Link>
-              </li>
-              <li className="color">our services</li>
-            </ul>
-          </div>
-        </div>
+        <h3 className="sv-card-name">{p.name}</h3>
+        <p className="sv-card-tagline">{p.tagline}</p>
+        <p className="sv-card-desc">{p.desc}</p>
+        <Link href="/service-details" className="sv-card-link">
+          Tìm hiểu thêm
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+            <path d="M9.41 8.47 1.88 16 0 14.12l7.53-7.53L.94 0H16v15.06z" fill="currentColor" />
+          </svg>
+        </Link>
       </div>
+    </div>
+  );
+}
 
-      {/* Services Section */}
-      <section className="game-feature-section-8 fix section-padding">
-        <div className="container">
-          <div className="row px-exclusive-wrap">
-            {services.map((service, index) => {
-              // Special layout for items 3 and 6
-              if (index === 2) {
-                return (
-                  <div key={service.id} className="col-xl-3 col-lg-6 col-md-6">
-                    <div className="game-feature-box-2 px-exclusive-item">
-                      <Image
-                        src="/assets/img/home-1/game/game-controll.png"
-                        alt="Game Controller"
-                        width={300}
-                        height={300}
-                      />
-                    </div>
-                  </div>
-                );
-              }
+export default function ServicePage() {
+  const rootRef = useRef<HTMLDivElement>(null);
 
-              if (index === 4) {
-                return (
-                  <div key={service.id} className="col-xl-3 col-lg-6 col-md-6">
-                    <div className="superhero-feature-box bg-cover px-exclusive-item" style={{ backgroundImage: "url('/assets/img/home-1/game/bg.jpg')" }}>
-                      <div className="thumb">
-                        <Image
-                          src="/assets/img/home-1/game/superhero.png"
-                          alt="Superhero"
-                          width={300}
-                          height={400}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-              return (
-                <div key={service.id} className="col-xl-3 col-lg-6 col-md-6">
-                  <div className="game-feature-box-items px-exclusive-item">
-                    <div className="shape-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="27" viewBox="0 0 30 27" fill="none">
-                        <path d="M1 27V6C1 3.23858 3.23858 1 6 1H30" stroke="white" strokeOpacity="0.2"/>
-                      </svg>
-                    </div>
-                    <div className="shape-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="27" viewBox="0 0 30 27" fill="none">
-                        <path d="M29 -9.53674e-07L29 21C29 23.7614 26.7614 26 24 26L-5.96046e-08 26" stroke="white" strokeOpacity="0.2"/>
-                      </svg>
-                    </div>
-                    <div className="icon">
-                      {service.icon}
-                    </div>
-                    <h4>
-                      <Link href={service.link}>{service.title}</Link>
-                    </h4>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+    const ctx = gsap.context(() => {
+      gsap.set('.sv-hero-eyebrow, .sv-hero-sub, .sv-hero-cta, .sv-hero-badges, .sv-hero-visual', { autoAlpha: 0 });
+      gsap.timeline({ delay: 0.12 })
+        .to('.sv-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' })
+        .fromTo('.sv-hero-title .sv-line span', { yPercent: 115 },
+          { yPercent: 0, duration: 1, stagger: 0.12, ease: 'power4.out' }, '-=0.3')
+        .to('.sv-hero-sub', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
+        .to('.sv-hero-badges', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
+        .to('.sv-hero-cta', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.45')
+        .to('.sv-hero-visual', { autoAlpha: 1, duration: 1, ease: 'power2.out' }, '-=0.8');
 
-      {/* Video Section */}
-      <section className="video-section-2 parallaxie fix section-padding bg-cover" style={{ backgroundImage: "url('/assets/img/home-2/video-bg.jpg')" }}>
-        <div className="video-info-items">
-          <h2 className="title">Born to Game</h2>
-          <a href="https://www.youtube.com/watch?v=Cn4G2lZ_g2I" className="video-btn ripple video-popup">
-            <i className="fa-solid fa-play"></i>
-          </a>
-        </div>
-      </section>
+      gsap.fromTo('.sv-stat',
+        { autoAlpha: 0, y: 24 },
+        { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: '.sv-stats', start: 'top 82%', once: true } });
 
-      {/* Testimonial Section */}
-      <section className="testimonial-section-2 section-padding">
-        <div className="container">
-          <div className="row g-4 align-items-center">
-            <div className="col-xl-6">
-              <div className="testimonial-box-items-2">
-                <div className="border-shape">
-                  <Image src="/assets/img/home-2/border-shape.png" alt="border" width={600} height={400} />
-                </div>
-                <div className="swiper tetsimonial-slider-2">
-                  <div className="swiper-wrapper">
-                    {testimonials.map((testimonial) => (
-                      <div key={testimonial.id} className="swiper-slide">
-                        <div className="testimonial-box-slider">
-                          <div className="quote-icon">
-                            <Image src="/assets/img/home-2/quote.png" alt="quote" width={50} height={50} />
-                          </div>
-                          <p>{testimonial.text}</p>
-                          <div className="client-info-items">
-                            <div className="client-info">
-                              <Image src={testimonial.image} alt={testimonial.author} width={60} height={60} />
-                              <div className="content">
-                                <h4>{testimonial.author}</h4>
-                                <span>{testimonial.role}</span>
-                              </div>
-                            </div>
-                            <div className="star">
-                              {[...Array(testimonial.rating)].map((_, i) => (
-                                <i key={i} className="fa-solid fa-star"></i>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+      const tw = gsap.utils.toArray<HTMLElement>('.sv-products-head .sv-sw');
+      if (tw.length) {
+        gsap.fromTo(tw, { opacity: 0.14 },
+          { opacity: 1, stagger: 0.05, ease: 'none',
+            scrollTrigger: { trigger: '.sv-products-head', start: 'top 85%', end: 'top 42%', scrub: 0.6 } });
+      }
+
+      gsap.fromTo('.sv-card',
+        { autoAlpha: 0, y: 36 },
+        { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: '.sv-grid', start: 'top 80%', once: true } });
+
+      gsap.fromTo('.sv-proc-line-fill', { scaleX: 0 },
+        { scaleX: 1, ease: 'none',
+          scrollTrigger: { trigger: '.sv-proc-track', start: 'top 70%', end: 'bottom 70%', scrub: 0.7 } });
+      gsap.utils.toArray<HTMLElement>('.sv-step').forEach((step) => {
+        gsap.timeline({ scrollTrigger: { trigger: step, start: 'top 84%', once: true } })
+          .fromTo(step.querySelector('.sv-step-node'), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'back.out(2)' }, 0)
+          .fromTo(step.querySelectorAll('.sv-step-body > *'), { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out' }, 0.05);
+      });
+
+      gsap.fromTo('.sv-trust-inner > *',
+        { autoAlpha: 0, y: 22 },
+        { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: '.sv-trust', start: 'top 84%', once: true } });
+
+      gsap.fromTo('.sv-cta-inner > *',
+        { autoAlpha: 0, y: 30 },
+        { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12, ease: 'power3.out',
+          scrollTrigger: { trigger: '.sv-cta', start: 'top 80%', once: true } });
+
+      ScrollTrigger.refresh();
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div className="sv-root" ref={rootRef}>
+
+      {/* ══ HERO ════════════════════════════════════════════════════════════ */}
+      <section className="sv-hero">
+        <div className="sv-hero-grid-bg" aria-hidden="true" />
+        <div className="sv-hero-lightwell" aria-hidden="true" />
+        <div className="sv-hero-inner">
+          <div className="sv-hero-left">
+            <nav className="sv-breadcrumb sv-hero-eyebrow">
+              <Link href="/">Trang chủ</Link>
+              <span className="sv-bc-sep">/</span>
+              <span className="sv-bc-current">ICS Group</span>
+            </nav>
+
+            <h1 className="sv-hero-title">
+              <span className="sv-line"><span>An ninh mạng</span></span>
+              <span className="sv-line sv-line-accent"><span>cho kỷ nguyên số</span></span>
+            </h1>
+
+            <p className="sv-hero-sub">
+              ICS — Công ty An ninh mạng Quốc tế. Chúng tôi không chỉ cung cấp giải pháp,
+              mà đồng hành cùng bạn xây dựng một hệ sinh thái số an toàn từ gốc.
+            </p>
+
+            <div className="sv-hero-badges">
+              {COMPLIANCE.map((c) => (
+                <span key={c} className="sv-compliance">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 12 2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
+                  {c}
+                </span>
+              ))}
             </div>
-            <div className="col-xl-6">
-              <div className="testimonial-right-items">
-                <div className="section-title mb-4">
-                  <h6 className="wow fadeInUp">our testimonials</h6>
-                  <h2 className="wow fadeInUp" data-wow-delay=".3s">
-                    Peoples Talk About Us
-                  </h2>
-                </div>
-                <div className="row g-4 mt-3">
-                  <div className="col-lg-6 wow fadeInUp" data-wow-delay=".3s">
-                    <div className="testimonial-image-1">
-                      <div className="overlay-style"></div>
-                      <Image src="/assets/img/home-2/testi-1.jpg" alt="testimonial" width={300} height={400} />
-                      <div className="testimonial-counter">
-                        <Image src="/assets/img/home-2/testi-count.png" alt="counter" width={100} height={100} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-6 wow fadeInUp" data-wow-delay=".5s">
-                    <div className="testimonial-image-1">
-                      <Image src="/assets/img/home-2/testi-2.jpg" alt="testimonial" width={300} height={400} />
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+            <div className="sv-hero-cta">
+              <a href="#products" className="sv-btn sv-btn-primary">Khám phá giải pháp</a>
+              <Link href="/contact" className="sv-btn sv-btn-ghost">Đặt lịch tư vấn</Link>
+            </div>
+          </div>
+
+          {/* visual: a "secure core" radar */}
+          <div className="sv-hero-visual" aria-hidden="true">
+            <div className="sv-radar">
+              <span className="sv-radar-ring sv-radar-ring-1" />
+              <span className="sv-radar-ring sv-radar-ring-2" />
+              <span className="sv-radar-ring sv-radar-ring-3" />
+              <span className="sv-radar-sweep" />
+              <span className="sv-radar-core">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </span>
+              <span className="sv-radar-blip sv-radar-blip-1" />
+              <span className="sv-radar-blip sv-radar-blip-2" />
+              <span className="sv-radar-blip sv-radar-blip-3" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-contact-section">
-        <div className="container">
-          <div className="cta-wrapper">
-            <div className="content wow fadeInUp" data-wow-delay=".3s">
-              <p>Pull the Trigger!</p>
-              <h3>
-                Let&apos;s Bring Your <br />
-                Vision To Life
-              </h3>
-            </div>
-            <div className="cta-image wow fadeInUp" data-wow-delay=".5s">
-              <Image src="/assets/img/home-1/cta-img.png" alt="CTA" width={200} height={200} />
-            </div>
-            <div className="contact-right wow fadeInUp" data-wow-delay=".7s">
-              <div className="contact-info">
-                <h3>call us</h3>
-                <p>
-                  <a href="tel:+91032145609870">+91 0321 4560 9870</a>
-                </p>
+      {/* ══ STATS ═══════════════════════════════════════════════════════════ */}
+      <section className="sv-stats">
+        {STATS.map((s) => (
+          <div className="sv-stat" key={s.label}>
+            <div className="sv-stat-num">{s.value}</div>
+            <div className="sv-stat-label">{s.label}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* ══ PRODUCTS ════════════════════════════════════════════════════════ */}
+      <section className="sv-products" id="products">
+        <div className="sv-products-head">
+          <span className="sv-section-kicker">Giải pháp</span>
+          <h2 className="sv-products-title">
+            <Words text="Bộ giải pháp bảo vệ toàn diện" />
+          </h2>
+          <p className="sv-products-lede">
+            Từ ứng dụng di động đến hạ tầng doanh nghiệp — mỗi sản phẩm của ICS giải quyết
+            một lớp phòng thủ, kết hợp lại thành một tấm khiên hoàn chỉnh.
+          </p>
+        </div>
+
+        <div className="sv-grid">
+          {PRODUCTS.map((p, i) => (
+            <ProductCard key={p.code} p={p} index={i} />
+          ))}
+        </div>
+      </section>
+
+      {/* ══ PROCESS ═════════════════════════════════════════════════════════ */}
+      <section className="sv-proc">
+        <div className="sv-proc-head">
+          <span className="sv-section-kicker">Cách chúng tôi bảo vệ bạn</span>
+          <h2 className="sv-products-title">Bốn bước, một cam kết</h2>
+        </div>
+        <div className="sv-proc-track">
+          <div className="sv-proc-line" aria-hidden="true"><span className="sv-proc-line-fill" /></div>
+          {PROCESS.map((s) => (
+            <div className="sv-step" key={s.k}>
+              <span className="sv-step-node" aria-hidden="true">{s.k}</span>
+              <div className="sv-step-body">
+                <h3 className="sv-step-title">{s.t}</h3>
+                <p className="sv-step-desc">{s.d}</p>
               </div>
-              <Link href="/contact" className="theme-btn">
-                get started
-              </Link>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══ TRUST: partners + compliance ════════════════════════════════════ */}
+      <section className="sv-trust">
+        <div className="sv-trust-inner">
+          <span className="sv-section-kicker">Đối tác công nghệ</span>
+          <h2 className="sv-trust-title">Được tin cậy trong một hệ sinh thái cao cấp</h2>
+          <div className="sv-partners">
+            {PARTNERS.map((p) => (
+              <span key={p} className="sv-partner">{p}</span>
+            ))}
+          </div>
+          <p className="sv-trust-note">
+            Tuân thủ các chuẩn quốc tế ISO 27001 &amp; SOC 2 · Giám sát 24/7 · Cam kết uptime 99.9%
+          </p>
+        </div>
+      </section>
+
+      {/* ══ CTA ═════════════════════════════════════════════════════════════ */}
+      <section className="sv-cta">
+        <div className="sv-cta-lightwell" aria-hidden="true" />
+        <div className="sv-cta-inner">
+          <span className="sv-section-kicker">Bắt đầu</span>
+          <h2 className="sv-cta-title">Hệ thống của bạn đã đủ an toàn chưa?</h2>
+          <p className="sv-cta-sub">
+            Đặt lịch đánh giá an ninh miễn phí cùng đội ngũ ICS. Chúng tôi sẽ chỉ ra
+            những điểm yếu trước khi kẻ tấn công kịp tìm thấy chúng.
+          </p>
+          <div className="sv-cta-actions">
+            <Link href="/contact" className="sv-btn sv-btn-primary">Đặt lịch đánh giá</Link>
+            <Link href="/service-details" className="sv-btn sv-btn-ghost">Xem chi tiết dịch vụ</Link>
           </div>
         </div>
       </section>
+
+      <style jsx global>{`
+        /* ╔══════════════════════════════════════════════════════════════════╗
+           ║  ICS GROUP — Cybersecurity, Dark Luxe                             ║
+           ╚══════════════════════════════════════════════════════════════════╝ */
+        .sv-root {
+          --sv-bg: #08060f;
+          --sv-purple: #6c5ce7;
+          --sv-purple-light: #8b7ae8;
+          --sv-purple-bright: #b09cff;
+          --sv-hair: rgba(139, 122, 232, 0.14);
+          --sv-text-soft: rgba(255, 255, 255, 0.62);
+          --sv-text-mute: rgba(255, 255, 255, 0.4);
+          --sv-maxw: 1280px;
+          --sv-pad: clamp(20px, 5vw, 80px);
+          position: relative; z-index: 1;
+          background: var(--sv-bg); color: #fff;
+          font-family: var(--font-body-regular, 'Inter', sans-serif);
+          overflow: hidden;
+        }
+        .sv-root .sv-section-kicker {
+          display: inline-block;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 12px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
+          color: var(--sv-purple-light); margin-bottom: 18px;
+        }
+        .sv-root .sv-btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+          text-decoration: none; border-radius: 6px;
+          transition: transform 0.25s ease, filter 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+        .sv-root .sv-btn-primary { color: #fff; background: linear-gradient(135deg, var(--sv-purple), #4b22d8); box-shadow: 0 10px 30px rgba(75, 34, 216, 0.4); }
+        .sv-root .sv-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.12); }
+        .sv-root .sv-btn-ghost { color: var(--sv-purple-bright); border: 1px solid rgba(139, 122, 232, 0.3); background: rgba(139, 122, 232, 0.04); }
+        .sv-root .sv-btn-ghost:hover { border-color: rgba(139, 122, 232, 0.6); background: rgba(139, 122, 232, 0.1); transform: translateY(-2px); }
+
+        /* ── HERO ── */
+        .sv-hero {
+          position: relative; min-height: 100dvh; display: flex; align-items: center;
+          padding: clamp(120px, 16vh, 200px) var(--sv-pad) clamp(70px, 9vh, 110px);
+          background:
+            radial-gradient(120% 80% at 82% 6%, rgba(108, 92, 231, 0.24) 0%, transparent 55%),
+            linear-gradient(180deg, #0c0820 0%, #08060f 74%);
+        }
+        .sv-hero-grid-bg {
+          position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
+          background-image:
+            linear-gradient(rgba(139,122,232,1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,122,232,1) 1px, transparent 1px);
+          background-size: 92px 92px;
+          mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
+          -webkit-mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
+        }
+        .sv-hero-lightwell {
+          position: absolute; top: -18%; right: -6%; width: 60vw; height: 60vw; max-width: 780px; max-height: 780px;
+          pointer-events: none; background: radial-gradient(closest-side, rgba(124, 92, 255, 0.2), transparent 70%); filter: blur(20px);
+        }
+        .sv-hero-inner {
+          position: relative; z-index: 2; width: 100%; max-width: var(--sv-maxw); margin: 0 auto;
+          display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 80px); align-items: center;
+        }
+        .sv-hero-left { min-width: 0; }
+        .sv-breadcrumb {
+          display: flex; align-items: center; gap: 10px;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 28px; transform: translateY(8px);
+        }
+        .sv-breadcrumb a { color: var(--sv-text-mute); text-decoration: none; transition: color 0.2s; }
+        .sv-breadcrumb a:hover { color: var(--sv-purple-bright); }
+        .sv-bc-sep { color: rgba(139, 122, 232, 0.4); }
+        .sv-bc-current { color: var(--sv-purple-bright); }
+        .sv-hero-title {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-weight: 900; font-size: clamp(38px, 5.6vw, 78px); line-height: 1.04; letter-spacing: -0.02em;
+          margin: 0 0 24px; color: #fff;
+        }
+        .sv-hero-title .sv-line { display: block; overflow: hidden; padding-bottom: 0.05em; }
+        .sv-hero-title .sv-line span { display: block; }
+        .sv-hero-title .sv-line-accent span { color: var(--sv-purple-bright); text-shadow: 0 0 40px rgba(139, 122, 232, 0.5); }
+        .sv-hero-sub {
+          font-size: clamp(15px, 1.4vw, 18px); line-height: 1.8; color: var(--sv-text-soft);
+          max-width: 50ch; margin: 0 0 26px; transform: translateY(16px);
+        }
+        .sv-hero-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 34px; transform: translateY(16px); }
+        .sv-compliance {
+          display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 100px;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--sv-purple-bright);
+          background: rgba(139, 122, 232, 0.08); border: 1px solid rgba(139, 122, 232, 0.25);
+        }
+        .sv-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; transform: translateY(16px); }
+
+        /* radar visual */
+        .sv-hero-visual { display: flex; align-items: center; justify-content: center; }
+        .sv-radar {
+          position: relative; width: clamp(260px, 30vw, 400px); aspect-ratio: 1; display: grid; place-items: center;
+        }
+        .sv-radar-ring {
+          position: absolute; border-radius: 50%; border: 1px solid rgba(139, 122, 232, 0.18); inset: 0; margin: auto;
+        }
+        .sv-radar-ring-1 { width: 100%; height: 100%; }
+        .sv-radar-ring-2 { width: 68%; height: 68%; border-color: rgba(139, 122, 232, 0.26); }
+        .sv-radar-ring-3 { width: 38%; height: 38%; border-color: rgba(139, 122, 232, 0.36); }
+        .sv-radar-sweep {
+          position: absolute; inset: 0; margin: auto; width: 100%; height: 100%; border-radius: 50%;
+          background: conic-gradient(from 0deg, rgba(139,122,232,0.35), transparent 38%);
+          animation: sv-sweep 4s linear infinite;
+        }
+        @keyframes sv-sweep { to { transform: rotate(360deg); } }
+        .sv-radar-core {
+          position: relative; z-index: 2; width: 92px; height: 92px; border-radius: 50%;
+          display: grid; place-items: center; color: var(--sv-purple-bright);
+          background: radial-gradient(circle at 34% 28%, rgba(139,122,232,0.4), rgba(18,11,46,0.95) 72%);
+          box-shadow: 0 0 0 1px rgba(139,122,232,0.5), 0 0 40px rgba(108, 92, 231, 0.4);
+        }
+        .sv-radar-blip {
+          position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--sv-purple-bright);
+          box-shadow: 0 0 12px rgba(139, 122, 232, 0.9); animation: sv-blip 2.4s ease-in-out infinite;
+        }
+        .sv-radar-blip-1 { top: 22%; left: 70%; animation-delay: 0s; }
+        .sv-radar-blip-2 { top: 64%; left: 26%; animation-delay: 0.8s; }
+        .sv-radar-blip-3 { top: 76%; left: 66%; animation-delay: 1.6s; }
+        @keyframes sv-blip { 0%, 100% { opacity: 0.3; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.1); } }
+
+        /* ── STATS ── */
+        .sv-stats {
+          max-width: var(--sv-maxw); margin: 0 auto; padding: clamp(40px, 6vw, 70px) var(--sv-pad);
+          display: grid; grid-template-columns: repeat(4, 1fr);
+          border-top: 1px solid var(--sv-hair); border-bottom: 1px solid var(--sv-hair);
+        }
+        .sv-stat { padding: clamp(16px, 2vw, 30px) clamp(12px, 2vw, 32px); }
+        .sv-stat + .sv-stat { border-left: 1px solid var(--sv-hair); }
+        .sv-stat-num {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-weight: 900; font-size: clamp(30px, 4vw, 52px); line-height: 1; color: var(--sv-purple-bright);
+          font-variant-numeric: tabular-nums; text-shadow: 0 0 28px rgba(139, 122, 232, 0.35); margin-bottom: 10px;
+        }
+        .sv-stat-label {
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sv-text-mute);
+        }
+
+        /* ── PRODUCTS ── */
+        .sv-products { max-width: var(--sv-maxw); margin: 0 auto; padding: clamp(70px, 10vw, 130px) var(--sv-pad); scroll-margin-top: 90px; }
+        .sv-products-head { max-width: 40ch; margin-bottom: clamp(40px, 5vw, 64px); }
+        .sv-products-title {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-weight: 900; font-size: clamp(28px, 3.6vw, 50px); line-height: 1.12; letter-spacing: -0.02em;
+          color: #fff; margin: 0 0 18px;
+        }
+        .sv-products-title .sv-sw { color: inherit; font: inherit; }
+        .sv-products-lede { font-size: 15.5px; line-height: 1.8; color: var(--sv-text-soft); margin: 0; max-width: 60ch; }
+
+        .sv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 24px); }
+        .sv-card { perspective: 1000px; }
+        .sv-card-inner {
+          position: relative; height: 100%; border-radius: 16px; overflow: hidden; padding: clamp(24px, 3vw, 34px);
+          background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+          border: 1px solid var(--sv-hair); transform-style: preserve-3d; will-change: transform;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+          display: flex; flex-direction: column;
+        }
+        .sv-card:hover .sv-card-inner {
+          border-color: color-mix(in srgb, var(--sv-accent) 55%, transparent);
+          box-shadow: 0 26px 60px rgba(0, 0, 0, 0.55), 0 0 40px color-mix(in srgb, var(--sv-accent) 20%, transparent);
+        }
+        .sv-card-glow {
+          position: absolute; top: 0; left: 0; width: 300px; height: 300px; margin: -150px 0 0 -150px;
+          border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0; visibility: hidden;
+          background: radial-gradient(circle, color-mix(in srgb, var(--sv-accent) 32%, transparent) 0%, transparent 60%);
+          mix-blend-mode: screen;
+        }
+        .sv-card-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+        .sv-card-icon {
+          width: 52px; height: 52px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center;
+          color: color-mix(in srgb, var(--sv-accent) 90%, white);
+          background: color-mix(in srgb, var(--sv-accent) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--sv-accent) 30%, transparent);
+        }
+        .sv-card-code {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: 14px; font-weight: 900; letter-spacing: 0.08em;
+          color: color-mix(in srgb, var(--sv-accent) 80%, white);
+          text-shadow: 0 0 14px color-mix(in srgb, var(--sv-accent) 55%, transparent);
+        }
+        .sv-card-name {
+          position: relative; z-index: 1;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 21px; font-weight: 700; color: #fff; margin: 0 0 5px; letter-spacing: -0.01em;
+        }
+        .sv-card-tagline {
+          position: relative; z-index: 1;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+          color: color-mix(in srgb, var(--sv-accent) 75%, white); margin: 0 0 16px;
+        }
+        .sv-card-desc { position: relative; z-index: 1; font-size: 14.5px; line-height: 1.75; color: var(--sv-text-soft); margin: 0 0 22px; flex: 1; }
+        .sv-card-link {
+          position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+          color: var(--sv-purple-bright); text-decoration: none; transition: gap 0.25s ease;
+        }
+        .sv-card-link:hover { gap: 13px; }
+
+        /* ── PROCESS ── */
+        .sv-proc { max-width: var(--sv-maxw); margin: 0 auto; padding: clamp(40px, 6vw, 80px) var(--sv-pad) clamp(70px, 9vw, 120px); }
+        .sv-proc-head { max-width: 30ch; margin-bottom: clamp(44px, 6vw, 72px); }
+        .sv-proc-track {
+          position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(20px, 3vw, 40px);
+          padding-top: 40px;
+        }
+        .sv-proc-line {
+          position: absolute; top: 6px; left: 0; right: 0; height: 2px; background: rgba(139, 122, 232, 0.12); border-radius: 2px; overflow: hidden;
+        }
+        .sv-proc-line-fill {
+          position: absolute; inset: 0; transform-origin: left center;
+          background: linear-gradient(90deg, var(--sv-purple-light), rgba(108,92,231,0.2));
+          box-shadow: 0 0 12px rgba(139, 122, 232, 0.6);
+        }
+        .sv-step { position: relative; }
+        .sv-step-node {
+          position: absolute; top: -40px; left: 0; width: 40px; height: 40px; border-radius: 50%;
+          display: inline-flex; align-items: center; justify-content: center;
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif); font-size: 13px; font-weight: 900;
+          color: #fff; background: radial-gradient(circle at 32% 26%, rgba(139,122,232,0.5), rgba(18,11,46,0.95) 72%);
+          box-shadow: 0 0 0 1px rgba(139,122,232,0.5), 0 0 18px rgba(108, 92, 231, 0.35);
+          transform: translateY(-50%);
+        }
+        .sv-step-body { padding-top: 14px; }
+        .sv-step-title {
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 10px; letter-spacing: -0.01em;
+        }
+        .sv-step-desc { font-size: 14px; line-height: 1.75; color: var(--sv-text-soft); margin: 0; }
+
+        /* ── TRUST ── */
+        .sv-trust { border-top: 1px solid var(--sv-hair); }
+        .sv-trust-inner { max-width: var(--sv-maxw); margin: 0 auto; padding: clamp(60px, 8vw, 100px) var(--sv-pad); text-align: center; }
+        .sv-trust-title {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-weight: 900; font-size: clamp(24px, 3vw, 40px); line-height: 1.16; letter-spacing: -0.02em;
+          color: #fff; margin: 0 auto 36px; max-width: 24ch;
+        }
+        .sv-partners { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(20px, 4vw, 56px); margin-bottom: 32px; }
+        .sv-partner {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: clamp(20px, 2.4vw, 30px); font-weight: 900; letter-spacing: 0.02em;
+          color: rgba(255, 255, 255, 0.3); transition: color 0.3s ease;
+        }
+        .sv-partner:hover { color: var(--sv-purple-bright); }
+        .sv-trust-note { font-size: 13.5px; color: var(--sv-text-mute); margin: 0; letter-spacing: 0.02em; }
+
+        /* ── CTA ── */
+        .sv-cta { position: relative; overflow: hidden; padding: clamp(90px, 12vw, 150px) var(--sv-pad); text-align: center; border-top: 1px solid var(--sv-hair); }
+        .sv-cta-lightwell {
+          position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+          width: 90vw; height: 60vh; max-width: 900px; pointer-events: none;
+          background: radial-gradient(closest-side, rgba(108, 92, 231, 0.16), transparent 70%); filter: blur(10px);
+        }
+        .sv-cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+        .sv-cta-title {
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-weight: 900; font-size: clamp(28px, 4.4vw, 54px); line-height: 1.1; letter-spacing: -0.02em;
+          color: #fff; margin: 0 0 20px; text-shadow: 0 0 50px rgba(139, 122, 232, 0.35);
+        }
+        .sv-cta-sub { font-size: 16px; line-height: 1.8; color: var(--sv-text-soft); max-width: 54ch; margin: 0 auto 38px; }
+        .sv-cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 991px) {
+          .sv-hero-inner { grid-template-columns: 1fr; gap: 48px; }
+          .sv-hero-visual { order: -1; }
+          .sv-radar { width: clamp(220px, 56vw, 320px); }
+          .sv-grid { grid-template-columns: repeat(2, 1fr); }
+          .sv-proc-track { grid-template-columns: 1fr 1fr; gap: 48px 32px; }
+          .sv-proc-line { display: none; }
+          .sv-step-node { position: static; transform: none; margin-bottom: 14px; }
+          .sv-step-body { padding-top: 0; }
+        }
+        @media (max-width: 575px) {
+          .sv-grid { grid-template-columns: 1fr; }
+          .sv-stats { grid-template-columns: 1fr 1fr; }
+          .sv-stat:nth-child(3) { border-left: none; }
+          .sv-stat:nth-child(3), .sv-stat:nth-child(4) { border-top: 1px solid var(--sv-hair); }
+          .sv-proc-track { grid-template-columns: 1fr; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sv-hero-eyebrow, .sv-hero-sub, .sv-hero-cta, .sv-hero-badges, .sv-hero-visual, .sv-stat, .sv-card, .sv-step-body > *, .sv-trust-inner > *, .sv-cta-inner > * { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+          .sv-hero-title .sv-line span { transform: none !important; }
+          .sv-products-title .sv-sw { opacity: 1 !important; }
+          .sv-radar-sweep, .sv-radar-blip { animation: none !important; }
+          .sv-step-node { opacity: 1 !important; }
+        }
+      `}</style>
     </div>
   );
 }
