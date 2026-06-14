@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { BeamsBackground } from './note';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -118,7 +117,6 @@ export default function ServiceSection7() {
 
   return (
     <section ref={sectionRef} className="values-section">
-      <BeamsBackground className="values-beams" intensity="subtle" />
       <div className="values-container">
         <div className="values-head">
           <div className="values-head-row">
@@ -154,10 +152,9 @@ export default function ServiceSection7() {
           z-index: 9;
           overflow: hidden;
           background:
-            radial-gradient(ellipse at 50% 0%, rgba(139, 122, 232, 0.12), rgba(8, 6, 20, 0) 32%),
-            radial-gradient(circle at 78% 18%, rgba(82, 74, 160, 0.18), rgba(8, 6, 20, 0) 36%),
+            radial-gradient(circle at 78% 18%, rgba(82, 74, 160, 0.1), rgba(8, 6, 20, 0) 32%),
             linear-gradient(180deg, #080614 0%, #090716 58%, #070512 100%);
-          padding: 132px 0 132px;
+          padding: 118px 0 132px;
         }
 
         .values-section::before {
@@ -182,27 +179,6 @@ export default function ServiceSection7() {
           height: 150px;
           background: linear-gradient(180deg, rgba(7, 5, 18, 0), #070512 86%);
           pointer-events: none;
-        }
-
-        .values-beams {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          opacity: 0.54;
-          pointer-events: none;
-          mix-blend-mode: screen;
-          -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 78%, transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 78%, transparent 100%);
-        }
-
-        .beams-background {
-          overflow: hidden;
-        }
-
-        .beams-background__canvas {
-          display: block;
-          width: 100%;
-          height: 100%;
         }
 
         .values-section > .values-container {

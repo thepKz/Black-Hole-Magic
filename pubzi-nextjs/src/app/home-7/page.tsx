@@ -1,5 +1,6 @@
 import HeroSection7 from '@/components/home-7/HeroSection7';
 import AboutSection7 from '@/components/home-7/AboutSection7';
+import PortalTransitionSection from '@/components/home-7/PortalTransitionSection';
 import ServiceSection7 from '@/components/home-7/ServiceSection7';
 import GameCaseStudySection from '@/components/home-7/GameCaseStudySection';
 import TeamSection7 from '@/components/home-7/TeamSection7';
@@ -21,6 +22,7 @@ export default function Home7Page() {
       </div>
       <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
         <AboutSection7 />
+        <PortalTransitionSection />
         <ServiceSection7 />
         <GameCaseStudySection />
         <CounterSection7 />

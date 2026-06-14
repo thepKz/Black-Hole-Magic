@@ -141,11 +141,30 @@ export default function TeamSection7() {
         .ptn-section {
           position: relative;
           z-index: 9;
-          background: #080614;
-          padding: 140px 0 150px;
+          overflow: hidden;
+          margin-top: -1px;
+          background:
+            linear-gradient(180deg, #080614 0%, #090716 46%, #080614 100%),
+            #080614 !important;
+          padding: clamp(42px, 4.2vw, 64px) 0 150px;
+        }
+
+        .ptn-section::before {
+          content: '';
+          position: absolute;
+          inset: -18% -8%;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse at 18% 28%, rgba(139, 122, 232, 0.1), transparent 34%),
+            radial-gradient(ellipse at 84% 56%, rgba(0, 206, 201, 0.055), transparent 30%),
+            linear-gradient(90deg, rgba(216, 216, 224, 0.028) 1px, transparent 1px);
+          background-size: auto, auto, 132px 100%;
+          mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
         }
 
         .ptn-container {
+          position: relative;
+          z-index: 1;
           max-width: 1520px;
           margin: 0 auto;
           padding: 0 clamp(24px, 4vw, 64px);
@@ -156,11 +175,12 @@ export default function TeamSection7() {
         }
 
         .ptn-kicker {
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px;
-          font-weight: 600;
-          letter-spacing: 4px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: #8b7ae8;
+          color: rgba(139, 122, 232, 0.9) !important;
           margin-bottom: 24px;
         }
 
@@ -173,20 +193,25 @@ export default function TeamSection7() {
 
         .ptn-title {
           max-width: 780px;
-          font-size: clamp(40px, 3.8vw, 58px);
-          font-weight: 800;
+          color: #f7f5ff !important;
+          font-family: var(--font-title-extra);
+          font-size: clamp(46px, 4.8vw, 82px);
+          font-weight: 900;
           line-height: 1.1;
-          color: #fff;
+          letter-spacing: 0;
+          text-transform: none;
+          text-wrap: balance;
           margin: 0;
           text-shadow:
-            0 0 22px rgba(255, 255, 255, 0.28),
-            0 0 56px rgba(139, 122, 232, 0.5);
+            0 0 24px rgba(255, 255, 255, 0.16),
+            0 0 46px rgba(139, 122, 232, 0.24);
         }
 
         .ptn-lede {
+          font-family: var(--font-body-regular);
           font-size: clamp(15px, 1vw, 17px);
           line-height: 1.65;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(216, 216, 224, 0.68) !important;
           text-transform: none;
           max-width: 46ch;
           margin: 0 0 8px auto;
@@ -204,7 +229,9 @@ export default function TeamSection7() {
           overflow: hidden;
           border-radius: 14px;
           border: 1px solid rgba(139, 122, 232, 0.18);
-          background: rgba(13, 9, 32, 0.55);
+          background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+            rgba(13, 9, 32, 0.55);
           cursor: pointer;
           outline: none;
           transition: border-color 0.4s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -243,9 +270,10 @@ export default function TeamSection7() {
           right: 16px;
           padding: 5px 12px;
           border-radius: 999px;
+          font-family: var(--font-subtitle-krafting);
           font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 1.2px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           color: #d9d0ff;
           background: rgba(10, 6, 28, 0.72);
@@ -258,17 +286,22 @@ export default function TeamSection7() {
         }
 
         .ptn-info h3 {
+          font-family: var(--font-title-extra);
           font-size: 19px;
-          font-weight: 700;
-          color: #fff;
+          font-weight: 900;
+          color: #fff !important;
+          line-height: 1.12;
+          letter-spacing: 0;
+          text-transform: none;
           margin: 0 0 6px;
         }
 
         .ptn-info p {
+          font-family: var(--font-body-regular);
           font-size: 13px;
-          letter-spacing: 1.2px;
+          letter-spacing: 0.04em;
           text-transform: uppercase;
-          color: rgba(196, 184, 255, 0.7);
+          color: rgba(196, 184, 255, 0.7) !important;
           margin: 0;
         }
 
@@ -319,7 +352,7 @@ export default function TeamSection7() {
 
         @media (max-width: 600px) {
           .ptn-section {
-            padding: 90px 0 100px;
+            padding: 54px 0 100px;
           }
 
           .ptn-container {

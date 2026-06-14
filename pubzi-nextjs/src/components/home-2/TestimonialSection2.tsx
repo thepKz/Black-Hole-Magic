@@ -103,15 +103,7 @@ export default function TestimonialSection2() {
             style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 16 }}
           >
             <div style={{ height: 1, width: 32, background: "var(--color-brand, #7DF9FF)" }} />
-            <span style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--color-brand, #7DF9FF)",
-            }}>
-              Tiếng nói đối tác
-            </span>
+           
             <div style={{ height: 1, width: 32, background: "var(--color-brand, #7DF9FF)" }} />
           </motion.div>
 

@@ -75,6 +75,15 @@ export default function AboutSection7() {
       fadeIn(2, 2.55); // model has landed on the right
       fadeOut(2, 3.35);
       fadeIn(3, 3.61); // fully in right as the next section starts its wipe
+      fadeOut(3, 4.22);
+      tl.to(track, {
+        x: () => window.innerWidth * 1.08,
+        autoAlpha: 0,
+        scale: 0.88,
+        filter: 'blur(10px)',
+        duration: 0.38,
+        ease: 'power2.in',
+      }, 4.16);
       tl.to({}, { duration: 0.4 }, 4.6);
     };
 

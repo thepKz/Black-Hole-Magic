@@ -32,6 +32,22 @@ const METRICS = [
   },
 ];
 
+function ScrollWords({ children }: { children: string }) {
+  return (
+    <>
+      {children.split(/(\s+)/).map((segment, index) =>
+        segment.trim() ? (
+          <span className="ops-word" key={`${segment}-${index}`}>
+            {segment}
+          </span>
+        ) : (
+          segment
+        )
+      )}
+    </>
+  );
+}
+
 export default function CounterSection7() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -105,7 +121,40 @@ export default function CounterSection7() {
           scrub: 1,
         },
       })
-        .to('.ops-ledger-table', { yPercent: -3, ease: 'none' }, 0);
+        .to('.ops-ledger-table', { yPercent: -3, ease: 'none' }, 0)
+        .fromTo(
+          '.ops-scroll-rail-fill',
+          { scaleY: 0, transformOrigin: 'top center' },
+          { scaleY: 1, ease: 'none' },
+          0
+        );
+
+      gsap.utils.toArray<HTMLElement>('.ops-scroll-text').forEach((textBlock) => {
+        const words = textBlock.querySelectorAll<HTMLElement>('.ops-word');
+        if (!words.length) return;
+
+        gsap.fromTo(
+          words,
+          {
+            autoAlpha: 0.22,
+            y: 10,
+            filter: 'blur(2px)',
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            ease: 'none',
+            stagger: 0.025,
+            scrollTrigger: {
+              trigger: textBlock,
+              start: 'top 88%',
+              end: 'top 46%',
+              scrub: 0.65,
+            },
+          }
+        );
+      });
     }, section);
 
     return () => ctx.revert();
@@ -113,6 +162,10 @@ export default function CounterSection7() {
 
   return (
     <section id="operations" ref={sectionRef} className="ops-section" aria-labelledby="ops-title">
+      <span className="ops-scroll-rail" aria-hidden="true">
+        <span className="ops-scroll-rail-fill" />
+      </span>
+
       <span className="ops-seam ops-seam--top" aria-hidden="true">
         <span className="ops-seam-fill" />
       </span>
@@ -121,10 +174,9 @@ export default function CounterSection7() {
         <div className="ops-ledger">
           <div className="ops-ledger-copy">
             <span className="ops-kicker">SECTION 04 · OPERATING CAPACITY</span>
-            <h2 id="ops-title">Năng lực vận hành, bằng số.</h2>
-            <p>
-              Một ledger ngắn cho buyer: đội ngũ, traffic, tải cao điểm và retention.
-            </p>
+            <h2 id="ops-title" className="ops-scroll-text">
+              <ScrollWords>Năng lực vận hành, bằng số.</ScrollWords>
+            </h2>
           </div>
 
           <div className="ops-ledger-table" role="table" aria-label="Chỉ số vận hành Blackhole Game">
@@ -135,8 +187,12 @@ export default function CounterSection7() {
                   {String(index + 1).padStart(2, '0')}
                 </span>
                 <div className="ops-ledger-text" role="cell">
-                  <h3>{item.label}</h3>
-                  <p>{item.note}</p>
+                  <h3 className="ops-scroll-text">
+                    <ScrollWords>{item.label}</ScrollWords>
+                  </h3>
+                  <p className="ops-scroll-text">
+                    <ScrollWords>{item.note}</ScrollWords>
+                  </p>
                 </div>
                 <strong className="ops-ledger-value" role="cell">
                   {item.prefix}
@@ -146,9 +202,7 @@ export default function CounterSection7() {
               </article>
             ))}
             <span className="ops-row-line ops-row-line--last" aria-hidden="true" />
-            <p className="ops-ledger-caption">
-              Publishing, cộng đồng, creator, giải đấu và retention được vận hành như một pipeline thống nhất.
-            </p>
+
           </div>
         </div>
       </div>
@@ -213,6 +267,33 @@ export default function CounterSection7() {
           max-width: 1500px;
           margin: 0 auto;
           padding: 0 clamp(24px, 4vw, 64px);
+        }
+
+        .ops-scroll-rail {
+          position: absolute;
+          left: clamp(22px, 3.2vw, 48px);
+          top: clamp(78px, 8vw, 128px);
+          bottom: clamp(78px, 8vw, 128px);
+          z-index: 2;
+          width: 1px;
+          overflow: hidden;
+          background: rgba(216, 216, 224, 0.08);
+        }
+
+        .ops-scroll-rail-fill {
+          display: block;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg, rgba(139, 122, 232, 0), rgba(139, 122, 232, 0.72), rgba(0, 206, 201, 0.44), rgba(139, 122, 232, 0));
+        }
+
+        .ops-scroll-text {
+          overflow-wrap: anywhere;
+        }
+
+        .ops-word {
+          display: inline-block;
+          will-change: opacity, transform, filter;
         }
 
         .ops-ledger {
@@ -377,6 +458,10 @@ export default function CounterSection7() {
             padding: 82px 0 96px;
           }
 
+          .ops-scroll-rail {
+            display: none;
+          }
+
           .ops-ledger-row {
             grid-template-columns: 44px minmax(0, 1fr);
             grid-template-areas:
@@ -404,6 +489,14 @@ export default function CounterSection7() {
             font-size: clamp(42px, 14vw, 68px);
           }
 
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ops-word {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+          }
         }
 
         @media (max-width: 480px) {

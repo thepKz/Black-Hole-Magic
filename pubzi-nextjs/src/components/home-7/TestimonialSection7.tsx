@@ -1,7 +1,11 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'motion/react';
+import { useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 type Card = {
   text: string;
@@ -67,167 +71,516 @@ const CARDS: Card[] = [
   },
 ];
 
-function Column({ cards, duration, delay = 0 }: { cards: Card[]; duration: number; delay?: number }) {
-  const doubled = [...cards, ...cards];
+const CARD_HEIGHT = 270;
+const GAP = 20;
+const col1 = CARDS.slice(0, 3);
+const col2 = CARDS.slice(3, 6);
+const col3 = CARDS.slice(6, 9);
+
+function ScrollWords({ children }: { children: string }) {
   return (
-    <div style={{ width: 290, flexShrink: 0, overflow: 'hidden' }}>
+    <>
+      {children.split(/(\s+)/).map((segment, index) =>
+        segment.trim() ? (
+          <span className="tst-word" key={`${segment}-${index}`}>
+            {segment}
+          </span>
+        ) : (
+          segment
+        )
+      )}
+    </>
+  );
+}
+
+function Column({ cards, duration, delay = 0, reverse = false }: { cards: Card[]; duration: number; delay?: number; reverse?: boolean }) {
+  const reduceMotion = useReducedMotion();
+  const doubled = [...cards, ...cards];
+  const distance = cards.length * (CARD_HEIGHT + GAP);
+
+  return (
+    <div className="tst-column">
       <motion.div
-        animate={{ y: [0, -(cards.length * (240 + 16))] }}
-        transition={{
-          duration,
-          ease: 'linear',
-          repeat: Infinity,
-          delay,
-        }}
-        style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+        className="tst-column-track"
+        animate={reduceMotion ? { y: 0 } : { y: reverse ? [-distance, 0] : [0, -distance] }}
+        transition={reduceMotion ? undefined : { duration, ease: 'linear', repeat: Infinity, delay }}
       >
-        {doubled.map((c, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'relative',
-              width: 290,
-              flexShrink: 0,
-              borderRadius: 14,
-              padding: '22px 20px 20px',
-              background: 'linear-gradient(145deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.02) 100%)',
-              border: '1px solid rgba(139,122,232,0.14)',
-              boxShadow: '0 4px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.055)',
-              overflow: 'hidden',
-            }}
-          >
-            {/* top glow */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(139,122,232,0.5), transparent)',
-            }} />
-
-            <p style={{ fontSize: 13.5, lineHeight: 1.7, color: 'rgba(255,255,255,0.68)', margin: '0 0 18px', letterSpacing: 0.1 }}>
-              &ldquo;{c.text}&rdquo;
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img
-                src={c.avatar}
-                alt={c.name}
-                style={{
-                  width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
-                  border: '1.5px solid rgba(139,122,232,0.35)',
-                }}
-              />
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', letterSpacing: 0.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {c.name}
-                </div>
-                <div style={{ fontSize: 11.5, color: 'rgba(196,184,255,0.55)', letterSpacing: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
-                  {c.role}
-                </div>
+        {doubled.map((card, index) => (
+          <article className="tst-card" key={`${card.name}-${index}`}>
+            <span className="tst-card-line" aria-hidden="true" />
+            <p>&ldquo;{card.text}&rdquo;</p>
+            <div className="tst-author">
+              <img src={card.avatar} alt={card.name} loading="lazy" />
+              <div>
+                <strong>{card.name}</strong>
+                <span>{card.role}</span>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </motion.div>
     </div>
   );
 }
 
-const col1 = CARDS.slice(0, 3);
-const col2 = CARDS.slice(3, 6);
-const col3 = CARDS.slice(6, 9);
-
-const CARD_HEIGHT = 240;
-const GAP = 16;
-
 export default function TestimonialSection7() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    const ctx = gsap.context(() => {
+      const enter = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 76%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+
+      enter
+        .fromTo(
+          '.tst-seam-fill, .tst-header-line',
+          { scaleX: 0, transformOrigin: 'left center' },
+          { scaleX: 1, duration: 0.95, ease: 'power3.inOut', stagger: 0.08 },
+          0
+        )
+        .fromTo(
+          '.tst-kicker, .tst-proof-note',
+          { autoAlpha: 0, y: 18 },
+          { autoAlpha: 1, y: 0, duration: 0.72, ease: 'power3.out', stagger: 0.08 },
+          0.08
+        )
+        .fromTo(
+          '.tst-column',
+          { autoAlpha: 0, y: 42, clipPath: 'inset(12% 0 12% 0)' },
+          { autoAlpha: 1, y: 0, clipPath: 'inset(0% 0 0% 0)', duration: 1, ease: 'power3.out', stagger: 0.12 },
+          0.22
+        );
+
+      gsap.utils.toArray<HTMLElement>('.tst-scroll-text').forEach((textBlock) => {
+        const words = textBlock.querySelectorAll<HTMLElement>('.tst-word');
+        if (!words.length) return;
+
+        gsap.fromTo(
+          words,
+          { autoAlpha: 0.16, y: 12, filter: 'blur(2px)' },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            ease: 'none',
+            stagger: 0.03,
+            scrollTrigger: {
+              trigger: textBlock,
+              start: 'top 90%',
+              end: 'top 48%',
+              scrub: 0.65,
+            },
+          }
+        );
+      });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      })
+        .to('.tst-columns', { yPercent: -4, ease: 'none' }, 0)
+        .fromTo('.tst-scroll-rail-fill', { scaleY: 0, transformOrigin: 'top center' }, { scaleY: 1, ease: 'none' }, 0);
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section style={{
-      position: 'relative',
-      zIndex: 9,
-      background: '#07050f',
-      padding: '130px 0 140px',
-      overflow: 'hidden',
-    }}>
-      {/* ambient glow */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(108,92,231,0.07) 0%, transparent 70%)',
-      }} />
+    <section ref={sectionRef} className="tst-section" aria-labelledby="tst-title">
+      <span className="tst-seam tst-seam--top" aria-hidden="true">
+        <span className="tst-seam-fill" />
+      </span>
+      <span className="tst-scroll-rail" aria-hidden="true">
+        <span className="tst-scroll-rail-fill" />
+      </span>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 48px', position: 'relative', zIndex: 1 }}>
+      <div className="tst-container">
+        <div className="tst-header">
+          <div className="tst-title-block">
+          
+            <h2 id="tst-title" className="tst-scroll-text">
+              <ScrollWords>Khách hàng nói về chúng tôi</ScrollWords>
+            </h2>
+          </div>
 
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true, margin: '-60px' }}
-          style={{ textAlign: 'center', marginBottom: 64 }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            viewport={{ once: true }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginBottom: 18 }}
-          >
-            <div style={{ height: 1, width: 28, background: 'rgba(139,122,232,0.7)' }} />
-            <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.22em',
-              textTransform: 'uppercase', color: 'rgba(196,184,255,0.8)',
-            }}>
-              Tiếng nói đối tác
-            </span>
-            <div style={{ height: 1, width: 28, background: 'rgba(139,122,232,0.7)' }} />
-          </motion.div>
+          <aside className="tst-proof-note">
+            <span className="tst-header-line" aria-hidden="true" />
+            <p className="tst-scroll-text">
+              <ScrollWords>Trích dẫn được ẩn danh theo thỏa thuận NDA, gom từ publisher, studio, community và buyer khu vực.</ScrollWords>
+            </p>
+            <div className="tst-proof-meta">
+              <strong>09</strong>
+              <span>cuộc phỏng vấn</span>
+              <strong>03</strong>
+              <span>nhóm buyer</span>
+            </div>
+          </aside>
+        </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.15 }}
-            viewport={{ once: true }}
-            style={{
-              fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 700,
-              color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.12,
-              margin: '0 0 12px',
-            }}
-          >
-            Khách hàng nói về{' '}
-            <span style={{ color: '#b09cff' }}>chúng tôi</span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.55, delay: 0.28 }}
-            viewport={{ once: true }}
-            style={{ fontSize: 13, color: 'rgba(255,255,255,0.32)', margin: 0 }}
-          >
-            Trích dẫn được ẩn danh theo thỏa thuận NDA
-          </motion.p>
-        </motion.div>
-
-        {/* ── Columns ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          viewport={{ once: true, margin: '-40px' }}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 16,
-            maxHeight: 560,
-            overflow: 'hidden',
-            maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)',
-          }}
-        >
-          <Column cards={col1} duration={col1.length * (CARD_HEIGHT + GAP) / 40} />
-          <Column cards={col2} duration={col2.length * (CARD_HEIGHT + GAP) / 32} delay={0.8} />
-          <Column cards={col3} duration={col3.length * (CARD_HEIGHT + GAP) / 36} delay={0.4} />
-        </motion.div>
-
+        <div className="tst-columns" aria-label="Nhận xét đối tác">
+          <Column cards={col1} duration={(col1.length * (CARD_HEIGHT + GAP)) / 34} />
+          <Column cards={col2} duration={(col2.length * (CARD_HEIGHT + GAP)) / 28} delay={0.75} reverse />
+          <Column cards={col3} duration={(col3.length * (CARD_HEIGHT + GAP)) / 31} delay={0.35} />
+        </div>
       </div>
+
+      <span className="tst-seam tst-seam--bottom" aria-hidden="true">
+        <span className="tst-seam-fill" />
+      </span>
+
+      <style jsx global>{`
+        .tst-section {
+          position: relative;
+          z-index: 9;
+          overflow: hidden;
+          isolation: isolate;
+          background:
+            linear-gradient(180deg, #080614 0%, #07050f 54%, #080614 100%),
+            #080614 !important;
+          padding: clamp(92px, 7vw, 118px) 0 clamp(28px, 3vw, 42px);
+        }
+
+        .tst-section::before {
+          content: '';
+          position: absolute;
+          inset: -16% -8%;
+          z-index: -2;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse at 18% 0%, rgba(139, 122, 232, 0.13), transparent 34%),
+            radial-gradient(ellipse at 82% 82%, rgba(0, 206, 201, 0.045), transparent 30%),
+            linear-gradient(90deg, rgba(216, 216, 224, 0.03) 1px, transparent 1px);
+          background-size: auto, auto, 132px 100%;
+          mask-image: linear-gradient(180deg, transparent, #000 14%, #000 88%, transparent);
+        }
+
+        .tst-seam {
+          position: absolute;
+          left: clamp(20px, 4vw, 68px);
+          right: clamp(20px, 4vw, 68px);
+          z-index: 2;
+          height: 1px;
+          overflow: hidden;
+          background: rgba(216, 216, 224, 0.08);
+        }
+
+        .tst-seam--top {
+          top: 34px;
+        }
+
+        .tst-seam--bottom {
+          bottom: 0;
+        }
+
+        .tst-seam-fill {
+          display: block;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.52), rgba(216, 216, 224, 0.2), transparent);
+        }
+
+        .tst-scroll-rail {
+          position: absolute;
+          left: clamp(22px, 3.2vw, 48px);
+          top: clamp(80px, 8vw, 132px);
+          bottom: clamp(80px, 8vw, 132px);
+          z-index: 2;
+          width: 1px;
+          overflow: hidden;
+          background: rgba(216, 216, 224, 0.08);
+        }
+
+        .tst-scroll-rail-fill {
+          display: block;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg, rgba(139, 122, 232, 0), rgba(139, 122, 232, 0.72), rgba(0, 206, 201, 0.32), rgba(139, 122, 232, 0));
+        }
+
+        .tst-container {
+          position: relative;
+          z-index: 1;
+          max-width: 1520px;
+          margin: 0 auto;
+          padding: 0 clamp(24px, 4vw, 64px);
+        }
+
+        .tst-header {
+          display: grid;
+          grid-template-columns: minmax(0, 0.95fr) minmax(360px, 520px);
+          gap: clamp(32px, 5vw, 84px);
+          align-items: end;
+          margin-bottom: 64px;
+        }
+
+        .tst-kicker {
+          display: block;
+          color: rgba(139, 122, 232, 0.9) !important;
+          font-family: var(--font-subtitle-krafting);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          margin-bottom: 22px;
+        }
+
+        .tst-title-block h2 {
+          max-width: 780px;
+          color: #f7f5ff !important;
+          font-family: var(--font-title-extra);
+          font-size: clamp(46px, 4.8vw, 82px);
+          font-weight: 900;
+          line-height: 1.1;
+          letter-spacing: 0;
+          text-transform: none;
+          text-wrap: balance;
+          margin: 0;
+          text-shadow: 0 0 34px rgba(139, 122, 232, 0.22);
+        }
+
+        .tst-proof-note {
+          max-width: 520px;
+          margin-left: auto;
+        }
+
+        .tst-header-line {
+          display: block;
+          width: 100%;
+          height: 1px;
+          margin-bottom: 22px;
+          background: linear-gradient(90deg, rgba(216, 216, 224, 0.5), rgba(139, 122, 232, 0.22), transparent);
+        }
+
+        .tst-proof-note p {
+          color: rgba(216, 216, 224, 0.72) !important;
+          font-family: var(--font-body-regular);
+          font-size: clamp(13px, 0.92vw, 15px);
+          line-height: 1.78;
+          text-transform: none;
+          margin: 0;
+        }
+
+        .tst-proof-meta {
+          display: grid;
+          grid-template-columns: auto 1fr auto 1fr;
+          align-items: baseline;
+          gap: 10px 12px;
+          margin-top: 28px;
+          color: rgba(216, 216, 224, 0.56);
+          font-family: var(--font-body-regular);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .tst-proof-meta strong {
+          color: #ffffff;
+          font-family: var(--font-title-extra);
+          font-size: 28px;
+          line-height: 1;
+          letter-spacing: 0;
+        }
+
+        .tst-columns {
+          display: flex;
+          justify-content: center;
+          gap: clamp(18px, 2vw, 28px);
+          max-height: clamp(560px, 62vw, 680px);
+          overflow: hidden;
+          mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 86%, transparent);
+          -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 86%, transparent);
+          will-change: transform;
+        }
+
+        .tst-column {
+          width: min(30vw, 380px);
+          min-width: 310px;
+          flex: 0 0 auto;
+          overflow: hidden;
+          will-change: transform, opacity, clip-path;
+        }
+
+        .tst-column-track {
+          display: flex;
+          flex-direction: column;
+          gap: ${GAP}px;
+        }
+
+        .tst-card {
+          position: relative;
+          min-height: ${CARD_HEIGHT}px;
+          padding: 28px 28px 24px;
+          overflow: hidden;
+          border: 1px solid rgba(216, 216, 224, 0.18);
+          border-radius: 8px;
+          background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.018)),
+            rgba(12, 10, 24, 0.74);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 22px 58px rgba(0, 0, 0, 0.28);
+        }
+
+        .tst-card-line {
+          position: absolute;
+          top: 0;
+          left: 24px;
+          right: 24px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.55), transparent);
+        }
+
+        .tst-card p {
+          color: rgba(247, 245, 255, 0.78) !important;
+          font-family: var(--font-body-regular);
+          font-size: clamp(13px, 0.95vw, 15px);
+          font-weight: 700;
+          line-height: 1.78;
+          letter-spacing: 0;
+          text-transform: uppercase;
+          margin: 0 0 24px;
+        }
+
+        .tst-author {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: auto;
+        }
+
+        .tst-author img {
+          width: 38px;
+          height: 38px;
+          flex: 0 0 auto;
+          object-fit: cover;
+          border-radius: 50%;
+          border: 1px solid rgba(139, 122, 232, 0.42);
+          filter: saturate(0.82);
+        }
+
+        .tst-author strong,
+        .tst-author span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .tst-author strong {
+          color: #ffffff !important;
+          font-family: var(--font-title-extra);
+          font-size: 13px;
+          line-height: 1.15;
+          letter-spacing: 0;
+          text-transform: none;
+        }
+
+        .tst-author span {
+          color: rgba(139, 122, 232, 0.7) !important;
+          font-family: var(--font-subtitle-krafting);
+          font-size: 10.5px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-top: 4px;
+        }
+
+        .tst-scroll-text {
+          overflow-wrap: anywhere;
+        }
+
+        .tst-word {
+          display: inline-block;
+          will-change: opacity, transform, filter;
+        }
+
+        @media (max-width: 1199px) {
+          .tst-header {
+            grid-template-columns: 1fr;
+            gap: 34px;
+          }
+
+          .tst-proof-note {
+            max-width: 680px;
+            margin-left: 0;
+          }
+
+          .tst-column {
+            min-width: 290px;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .tst-section {
+            padding: 78px 0 32px;
+          }
+
+          .tst-scroll-rail {
+            display: none;
+          }
+
+          .tst-header {
+            margin-bottom: 44px;
+          }
+
+          .tst-title-block h2 {
+            font-size: clamp(34px, 10vw, 48px);
+          }
+
+          .tst-proof-meta {
+            grid-template-columns: auto 1fr;
+          }
+
+          .tst-columns {
+            justify-content: flex-start;
+            gap: 16px;
+            max-height: 590px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+            mask-image: none;
+            -webkit-mask-image: none;
+          }
+
+          .tst-column {
+            width: 82vw;
+            min-width: 82vw;
+            scroll-snap-align: start;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .tst-container {
+            padding: 0 20px;
+          }
+
+          .tst-card {
+            padding: 24px 22px 22px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .tst-word {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }
