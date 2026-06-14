@@ -105,9 +105,9 @@ export default function NewsSection7() {
 
         .news7-head h2 {
           color: #ffffff !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-title-extra);
           font-size: clamp(38px, 4vw, 64px);
-          font-weight: 800;
+          font-weight: 900;
           line-height: 1.05;
           letter-spacing: 0;
           text-transform: none;
@@ -117,6 +117,7 @@ export default function NewsSection7() {
         .news7-head p,
         .news7-copy p {
           color: rgba(216, 216, 224, 0.68) !important;
+          font-family: var(--font-body-regular);
           text-transform: none;
           line-height: 1.7;
           margin: 0;
@@ -184,7 +185,7 @@ export default function NewsSection7() {
         .news7-meta {
           display: block;
           color: rgba(155, 124, 255, 0.82) !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.13em;
@@ -198,7 +199,8 @@ export default function NewsSection7() {
 
         .news7-copy h3 a {
           color: #ffffff !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-title-extra);
+          font-weight: 900;
           font-size: clamp(22px, 2vw, 32px);
           line-height: 1.15;
           text-transform: none;
@@ -226,7 +228,7 @@ export default function NewsSection7() {
           color: #ffffff !important;
           border: 1px solid rgba(139, 122, 232, 0.55);
           background: rgba(21, 13, 58, 0.72);
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px;
           font-weight: 800;
           letter-spacing: 0.12em;

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { BeamsBackground } from './note';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -117,14 +118,12 @@ export default function ServiceSection7() {
 
   return (
     <section ref={sectionRef} className="values-section">
+      <BeamsBackground className="values-beams" intensity="subtle" />
       <div className="values-container">
         <div className="values-head">
-          <h6 className="values-kicker">LỢI THẾ CẠNH TRANH</h6>
           <div className="values-head-row">
             <h2 className="values-title">
-              <Words text="Vì sao chọn" />
-              <br />
-              <Words text="Blackhole Game" />
+              <Words text="GIÁ TRỊ CỐT LÕI" />
             </h2>
             <p className="values-lede">
               Bốn nguyên tắc vận hành đứng sau mọi sản phẩm chúng tôi đồng phát hành tại thị trường Việt Nam.
@@ -153,34 +152,75 @@ export default function ServiceSection7() {
         .values-section {
           position: relative;
           z-index: 9;
-          background: #080614;
-          padding: 150px 0 160px;
+          overflow: hidden;
+          background:
+            radial-gradient(ellipse at 50% 0%, rgba(139, 122, 232, 0.12), rgba(8, 6, 20, 0) 32%),
+            radial-gradient(circle at 78% 18%, rgba(82, 74, 160, 0.18), rgba(8, 6, 20, 0) 36%),
+            linear-gradient(180deg, #080614 0%, #090716 58%, #070512 100%);
+          padding: 132px 0 132px;
         }
 
-        /* Seam connecting the About glass story to this solid section:
-           a fade band reaching UP over the story's tail + a glow hairline. */
         .values-section::before {
           content: '';
           position: absolute;
-          top: -160px;
-          left: 0;
-          right: 0;
-          height: 160px;
-          background: linear-gradient(180deg, rgba(8, 6, 20, 0) 0%, #080614 96%);
+          inset: 0;
+          z-index: 0;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 24%),
+            linear-gradient(90deg, rgba(139, 122, 232, 0.04), transparent 34%, rgba(139, 122, 232, 0.035));
+          opacity: 0.74;
           pointer-events: none;
         }
 
         .values-section::after {
           content: '';
           position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: min(72vw, 1100px);
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.55) 50%, transparent);
-          box-shadow: 0 0 18px rgba(139, 122, 232, 0.35);
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 1;
+          height: 150px;
+          background: linear-gradient(180deg, rgba(7, 5, 18, 0), #070512 86%);
           pointer-events: none;
+        }
+
+        .values-beams {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          opacity: 0.54;
+          pointer-events: none;
+          mix-blend-mode: screen;
+          -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 78%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 10%, #000 78%, transparent 100%);
+        }
+
+        .beams-background {
+          overflow: hidden;
+        }
+
+        .beams-background__canvas {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+        .values-section > .values-container {
+          position: relative;
+          z-index: 2;
+        }
+
+        .values-section > .values-container::before {
+          content: '';
+          position: absolute;
+          top: -90px;
+          right: clamp(20px, 6vw, 90px);
+          width: min(42vw, 620px);
+          height: 340px;
+          background: radial-gradient(ellipse at center, rgba(139, 122, 232, 0.14), rgba(8, 6, 20, 0) 70%);
+          filter: blur(18px);
+          pointer-events: none;
+          z-index: -1;
         }
 
         .values-container {
@@ -211,25 +251,44 @@ export default function ServiceSection7() {
 
         .values-title {
           max-width: 780px;
+          font-family: var(--font-title-extra);
           font-size: clamp(44px, 4.15vw, 68px);
-          font-weight: 800;
+          font-weight: 900 !important;
           line-height: 1.08;
-          color: #fff;
+          color: #fff !important;
           margin: 0;
+          letter-spacing: 0;
           text-shadow:
-            0 0 22px rgba(255, 255, 255, 0.28),
-            0 0 56px rgba(139, 122, 232, 0.5);
+            0 0 14px rgba(255, 255, 255, 0.18),
+            0 0 34px rgba(139, 122, 232, 0.28);
+          -webkit-font-smoothing: antialiased;
+          text-rendering: geometricPrecision;
           will-change: clip-path, transform;
         }
 
+        .values-title .sw {
+          color: #fff !important;
+          font-family: inherit;
+          font-weight: inherit;
+        }
+
         .values-lede {
+          font-family: var(--font-body-regular);
           font-size: clamp(15px, 1vw, 17px);
+          font-weight: 400 !important;
           line-height: 1.65;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(255, 255, 255, 0.62) !important;
           text-transform: none;
           max-width: 46ch;
           margin: 0 0 8px auto;
           text-align: right;
+        }
+
+        .values-lede .sw,
+        .vrow-body .sw {
+          color: inherit !important;
+          font-family: inherit;
+          font-weight: inherit;
         }
 
         .values-rail {
@@ -284,8 +343,9 @@ export default function ServiceSection7() {
         }
 
         .vrow-num {
+          font-family: var(--font-title-extra);
           font-size: clamp(72px, 6.2vw, 104px);
-          font-weight: 900;
+          font-weight: 900 !important;
           line-height: 0.9;
           color: transparent;
           -webkit-text-stroke: 1px rgba(139, 122, 232, 0.34);
@@ -300,13 +360,20 @@ export default function ServiceSection7() {
         }
 
         .vrow-title {
+          font-family: var(--font-subtitle-krafting);
           font-size: clamp(24px, 2vw, 34px);
-          font-weight: 700;
+          font-weight: 700 !important;
           line-height: 1.15;
-          color: #fff;
+          color: #fff !important;
           margin: 0;
           transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
           will-change: clip-path, transform;
+        }
+
+        .vrow-title .sw {
+          color: #fff !important;
+          font-family: inherit;
+          font-weight: inherit;
         }
 
         .vrow:hover .vrow-title {
@@ -314,9 +381,11 @@ export default function ServiceSection7() {
         }
 
         .vrow-body {
+          font-family: var(--font-body-regular);
           font-size: clamp(14px, 0.95vw, 16px);
+          font-weight: 400 !important;
           line-height: 1.75;
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(255, 255, 255, 0.7) !important;
           text-transform: none;
           max-width: 58ch;
           margin: 0;

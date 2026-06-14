@@ -185,37 +185,43 @@ export default function AboutSection7() {
         }
 
         .stage-kicker {
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 3px;
           text-transform: uppercase;
           margin-bottom: 20px;
         }
 
         .stage-title {
+          font-family: var(--font-title-extra);
           font-size: 32px;
-          font-weight: 800;
+          font-weight: 900;
           line-height: 1.3;
           margin-bottom: 16px;
           color: #fff;
         }
 
         .stage-body {
+          font-family: var(--font-body-regular);
           font-size: 16px;
+          font-weight: 400;
           line-height: 1.7;
           color: rgba(255, 255, 255, 0.85);
         }
 
         .stage-statement {
+          font-family: var(--font-body-regular);
           font-size: 23px;
-          font-weight: 600;
+          font-weight: 400;
           line-height: 1.6;
           color: rgba(255, 255, 255, 0.92);
         }
 
         .stage-finale {
+          font-family: var(--font-title-extra);
           font-size: 44px;
-          font-weight: 800;
+          font-weight: 900;
           line-height: 1.25;
           color: #fff;
         }

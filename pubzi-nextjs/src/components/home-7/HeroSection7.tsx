@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -22,6 +23,7 @@ export default function HeroSection7() {
   const heroRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const frostRef = useRef<HTMLVideoElement>(null);
+  const phoneImageRef = useRef<HTMLImageElement>(null);
 
   // Video visibility observer - extended to both videos, respects mobile + reduced motion
   useEffect(() => {
@@ -88,15 +90,49 @@ export default function HeroSection7() {
     if (!heroRef.current) return;
 
     let startTimer: number | undefined;
+    let settleFrameOne: number | undefined;
+    let settleFrameTwo: number | undefined;
     let hasStarted = false;
+    let isCancelled = false;
 
     const mm = gsap.matchMedia(heroRef);
+    gsap.set(['.iphone-float', '.hero-title-block'], { autoAlpha: 0 });
 
-    // Desktop choreography - master timeline created immediately
-    mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', () => {
+    const waitForPhoneImage = () =>
+      new Promise<void>((resolve) => {
+        const image = phoneImageRef.current;
+        if (!image) {
+          resolve();
+          return;
+        }
+
+        const finish = () => {
+          image.decode?.().catch(() => undefined).finally(resolve);
+        };
+
+        if (image.complete && image.naturalWidth > 0) {
+          finish();
+          return;
+        }
+
+        image.addEventListener('load', finish, { once: true });
+        image.addEventListener('error', () => resolve(), { once: true });
+      });
+
+    const waitForFonts = () => document.fonts?.ready.catch(() => undefined) ?? Promise.resolve();
+
+    const waitForSettledPaint = () =>
+      new Promise<void>((resolve) => {
+        settleFrameOne = window.requestAnimationFrame(() => {
+          settleFrameTwo = window.requestAnimationFrame(() => resolve());
+        });
+      });
+
+    // Desktop choreography - created only after preloader, media, fonts, and paint settle.
+    const addDesktopChoreography = () => mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', () => {
       const pinRange = heroRef.current!.closest('.hero-pin-range') ?? heroRef.current!.parentElement!;
       const tl = gsap.timeline({
-        defaults: { ease: 'none', force3D: true },
+        defaults: { ease: 'none', force3D: true, immediateRender: false },
         scrollTrigger: {
           trigger: pinRange,
           start: 'top top',
@@ -208,6 +244,8 @@ export default function HeroSection7() {
           }
         );
       }
+
+      tl.progress(0);
     });
 
     // Mobile + reduced motion fallback
@@ -225,15 +263,22 @@ export default function HeroSection7() {
     });
 
     // Preloader gating
-    const startHeroAnimations = () => {
+    const startHeroAnimations = async () => {
       if (hasStarted) return;
       hasStarted = true;
+
+      await Promise.all([waitForPhoneImage(), waitForFonts()]);
+      await waitForSettledPaint();
+      if (isCancelled) return;
 
       const isMobile = window.matchMedia('(max-width: 991px)').matches;
       const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isDesktopAnimated = !isMobile && !isReducedMotion;
 
       if (isDesktopAnimated) {
+        addDesktopChoreography();
+        ScrollTrigger.refresh();
+
         gsap.fromTo('.iphone-float',
           { autoAlpha: 0, y: 46, scale: 0.96 },
           {
@@ -269,7 +314,6 @@ export default function HeroSection7() {
         videoRef.current?.pause();
         frostRef.current?.pause();
       }
-      ScrollTrigger.refresh();
     };
 
     const handlePreloaderComplete = () => {
@@ -284,7 +328,10 @@ export default function HeroSection7() {
     }
 
     return () => {
+      isCancelled = true;
       if (startTimer) window.clearTimeout(startTimer);
+      if (settleFrameOne) window.cancelAnimationFrame(settleFrameOne);
+      if (settleFrameTwo) window.cancelAnimationFrame(settleFrameTwo);
       window.removeEventListener('black-hole:preloader-complete', handlePreloaderComplete);
       mm.revert();
     };
@@ -371,8 +418,17 @@ export default function HeroSection7() {
         {/* CENTERED PHONE */}
         <div className="hero-phone-wrap">
           <div className="iphone-stage">
-            <div className="iphone-float" style={{ opacity: 0 }}>
-              <img src="/assets/img/landing-page/iphone_2.png" alt="Trải nghiệm game trên iPhone" className="iphone-art" />
+            <div className="iphone-float" style={{ opacity: 0, visibility: 'hidden' }}>
+              <Image
+                ref={phoneImageRef}
+                src="/assets/img/landing-page/iphone_2.png"
+                alt="Trải nghiệm game trên iPhone"
+                className="iphone-art"
+                width={1920}
+                height={1080}
+                priority
+                sizes="(min-width: 992px) 62vw, 92vw"
+              />
              
             </div>
           </div>
@@ -380,7 +436,7 @@ export default function HeroSection7() {
 
         {/* CENTERED TITLE */}
         <div className="hero-title-wrap">
-          <div className="hero-title-block">
+          <div className="hero-title-block" style={{ opacity: 0, visibility: 'hidden' }}>
             <div className="hero-kicker-text" style={{
               fontSize: '13px',
               fontWeight: 600,
@@ -452,6 +508,7 @@ export default function HeroSection7() {
 
           .iphone-stage {
             width: min(92vw, 560px);
+            aspect-ratio: 16 / 9;
           }
 
           .hero-section.hero-7 {
@@ -528,7 +585,8 @@ export default function HeroSection7() {
           .iphone-art {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: contain;
             filter: contrast(1.22) saturate(0.92) hue-rotate(14deg);
           }
 
@@ -651,7 +709,7 @@ export default function HeroSection7() {
           .hero-main-title {
             font-size: clamp(42px, 7vw, 104px);
             font-weight: 900;
-            font-family: Orbitron, sans-serif;
+            font-family: var(--font-title-extra);
             line-height: 1.08;
             margin: 0;
             text-transform: uppercase;

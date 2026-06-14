@@ -1,17 +1,47 @@
 /**
  * Black Hole Typography System
- * Headlines: Chakra Petch (full Vietnamese diacritics — Orbitron has no
- * vietnamese subset and silently falls back per-glyph, breaking VN text).
- * Orbitron is reserved for ASCII-only brand moments ("BLACK HOLE GAME",
- * preloader) via --font-brand.
+ * Local SVN webfonts are used for Vietnamese-facing content:
+ * - Title extra: SVN Sohne Breit Extrafett
+ * - Subtitle krafting: SVN Sohne Breit Krafting
+ * - Body regular: SVN Martian Mono Regular
+ *
+ * The landing page uses the three localized brand fonts below. Keep fallbacks
+ * generic so Vietnamese glyphs do not silently fall back to older imports.
  */
+
+@font-face {
+  font-family: 'SVN Sohne Breit';
+  src: url('/assets/webfonts/SVN-SOHNEBREIT-EXTRAFETT.OTF') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SVN Sohne Breit Krafting';
+  src: url('/assets/webfonts/SVN-SOHNEBREIT-KRAFTING.OTF') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SVN Martian Mono';
+  src: url('/assets/webfonts/SVN-MARTIANMONO-REGULAR.OTF') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* Font Families */
-  --font-headline: 'Chakra Petch', 'Montserrat', sans-serif;
-  --font-brand: 'Orbitron', 'Chakra Petch', sans-serif;
-  --font-headline-alt: 'Montserrat', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-title-extra: 'SVN Sohne Breit', sans-serif;
+  --font-subtitle-krafting: 'SVN Sohne Breit Krafting', sans-serif;
+  --font-body-regular: 'SVN Martian Mono', monospace;
+  --font-headline: var(--font-title-extra);
+  --font-brand: var(--font-title-extra);
+  --font-headline-alt: var(--font-subtitle-krafting);
+  --font-body: var(--font-body-regular);
 
   /* Font Sizes - Responsive Scale */
   --text-xs: 0.75rem;     /* 12px */
@@ -42,7 +72,7 @@
   --leading-loose: 2;
 }
 
-/* Headline Typography - Chakra Petch */
+/* Headline Typography - SVN Sohne Breit Extrafett */
 h1, .h1 {
   font-family: var(--font-headline);
   font-size: var(--text-6xl);
@@ -66,7 +96,7 @@ h3, .h3 {
   line-height: var(--leading-snug);
 }
 
-/* Alternative Headlines - Montserrat */
+/* Alternative Headlines - SVN Sohne Breit Krafting */
 h4, .h4 {
   font-family: var(--font-headline-alt);
   font-size: var(--text-3xl);
@@ -90,7 +120,7 @@ h6, .h6 {
   letter-spacing: 0.05em;
 }
 
-/* Body Typography - Inter */
+/* Body Typography - SVN Martian Mono Regular */
 body, p, li, a, button, input, textarea, select {
   font-family: var(--font-body);
   font-size: var(--text-base);

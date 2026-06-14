@@ -23,9 +23,9 @@ export default function Home7Page() {
         <AboutSection7 />
         <ServiceSection7 />
         <GameCaseStudySection />
+        <CounterSection7 />
         <TestimonialSection7 />
         <TeamSection7 />
-        <CounterSection7 />
         <NewsSection7 />
       </div>
     </>

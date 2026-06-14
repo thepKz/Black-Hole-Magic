@@ -80,7 +80,7 @@ export default function Header7() {
                   </a>
                   <div className="header-button">
                     <Link href="/contact" className="header-electric-btn">
-                      Vào đấu trường
+                      Liên hệ
                     </Link>
                   </div>
                   <div className="header__hamburger d-xl-block my-auto">
@@ -150,7 +150,7 @@ export default function Header7() {
         }
 
         #header-sticky.bh-header .header-wordmark {
-          font-family: var(--font-brand);
+          font-family: var(--font-title-extra);
           font-size: 24px;
           font-weight: 700;
           line-height: 1;
@@ -211,7 +211,7 @@ export default function Header7() {
           border: 1px solid rgba(155, 124, 255, 0.45);
           background: rgba(14, 10, 32, 0.7);
           color: #ffffff !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px;
           font-weight: 700;
           letter-spacing: 0.08em;
@@ -472,7 +472,7 @@ export default function Header7() {
           align-items: center;
           padding: 0 !important;
           color: rgba(243, 241, 255, 0.84) !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: clamp(13px, 0.78vw, 15px) !important;
           font-weight: 800;
           line-height: 1 !important;
@@ -533,7 +533,7 @@ export default function Header7() {
             linear-gradient(180deg, rgba(39, 22, 90, 0.72), rgba(9, 7, 22, 0.84)) !important;
           clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
           color: #ffffff !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px !important;
           font-weight: 800;
           letter-spacing: 0.06em !important;

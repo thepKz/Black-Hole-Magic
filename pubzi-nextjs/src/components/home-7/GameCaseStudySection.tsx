@@ -161,12 +161,12 @@ export default function GameCaseStudySection() {
           <h6 className="games-kicker">DANH MỤC PHÁT HÀNH</h6>
           <div className="games-head-row">
             <h2 className="games-title">
-              <Words text="Những tựa game" />
+              <Words text="Danh sách game" />
               <br />
-              <Words text="chúng tôi đồng hành" />
+              <Words text="BLACKHOLE" />
             </h2>
             <p className="games-lede">
-              Các IP đã và đang được Blackhole Game đồng phát hành, vận hành và tăng trưởng tại thị trường Việt Nam.
+              Danh sách những tựa game phát hành và đồng phát hành cùng đối tác trong năm 2024 -&gt; 2025.
             </p>
           </div>
         </div>
@@ -218,23 +218,54 @@ export default function GameCaseStudySection() {
         .games-section {
           position: relative;
           z-index: 9;
-          background: #080614;
-          padding: 140px 0 150px;
+          overflow: hidden;
+          background:
+            radial-gradient(ellipse at 50% 0%, rgba(139, 122, 232, 0.1), rgba(8, 6, 20, 0) 34%),
+            radial-gradient(ellipse at 88% 20%, rgba(82, 74, 160, 0.1), rgba(8, 6, 20, 0) 34%),
+            linear-gradient(180deg, #070512 0%, #06050d 48%, #080614 100%);
+          padding: 118px 0 150px;
+        }
+
+        .games-section::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 22%),
+            linear-gradient(90deg, rgba(139, 122, 232, 0.035), transparent 36%, rgba(139, 122, 232, 0.025));
+          opacity: 0.8;
+          pointer-events: none;
+        }
+
+        .games-section::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          z-index: 0;
+          height: 120px;
+          background: linear-gradient(180deg, #070512 0%, rgba(7, 5, 18, 0) 100%);
+          pointer-events: none;
         }
 
         .games-container {
+          position: relative;
+          z-index: 1;
           max-width: 1700px;
           margin: 0 auto;
           padding: 0 48px;
         }
 
         .games-head {
-          margin-bottom: 64px;
+          margin-bottom: 54px;
         }
 
         .games-kicker {
+          font-family: var(--font-subtitle-krafting);
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 4px;
           text-transform: uppercase;
           color: #8b7ae8;
@@ -249,23 +280,34 @@ export default function GameCaseStudySection() {
         }
 
         .games-title {
-          font-size: clamp(38px, 4vw, 58px);
-          font-weight: 800;
-          line-height: 1.08;
-          color: #fff;
+          font-family: var(--font-title-extra);
+          font-size: clamp(42px, 4.55vw, 72px);
+          font-weight: 900 !important;
+          line-height: 0.98;
+          color: #fff !important;
           margin: 0;
+          letter-spacing: 0;
+          text-transform: none;
           text-shadow:
-            0 0 22px rgba(255, 255, 255, 0.28),
-            0 0 56px rgba(139, 122, 232, 0.5);
+            0 0 16px rgba(255, 255, 255, 0.2),
+            0 0 38px rgba(139, 122, 232, 0.32);
           will-change: clip-path, transform;
         }
 
+        .games-title .sw {
+          color: #fff !important;
+          font-family: inherit;
+          font-weight: inherit;
+        }
+
         .games-lede {
-          font-size: 17px;
+          font-family: var(--font-body-regular);
+          font-size: clamp(14px, 0.95vw, 17px);
+          font-weight: 400 !important;
           line-height: 1.7;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(255, 255, 255, 0.72) !important;
           text-transform: none;
-          max-width: 44ch;
+          max-width: 58ch;
           margin: 0 0 8px auto;
           text-align: right;
         }
@@ -289,6 +331,7 @@ export default function GameCaseStudySection() {
         }
 
         .games-marquee-item {
+          font-family: var(--font-subtitle-krafting);
           display: inline-flex;
           align-items: center;
           gap: 26px;
@@ -313,6 +356,10 @@ export default function GameCaseStudySection() {
           gap: 12px;
           height: min(62vh, 600px);
           min-height: 460px;
+          padding: 1px;
+          border-top: 1px solid rgba(139, 122, 232, 0.12);
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%);
         }
 
         /* one featured panel by default so the strip never looks flat */
@@ -332,6 +379,7 @@ export default function GameCaseStudySection() {
         }
 
         .game-panel-ghost {
+          font-family: var(--font-title-extra);
           position: absolute;
           left: 50%;
           top: 44%;
@@ -409,6 +457,7 @@ export default function GameCaseStudySection() {
         }
 
         .game-panel-num {
+          font-family: var(--font-title-extra);
           position: absolute;
           top: 22px;
           right: 24px;
@@ -433,8 +482,9 @@ export default function GameCaseStudySection() {
         }
 
         .game-panel-title {
+          font-family: var(--font-title-extra);
           font-size: 22px;
-          font-weight: 700;
+          font-weight: 900;
           line-height: 1.25;
           color: #fff;
           margin: 0 0 8px;
@@ -442,7 +492,9 @@ export default function GameCaseStudySection() {
         }
 
         .game-panel-meta {
+          font-family: var(--font-body-regular);
           font-size: 13px;
+          font-weight: 400;
           letter-spacing: 1.5px;
           text-transform: uppercase;
           color: rgba(196, 184, 255, 0.85);
@@ -514,7 +566,7 @@ export default function GameCaseStudySection() {
 
         @media (max-width: 600px) {
           .games-section {
-            padding: 90px 0 100px;
+            padding: 88px 0 100px;
           }
 
           .games-container {

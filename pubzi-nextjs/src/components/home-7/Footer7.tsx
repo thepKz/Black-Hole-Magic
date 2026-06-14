@@ -580,7 +580,7 @@ export default function Footer7() {
         <div className="bhf-grid">
           <div className="bhf-col bhf-brand" data-bhf-pull>
             <Link href="/" className="bhf-lens">
-              <Image src="/assets/img/logo/white-logo-3.svg" alt="Black Hole Logo" width={150} height={50} />
+              <Image src="/assets/img/logo/white-logo-2.png" alt="Black Hole Logo" width={150} height={150} />
             </Link>
             <p className="bhf-desc">
               {Words('Black Hole kết nối giải đấu, cộng đồng, phát hành game và giải pháp công nghệ thành một hệ sinh thái esports sẵn sàng bứt tốc tại Việt Nam.')}
@@ -741,7 +741,7 @@ export default function Footer7() {
         .bhf-h {
           color: #8b7ae8 !important;
           text-shadow: none !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 15px;
           font-weight: 700;
           letter-spacing: 0.16em;
@@ -750,6 +750,7 @@ export default function Footer7() {
         }
         .bhf-desc, .bhf-copy {
           color: #D8D8E0;
+          font-family: var(--font-body-regular);
           text-transform: none;
           font-size: 15px;
           line-height: 1.7;
@@ -772,7 +773,7 @@ export default function Footer7() {
         .bhf-cta-kicker {
           display: block;
           color: #9b7cff;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.18em;
@@ -782,13 +783,14 @@ export default function Footer7() {
         .bhf-command strong {
           display: block;
           color: #ffffff;
-          font-family: 'Orbitron', sans-serif;
+          font-family: var(--font-title-extra);
           font-size: 36px;
           line-height: 1;
           text-shadow: 0 0 18px rgba(155,124,255,0.5);
         }
         .bhf-command p {
           color: rgba(216,216,224,0.78);
+          font-family: var(--font-body-regular);
           font-size: 14px;
           line-height: 1.55;
           margin: 10px 0 0;
@@ -804,6 +806,7 @@ export default function Footer7() {
         }
         .bhf-link {
           color: rgba(216,216,224,0.78) !important;
+          font-family: var(--font-body-regular);
           text-transform: none;
           font-size: 14px;
           text-decoration: none;
@@ -839,7 +842,7 @@ export default function Footer7() {
         }
         .bhf-cta h3 {
           color: #ffffff !important;
-          font-family: 'Orbitron', sans-serif;
+          font-family: var(--font-title-extra);
           font-size: clamp(24px, 3vw, 42px);
           line-height: 1.12;
           letter-spacing: 0;
@@ -855,7 +858,7 @@ export default function Footer7() {
           min-height: 54px;
           padding: 0 24px;
           color: #ffffff !important;
-          font-family: 'Chakra Petch', sans-serif;
+          font-family: var(--font-subtitle-krafting);
           font-size: 14px;
           font-weight: 800;
           letter-spacing: 0.12em;
