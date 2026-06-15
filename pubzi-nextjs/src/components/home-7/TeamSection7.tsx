@@ -264,7 +264,7 @@ export default function TeamSection7() {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          /* Keep the original key-art punchy — full color, a touch more contrast. */
+          /* Keep the original key-art punchy, full color, a touch more contrast. */
           filter: contrast(1.12) saturate(1.05);
           transform: scale(1.04);
           transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
