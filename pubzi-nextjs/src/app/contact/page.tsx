@@ -8,16 +8,16 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const CHANNELS = [
-  { icon: 'fa-phone', label: 'Gọi cho chúng tôi', value: '+84 24 7100 0000', href: 'tel:+842471000000' },
-  { icon: 'fa-envelope', label: 'Email hợp tác', value: 'hello@blackhole.gg', href: 'mailto:hello@blackhole.gg' },
-  { icon: 'fa-location-dot', label: 'Trụ sở', value: 'Hà Nội, Việt Nam', href: '#' },
-  { icon: 'fa-clock', label: 'Giờ làm việc', value: 'Thứ 2 – Thứ 7 · 9:00–18:00', href: '#' },
+  { icon: 'fa-phone', label: 'Số điện thoại', value: '0779467868', href: 'tel:+84779467868' },
+  { icon: 'fa-envelope', label: 'Email hợp tác', value: 'contact@blackholegame.com', href: 'mailto:contact@blackholegame.com' },
+  { icon: 'fa-location-dot', label: 'Địa chỉ', value: '777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên', href: 'https://www.google.com/maps/search/?api=1&query=S%E1%BB%91%20777%20Nguy%E1%BB%85n%20Thi%E1%BB%87n%20Thu%E1%BA%ADt%2C%20M%E1%BB%B9%20H%C3%A0o%2C%20H%C6%B0ng%20Y%C3%AAn' },
+  { icon: 'fa-clock', label: 'Thời gian phản hồi', value: 'Trong 24 giờ làm việc', href: '#' },
 ];
 
 const REASONS = [
-  { k: '01', t: 'Phát hành game', d: 'Bạn là nhà phát triển muốn đưa game ra thị trường Việt Nam & Đông Nam Á.' },
-  { k: '02', t: 'Tài trợ & quảng bá', d: 'Hợp tác thương hiệu, tài trợ đội tuyển và các chiến dịch truyền thông.' },
-  { k: '03', t: 'Tuyển dụng & thử việc', d: 'Gia nhập đội tuyển, ban huấn luyện hoặc đội ngũ vận hành của Black Hole.' },
+  { k: '01', t: 'Phát hành mobile game', d: 'Bạn là studio hoặc đối tác muốn đưa sản phẩm vào thị trường Việt Nam.' },
+  { k: '02', t: 'Đồng phát hành', d: 'Blackhole Game phối hợp vận hành, local marketing, cộng đồng và tăng trưởng doanh thu.' },
+  { k: '03', t: 'Việt hóa, pháp lý, thanh toán', d: 'Hỗ trợ trọn bộ Việt hóa, pháp lý chuyên sâu và cổng thanh toán Blackhole Pay.' },
 ];
 
 export default function ContactPage() {
@@ -112,8 +112,8 @@ export default function ContactPage() {
           </h1>
 
           <p className="ct-hero-sub">
-            Dù bạn muốn phát hành game, tài trợ đội tuyển, hay gia nhập Black Hole —
-            đội ngũ của chúng tôi luôn sẵn sàng. Phản hồi trong vòng 24 giờ làm việc.
+            Blackhole Game là nhà phát hành và đồng phát hành mobile game tại Việt Nam,
+            vận hành bằng hệ sinh thái Việt hóa, pháp lý chuyên sâu và Blackhole Pay.
           </p>
 
           <div className="ct-hero-channels">
@@ -145,7 +145,7 @@ export default function ContactPage() {
             )}
             {submitStatus === 'error' && (
               <div className="ct-alert ct-alert-err">
-                Có lỗi xảy ra. Vui lòng thử lại hoặc gửi email trực tiếp đến hello@blackhole.gg.
+                Có lỗi xảy ra. Vui lòng thử lại hoặc gửi email trực tiếp đến contact@blackholegame.com.
               </div>
             )}
 
@@ -162,7 +162,7 @@ export default function ContactPage() {
               </div>
               <div className="ct-field ct-field-full">
                 <label htmlFor="subject">Chủ đề</label>
-                <input id="subject" name="subject" type="text" placeholder="Đề xuất phát hành game / Tài trợ / Tuyển dụng…"
+                <input id="subject" name="subject" type="text" placeholder="Đề xuất phát hành game / Đồng phát hành / Thanh toán"
                   value={formData.subject} onChange={handleChange} />
               </div>
               <div className="ct-field ct-field-full">
@@ -197,9 +197,16 @@ export default function ContactPage() {
                 </div>
               ))}
             </div>
+            <div className="ct-company-card">
+              <span className="ct-company-label">Thông tin pháp nhân</span>
+              <strong>CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ BLACK HOLE</strong>
+              <p>Địa chỉ: Số 777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên</p>
+              <p>Giấy CNĐKKD: 0901214374 - cấp ngày 20/10/2025</p>
+              <p>Giấy phép cung cấp dịch vụ trò chơi điện tử G1 trên mạng số: 105/GP-PTTH&amp;TTĐT cấp ngày 02/06/2026 do Cục PTTH &amp; TTĐT - Bộ VHTTDL cấp</p>
+            </div>
             <div className="ct-reasons-cta">
               <p>Cần phản hồi gấp?</p>
-              <a href="mailto:hello@blackhole.gg" className="ct-btn ct-btn-ghost">Email trực tiếp</a>
+              <a href="mailto:contact@blackholegame.com" className="ct-btn ct-btn-ghost">Email trực tiếp</a>
             </div>
           </aside>
         </div>
@@ -210,7 +217,7 @@ export default function ContactPage() {
         <div className="ct-map-frame">
           <iframe
             title="Bản đồ Black Hole"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.0!2d105.8342!3d21.0278!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zSMOgIE7hu5lp!5e0!3m2!1svi!2s!4v1700000000000"
+            src="https://www.google.com/maps?q=S%E1%BB%91%20777%20Nguy%E1%BB%85n%20Thi%E1%BB%87n%20Thu%E1%BA%ADt%2C%20M%E1%BB%B9%20H%C3%A0o%2C%20H%C6%B0ng%20Y%C3%AAn&output=embed"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
@@ -220,7 +227,7 @@ export default function ContactPage() {
 
       <style jsx global>{`
         /* ╔══════════════════════════════════════════════════════════════════╗
-           ║  CONTACT — Dark Luxe, Black Hole                                  ║
+           ║  CONTACT - Dark Luxe, Black Hole                                  ║
            ╚══════════════════════════════════════════════════════════════════╝ */
         .ct-root {
           --ct-bg: #08060f;
@@ -389,6 +396,44 @@ export default function ContactPage() {
           font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 7px; letter-spacing: -0.01em;
         }
         .ct-reason-d { font-size: 14px; line-height: 1.7; color: var(--ct-text-soft); margin: 0; }
+        .ct-company-card {
+          margin-top: 28px;
+          padding: 24px;
+          border: 1px solid rgba(139, 122, 232, 0.2);
+          border-radius: 14px;
+          background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.014)),
+            rgba(12, 9, 26, 0.62);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .ct-company-label {
+          display: block;
+          color: var(--ct-purple-light);
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          margin-bottom: 12px;
+        }
+        .ct-company-card strong {
+          display: block;
+          color: #ffffff;
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: clamp(17px, 1.5vw, 21px);
+          line-height: 1.22;
+          letter-spacing: 0;
+          margin-bottom: 14px;
+        }
+        .ct-company-card p {
+          color: var(--ct-text-soft);
+          font-size: 14px;
+          line-height: 1.65;
+          margin: 0;
+        }
+        .ct-company-card p + p {
+          margin-top: 10px;
+        }
         .ct-reasons-cta {
           margin-top: 28px; padding: 22px; border-radius: 12px;
           background: rgba(139, 122, 232, 0.06); border: 1px solid var(--ct-hair);

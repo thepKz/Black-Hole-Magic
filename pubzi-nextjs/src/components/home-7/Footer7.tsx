@@ -583,51 +583,57 @@ export default function Footer7() {
               <Image src="/assets/img/logo/white-logo-2.png" alt="Black Hole Logo" width={150} height={150} />
             </Link>
             <p className="bhf-desc">
-              {Words('Black Hole kết nối giải đấu, cộng đồng, phát hành game và giải pháp công nghệ thành một hệ sinh thái esports sẵn sàng bứt tốc tại Việt Nam.')}
+              {Words('Blackhole Game là nhà phát hành và đồng phát hành mobile game tại Việt Nam, vận hành bằng hệ sinh thái Việt hóa, pháp lý chuyên sâu và Blackhole Pay.')}
             </p>
             <div className="bhf-command">
-              <span className="bhf-command-kicker">Trạm chỉ huy</span>
-              <strong>24/7</strong>
-              <p>Hỗ trợ đội tuyển, nhà phát hành và đối tác vận hành chiến dịch từ brief đến ngày lên sóng.</p>
+              <span className="bhf-command-kicker">Liên hệ</span>
+              <strong>0779467868</strong>
+              <a href="mailto:contact@blackholegame.com">contact@blackholegame.com</a>
+              <p>Số 777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên</p>
             </div>
           </div>
           <nav className="bhf-col" data-bhf-pull aria-label="Hệ sinh thái">
             <h5 className="bhf-h">Hệ sinh thái</h5>
             <ul className="bhf-links">
-              <li><Link href="/game-publishing" className="bhf-link">Phát hành game</Link></li>
-              <li><Link href="/match" className="bhf-link">Giải đấu esports</Link></li>
-              <li><Link href="/platform" className="bhf-link">Nền tảng cộng đồng</Link></li>
-              <li><Link href="/b2b-tech" className="bhf-link">Giải pháp B2B</Link></li>
+              <li><Link href="/game" className="bhf-link">Phát hành mobile game</Link></li>
+              <li><Link href="/service" className="bhf-link">Đồng phát hành</Link></li>
+              <li><Link href="/service" className="bhf-link">Việt hóa game</Link></li>
+              <li><Link href="/service" className="bhf-link">Blackhole Pay</Link></li>
             </ul>
           </nav>
           <nav className="bhf-col" data-bhf-pull aria-label="Công ty">
             <h5 className="bhf-h">Black Hole</h5>
             <ul className="bhf-links">
               <li><Link href="/about" className="bhf-link">Về chúng tôi</Link></li>
-              <li><Link href="/team" className="bhf-link">Đội tuyển</Link></li>
-              <li><Link href="/gallery" className="bhf-link">Khoảnh khắc</Link></li>
+              <li><Link href="/service" className="bhf-link">Pháp lý chuyên sâu</Link></li>
+              <li><Link href="/news" className="bhf-link">Tin tức phát hành</Link></li>
               <li><Link href="/contact" className="bhf-link">Liên hệ hợp tác</Link></li>
             </ul>
           </nav>
           <nav className="bhf-col" data-bhf-pull aria-label="Tài nguyên">
             <h5 className="bhf-h">Tài nguyên</h5>
             <ul className="bhf-links">
-              <li><Link href="/news" className="bhf-link">Bản tin esports</Link></li>
+              <li><Link href="/game" className="bhf-link">Danh mục game</Link></li>
               <li><Link href="/faq" className="bhf-link">Câu hỏi thường gặp</Link></li>
-              <li><Link href="/support" className="bhf-link">Trung tâm hỗ trợ</Link></li>
-              <li><Link href="/legal" className="bhf-link">Pháp lý & bảo mật</Link></li>
+              <li><Link href="/contact" className="bhf-link">Trung tâm hỗ trợ</Link></li>
+              <li><Link href="/contact" className="bhf-link">Pháp lý &amp; bảo mật</Link></li>
             </ul>
           </nav>
         </div>
-        <div className="bhf-cta" data-bhf-pull>
-          <div>
-            <span className="bhf-cta-kicker">Sẵn sàng mở cổng?</span>
-            <h3>Đưa giải đấu, cộng đồng hoặc tựa game của bạn lên sân khấu lớn.</h3>
+        <div className="bhf-legal" data-bhf-pull>
+          <div className="bhf-legal-main">
+            <span className="bhf-legal-kicker">Thông tin pháp nhân</span>
+            <h3>CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ BLACK HOLE</h3>
+            <p>Địa chỉ: Số 777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên</p>
+            <p>Giấy CNĐKKD: 0901214374 - cấp ngày 20/10/2025</p>
           </div>
-          <Link href="/contact" className="bhf-cta-btn">Gửi brief hợp tác</Link>
+          <div className="bhf-legal-license">
+            <span>Giấy phép G1</span>
+            <p>Giấy phép cung cấp dịch vụ trò chơi điện tử G1 trên mạng số: 105/GP-PTTH&amp;TTĐT cấp ngày 02/06/2026 do Cục PTTH &amp; TTĐT - Bộ VHTTDL cấp</p>
+          </div>
         </div>
         <div className="bhf-bottom" data-bhf-pull>
-          <p className="bhf-copy">© 2026 Black Hole. Bản quyền thuộc về Black Hole.</p>
+          <p className="bhf-copy">© 2026 Blackhole Game. Bản quyền thuộc về CÔNG TY CỔ PHẦN GIẢI PHÁP CÔNG NGHỆ BLACK HOLE.</p>
           <div className="bhf-social">
             <a href="#" className="bhf-soc" aria-label="Facebook"><i className="fa-brands fa-facebook-f"></i></a>
             <a href="#" className="bhf-soc" aria-label="X"><i className="fa-brands fa-twitter"></i></a>
@@ -717,7 +723,7 @@ export default function Footer7() {
         }
         .bhf-grid {
           display: grid;
-          grid-template-columns: 1.5fr 1fr 1fr 1fr;
+          grid-template-columns: minmax(320px, 1.55fr) repeat(3, minmax(160px, 1fr));
           gap: 48px;
         }
         @media (max-width: 991px) {
@@ -784,9 +790,23 @@ export default function Footer7() {
           display: block;
           color: #ffffff;
           font-family: var(--font-title-extra);
-          font-size: 36px;
+          font-size: clamp(25px, 2.6vw, 34px);
           line-height: 1;
           text-shadow: 0 0 18px rgba(155,124,255,0.5);
+        }
+        .bhf-command a {
+          display: inline-block;
+          color: #d8d8e0 !important;
+          font-family: var(--font-body-regular);
+          font-size: 14px;
+          line-height: 1.45;
+          text-decoration: none;
+          margin-top: 12px;
+          overflow-wrap: anywhere;
+        }
+        .bhf-command a:hover,
+        .bhf-command a:focus-visible {
+          color: #b09cff !important;
         }
         .bhf-command p {
           color: rgba(216,216,224,0.78);
@@ -825,6 +845,53 @@ export default function Footer7() {
         .bhf-link:focus-visible {
           outline: 2px solid #8b7ae8;
           outline-offset: 3px;
+        }
+        .bhf-legal {
+          display: grid;
+          grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+          gap: clamp(22px, 4vw, 56px);
+          margin-top: 58px;
+          padding: 30px;
+          border: 1px solid rgba(139,122,232,0.24);
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)),
+            rgba(10, 7, 24, 0.76);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px rgba(0,0,0,0.22);
+        }
+        .bhf-legal-kicker,
+        .bhf-legal-license span {
+          display: block;
+          color: #9b7cff;
+          font-family: var(--font-subtitle-krafting);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          margin-bottom: 10px;
+        }
+        .bhf-legal h3 {
+          color: #ffffff !important;
+          font-family: var(--font-title-extra);
+          font-size: clamp(20px, 2vw, 28px);
+          line-height: 1.18;
+          letter-spacing: 0;
+          text-transform: none;
+          margin: 0 0 16px;
+        }
+        .bhf-legal p {
+          color: rgba(216,216,224,0.78);
+          font-family: var(--font-body-regular);
+          font-size: 14px;
+          line-height: 1.65;
+          text-transform: none;
+          margin: 0;
+        }
+        .bhf-legal p + p {
+          margin-top: 9px;
+        }
+        .bhf-legal-license {
+          padding-left: clamp(0px, 3vw, 34px);
+          border-left: 1px solid rgba(139,122,232,0.18);
         }
         .bhf-cta {
           display: flex;
@@ -930,6 +997,16 @@ export default function Footer7() {
           pointer-events: none;
         }
         @media (max-width: 767px) {
+          .bhf-legal {
+            grid-template-columns: 1fr;
+            padding: 24px 22px;
+          }
+          .bhf-legal-license {
+            padding-left: 0;
+            padding-top: 20px;
+            border-left: 0;
+            border-top: 1px solid rgba(139,122,232,0.18);
+          }
           .bhf-cta {
             align-items: flex-start;
             flex-direction: column;

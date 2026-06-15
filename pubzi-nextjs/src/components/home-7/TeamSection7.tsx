@@ -20,32 +20,31 @@ function Words({ text }: { text: string }) {
   );
 }
 
-// NOTE: placeholder names + template images — swap with the real
-// streamer/creator roster (images in public/assets/img/home-4/team/).
 const PARTNERS = [
   {
-    name: 'Linh Katy',
-    role: 'Creator · Võ Lâm Truyền Kỳ',
-    tag: '1.2M followers',
-    image: '/assets/img/home-4/team/team-01.png',
+    name: 'Faker',
+    role: 'Mid Laner · T1',
+    image: '/assets/img/landing-page/kol/faker-t1.png',
   },
   {
-    name: 'Phong JX',
-    role: 'Caster · Giải đấu JX2',
-    tag: '860K followers',
-    image: '/assets/img/home-4/team/team-02.png',
+    name: 'Keria',
+    role: 'Support · T1',
+    image: '/assets/img/landing-page/kol/keria-t1.png',
   },
   {
-    name: 'Đại Ca Mobile',
-    role: 'Streamer · Kiếm Thế Mobile',
-    tag: '640K followers',
-    image: '/assets/img/home-4/team/team-03.png',
+    name: 'T1 Esports',
+    role: 'Đội tuyển · LCK',
+    image: '/assets/img/landing-page/kol/t1-esports.png',
   },
   {
-    name: 'Tơ Lụa TV',
-    role: 'Cộng đồng · Con Đường Tơ Lụa',
-    tag: '420K followers',
-    image: '/assets/img/home-4/team/team-04.png',
+    name: 'GEN Esports',
+    role: 'Đội tuyển · LCK',
+    image: '/assets/img/landing-page/kol/gen-esports.png',
+  },
+  {
+    name: 'SPG',
+    role: 'Đội tuyển · Đối tác',
+    image: '/assets/img/landing-page/kol/spg.png',
   },
 ];
 
@@ -126,7 +125,6 @@ export default function TeamSection7() {
               <div className="ptn-photo">
                 <img src={p.image} alt={p.name} loading="lazy" />
               </div>
-              <span className="ptn-tag">{p.tag}</span>
               <div className="ptn-info">
                 <h3>{p.name}</h3>
                 <p>{p.role}</p>
@@ -140,26 +138,39 @@ export default function TeamSection7() {
       <style jsx global>{`
         .ptn-section {
           position: relative;
-          z-index: 9;
+          z-index: 8;
           overflow: hidden;
-          margin-top: -1px;
+          margin-top: clamp(-84px, -5vw, -48px);
           background:
-            linear-gradient(180deg, #080614 0%, #090716 46%, #080614 100%),
+            radial-gradient(ellipse at 82% -10%, rgba(0, 206, 201, 0.046), transparent 34%),
+            radial-gradient(ellipse at 18% 44%, rgba(139, 122, 232, 0.085), transparent 34%),
+            linear-gradient(180deg, #080614 0%, #080614 26%, #090716 58%, #080614 100%),
             #080614 !important;
-          padding: clamp(42px, 4.2vw, 64px) 0 150px;
+          padding: clamp(136px, 11vw, 184px) 0 150px;
         }
 
         .ptn-section::before {
           content: '';
           position: absolute;
-          inset: -18% -8%;
+          inset: 14% -8% -18%;
           pointer-events: none;
           background:
-            radial-gradient(ellipse at 18% 28%, rgba(139, 122, 232, 0.1), transparent 34%),
-            radial-gradient(ellipse at 84% 56%, rgba(0, 206, 201, 0.055), transparent 30%),
+            radial-gradient(ellipse at 18% 24%, rgba(139, 122, 232, 0.075), transparent 34%),
+            radial-gradient(ellipse at 84% 46%, rgba(0, 206, 201, 0.045), transparent 30%),
             linear-gradient(90deg, rgba(216, 216, 224, 0.028) 1px, transparent 1px);
           background-size: auto, auto, 132px 100%;
-          mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 24%, #000 84%, transparent);
+        }
+
+        .ptn-section::after {
+          content: '';
+          position: absolute;
+          left: clamp(20px, 4vw, 68px);
+          right: clamp(20px, 4vw, 68px);
+          top: clamp(58px, 5vw, 86px);
+          height: 1px;
+          pointer-events: none;
+          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.5), rgba(216, 216, 224, 0.18), rgba(0, 206, 201, 0.22), transparent);
         }
 
         .ptn-container {
@@ -220,8 +231,8 @@ export default function TeamSection7() {
 
         .ptn-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 22px;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 18px;
         }
 
         .ptn-card {
@@ -253,32 +264,16 @@ export default function TeamSection7() {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          filter: saturate(0.55) brightness(0.82);
+          /* Keep the original key-art punchy — full color, a touch more contrast. */
+          filter: contrast(1.12) saturate(1.05);
           transform: scale(1.04);
           transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .ptn-card:hover .ptn-photo img,
         .ptn-card:focus-visible .ptn-photo img {
-          filter: saturate(1) brightness(1);
+          filter: contrast(1.16) saturate(1.12);
           transform: scale(1);
-        }
-
-        .ptn-tag {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          padding: 5px 12px;
-          border-radius: 999px;
-          font-family: var(--font-subtitle-krafting);
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: #d9d0ff;
-          background: rgba(10, 6, 28, 0.72);
-          border: 1px solid rgba(139, 122, 232, 0.35);
-          backdrop-filter: blur(4px);
         }
 
         .ptn-info {
@@ -346,13 +341,20 @@ export default function TeamSection7() {
           }
 
           .ptn-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 760px) {
+          .ptn-grid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
         @media (max-width: 600px) {
           .ptn-section {
-            padding: 54px 0 100px;
+            margin-top: -58px;
+            padding: 116px 0 100px;
           }
 
           .ptn-container {

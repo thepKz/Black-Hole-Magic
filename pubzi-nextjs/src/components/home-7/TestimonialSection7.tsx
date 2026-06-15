@@ -223,12 +223,7 @@ export default function TestimonialSection7() {
             <p className="tst-scroll-text">
               <ScrollWords>Trích dẫn được ẩn danh theo thỏa thuận NDA, gom từ publisher, studio, community và buyer khu vực.</ScrollWords>
             </p>
-            <div className="tst-proof-meta">
-              <strong>09</strong>
-              <span>cuộc phỏng vấn</span>
-              <strong>03</strong>
-              <span>nhóm buyer</span>
-            </div>
+
           </aside>
         </div>
 
@@ -236,6 +231,13 @@ export default function TestimonialSection7() {
           <Column cards={col1} duration={(col1.length * (CARD_HEIGHT + GAP)) / 34} />
           <Column cards={col2} duration={(col2.length * (CARD_HEIGHT + GAP)) / 28} delay={0.75} reverse />
           <Column cards={col3} duration={(col3.length * (CARD_HEIGHT + GAP)) / 31} delay={0.35} />
+        </div>
+
+        <div className="tst-partner-bridge" aria-hidden="true">
+          <span className="tst-bridge-line" />
+          <span className="tst-bridge-node" />
+          <span className="tst-bridge-copy">Từ phản hồi đối tác đến mạng lưới sáng tạo</span>
+          <span className="tst-bridge-node" />
         </div>
       </div>
 
@@ -252,7 +254,7 @@ export default function TestimonialSection7() {
           background:
             linear-gradient(180deg, #080614 0%, #07050f 54%, #080614 100%),
             #080614 !important;
-          padding: clamp(92px, 7vw, 118px) 0 clamp(28px, 3vw, 42px);
+          padding: clamp(46px, 4vw, 66px) 0 clamp(58px, 6vw, 92px);
         }
 
         .tst-section::before {
@@ -280,7 +282,7 @@ export default function TestimonialSection7() {
         }
 
         .tst-seam--top {
-          top: 34px;
+          top: 0;
         }
 
         .tst-seam--bottom {
@@ -297,7 +299,7 @@ export default function TestimonialSection7() {
         .tst-scroll-rail {
           position: absolute;
           left: clamp(22px, 3.2vw, 48px);
-          top: clamp(80px, 8vw, 132px);
+          top: clamp(46px, 5vw, 76px);
           bottom: clamp(80px, 8vw, 132px);
           z-index: 2;
           width: 1px;
@@ -402,9 +404,61 @@ export default function TestimonialSection7() {
           gap: clamp(18px, 2vw, 28px);
           max-height: clamp(560px, 62vw, 680px);
           overflow: hidden;
-          mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 86%, transparent);
-          -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 86%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 82%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 82%, transparent 100%);
           will-change: transform;
+        }
+
+        .tst-partner-bridge {
+          position: relative;
+          display: grid;
+          grid-template-columns: 1fr auto auto auto 1fr;
+          align-items: center;
+          gap: 14px;
+          min-height: clamp(82px, 7vw, 116px);
+          margin-top: clamp(20px, 3vw, 42px);
+          color: rgba(216, 216, 224, 0.58);
+          font-family: var(--font-subtitle-krafting);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+
+        .tst-partner-bridge::before {
+          content: '';
+          position: absolute;
+          left: clamp(24px, 7vw, 110px);
+          right: clamp(24px, 7vw, 110px);
+          top: 50%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 122, 232, 0.5), rgba(216, 216, 224, 0.22), rgba(0, 206, 201, 0.24), transparent);
+        }
+
+        .tst-bridge-line {
+          height: 1px;
+        }
+
+        .tst-bridge-node {
+          position: relative;
+          z-index: 1;
+          width: 9px;
+          height: 9px;
+          border: 1px solid rgba(216, 216, 224, 0.52);
+          border-radius: 50%;
+          background: #080614;
+          box-shadow: 0 0 22px rgba(139, 122, 232, 0.32);
+        }
+
+        .tst-bridge-copy {
+          position: relative;
+          z-index: 1;
+          padding: 10px 18px;
+          border: 1px solid rgba(216, 216, 224, 0.1);
+          border-radius: 999px;
+          background: rgba(8, 6, 20, 0.88);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          white-space: nowrap;
         }
 
         .tst-column {
@@ -525,7 +579,7 @@ export default function TestimonialSection7() {
 
         @media (max-width: 760px) {
           .tst-section {
-            padding: 78px 0 32px;
+            padding: 44px 0 64px;
           }
 
           .tst-scroll-rail {
@@ -554,6 +608,25 @@ export default function TestimonialSection7() {
             scroll-snap-type: x mandatory;
             mask-image: none;
             -webkit-mask-image: none;
+          }
+
+          .tst-partner-bridge {
+            display: flex;
+            justify-content: center;
+            min-height: 88px;
+            margin-top: 18px;
+            font-size: 9.5px;
+            letter-spacing: 0.12em;
+          }
+
+          .tst-bridge-line,
+          .tst-bridge-node {
+            display: none;
+          }
+
+          .tst-bridge-copy {
+            white-space: normal;
+            text-align: center;
           }
 
           .tst-column {

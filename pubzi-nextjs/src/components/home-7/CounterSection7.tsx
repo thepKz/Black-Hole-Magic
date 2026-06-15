@@ -219,7 +219,7 @@ export default function CounterSection7() {
           background:
             linear-gradient(180deg, #080614 0%, #090716 48%, #080614 100%),
             #080614 !important;
-          padding: clamp(86px, 8vw, 132px) 0 clamp(90px, 8vw, 136px);
+          padding: clamp(86px, 8vw, 132px) 0 clamp(38px, 4vw, 64px);
         }
 
         .ops-section::before {
@@ -251,7 +251,7 @@ export default function CounterSection7() {
         }
 
         .ops-seam--bottom {
-          bottom: 34px;
+          bottom: 0;
         }
 
         .ops-seam-fill {
@@ -455,7 +455,7 @@ export default function CounterSection7() {
 
         @media (max-width: 760px) {
           .ops-section {
-            padding: 82px 0 96px;
+            padding: 82px 0 44px;
           }
 
           .ops-scroll-rail {

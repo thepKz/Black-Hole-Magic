@@ -30,44 +30,42 @@ function Words({ text }: { text: string }) {
   );
 }
 
-// NOTE: images are template placeholders — drop the real key-art into
-// public/assets/img/home-3/game-case-study/ with the same names to replace.
 const GAMES: GameItem[] = [
   {
     num: '01',
-    code: 'VL2',
+    code: 'VLTK',
     accent: '#8b7ae8',
-    title: 'Võ Lâm Truyền Kỳ 2',
+    title: 'Võ Lâm Truyền Kỳ',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'PC',
-    image: '/assets/img/home-3/game-case-study/game-01.jpg',
+    image: '/assets/img/landing-page/game/vltk.png',
   },
   {
     num: '02',
-    code: 'JX2',
+    code: 'TNGH',
     accent: '#6fa8ff',
-    title: 'Võ Lâm JX2 Global',
+    title: 'Tiếu Ngạo Giang Hồ',
     genre: 'MMORPG Kiếm Hiệp',
-    platform: 'Global',
-    image: '/assets/img/home-3/game-case-study/game-02.jpg',
+    platform: 'PC & Mobile',
+    image: '/assets/img/landing-page/game/tieu-ngao-giang-ho.png',
   },
   {
     num: '03',
     code: 'KT',
     accent: '#b07ae8',
-    title: 'Kiếm Thế Mobile',
+    title: 'Kiếm Thế',
     genre: 'MMORPG',
     platform: 'Mobile',
-    image: '/assets/img/home-3/game-case-study/game-03.jpg',
+    image: '/assets/img/landing-page/game/kiem-the.png',
   },
   {
     num: '04',
-    code: 'TL',
+    code: 'CDTL',
     accent: '#7adcff',
     title: 'Con Đường Tơ Lụa',
     genre: 'MMORPG',
     platform: 'PC',
-    image: '/assets/img/home-3/game-case-study/game-04.jpg',
+    image: '/assets/img/landing-page/game/con-duong-to-lua.png',
   },
   {
     num: '05',
@@ -76,7 +74,7 @@ const GAMES: GameItem[] = [
     title: 'Thiên Long Bát Bộ',
     genre: 'MMORPG',
     platform: 'PC & Mobile',
-    image: '/assets/img/home-3/game-case-study/game-05.jpg',
+    image: '/assets/img/landing-page/game/thien-long-bat-bo.png',
   },
 ];
 
@@ -199,7 +197,6 @@ export default function GameCaseStudySection() {
                 style={{ backgroundImage: `url('${g.image}')` }}
               />
               <div className="game-panel-tint" />
-              <span className="game-panel-ghost" aria-hidden="true">{g.code}</span>
               <span className="game-panel-sheen" aria-hidden="true" />
               <span className="game-panel-num">{g.num}</span>
               <div className="game-panel-info">
@@ -354,51 +351,30 @@ export default function GameCaseStudySection() {
         .games-strip {
           display: flex;
           gap: 12px;
-          height: min(62vh, 600px);
-          min-height: 460px;
+          /* Height tuned so the active panel (flex 4.5 of 8.5 ≈ 850px wide) lands
+             near the source art's 16:9 ratio — minimal cropping when expanded. */
+          height: min(52vh, 500px);
+          min-height: 420px;
           padding: 1px;
           border-top: 1px solid rgba(139, 122, 232, 0.12);
           -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%);
         }
 
-        /* one featured panel by default so the strip never looks flat */
+        /* Panel #3 (Kiếm Thế) is featured by default so the strip never looks flat */
         @media (min-width: 992px) {
-          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child {
-            flex: 2.6;
+          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) {
+            flex: 4.5;
           }
 
-          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-meta {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) .game-panel-meta {
             opacity: 1;
             transform: translateY(0);
           }
 
-          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-edge {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) .game-panel-edge {
             transform: scaleX(1);
           }
-        }
-
-        .game-panel-ghost {
-          font-family: var(--font-title-extra);
-          position: absolute;
-          left: 50%;
-          top: 44%;
-          transform: translate(-50%, -50%);
-          font-size: clamp(64px, 7vw, 120px);
-          font-weight: 900;
-          letter-spacing: 2px;
-          color: transparent;
-          -webkit-text-stroke: 1px color-mix(in srgb, var(--gp-accent, #8b7ae8) 55%, transparent);
-          opacity: 0.7;
-          pointer-events: none;
-          user-select: none;
-          transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .game-panel:hover .game-panel-ghost,
-        .game-panel:focus-visible .game-panel-ghost {
-          opacity: 0.22;
-          transform: translate(-50%, -50%) scale(1.12);
         }
 
         .game-panel-sheen {
@@ -417,7 +393,7 @@ export default function GameCaseStudySection() {
 
         .game-panel {
           position: relative;
-          flex: 1;
+          flex: 0.7;
           overflow: hidden;
           border-radius: 14px;
           cursor: pointer;
@@ -428,31 +404,39 @@ export default function GameCaseStudySection() {
 
         .game-panel:hover,
         .game-panel:focus-visible {
-          flex: 3;
+          flex: 4.6;
         }
 
         .game-panel-art {
           position: absolute;
           inset: 0;
           background-size: cover;
-          background-position: center;
-          filter: saturate(0.8) brightness(0.58) contrast(1.05);
-          transform: scale(1.06);
-          transition: filter 0.6s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+          /* Collapsed panels are tall+narrow: anchor the art to the LEFT so the
+             subject (always on the left of the key-art) stays visible. */
+          background-position: left center;
+          /* Near-neutral — let the original key-art colors carry. Only a whisper
+             of dim on collapsed panels so the title text stays legible. */
+          filter: brightness(0.97);
+          transform: scale(1.04);
+          transition: filter 0.6s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+            background-position 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .game-panel:hover .game-panel-art,
         .game-panel:focus-visible .game-panel-art {
-          filter: saturate(1.05) brightness(0.82) contrast(1.05);
+          /* Active panel is wide (~16:9, matching the source) — recenter and show
+             the art at full, untouched color. */
+          background-position: center;
+          filter: brightness(1);
           transform: scale(1);
         }
 
         .game-panel-tint {
           position: absolute;
           inset: 0;
-          background:
-            linear-gradient(180deg, rgba(13, 8, 34, 0.25) 0%, rgba(8, 5, 20, 0.05) 45%, rgba(8, 5, 20, 0.85) 100%),
-            linear-gradient(160deg, color-mix(in srgb, var(--gp-accent, #6c5ce7) 26%, transparent), transparent 55%);
+          /* Only a bottom scrim for title legibility — no color tint over the art,
+             so the original key-art palette stays intact. */
+          background: linear-gradient(180deg, rgba(8, 5, 20, 0) 62%, rgba(8, 5, 20, 0.42) 82%, rgba(8, 5, 20, 0.82) 100%);
           transition: opacity 0.5s ease;
         }
 
