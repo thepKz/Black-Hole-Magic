@@ -148,9 +148,9 @@ export default function CounterSection7() {
             stagger: 0.025,
             scrollTrigger: {
               trigger: textBlock,
-              start: 'top 88%',
-              end: 'top 46%',
-              scrub: 0.65,
+              start: 'top 96%',
+              end: 'top 72%',
+              scrub: 0.45,
             },
           }
         );
@@ -326,7 +326,7 @@ export default function CounterSection7() {
           font-family: var(--font-title-extra);
           font-size: clamp(36px, 4.2vw, 68px);
           font-weight: 900;
-          line-height: 0.98;
+          line-height: 1.18;
           letter-spacing: 0;
           text-transform: none;
           text-wrap: balance;

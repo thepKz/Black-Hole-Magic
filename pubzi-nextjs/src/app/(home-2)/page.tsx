@@ -19,7 +19,7 @@ import GameCaseStudySection from '@/components/home-7/GameCaseStudySection';
 import TeamSection7 from '@/components/home-7/TeamSection7';
 import TestimonialSection7 from '@/components/home-7/TestimonialSection7';
 import CounterSection7 from '@/components/home-7/CounterSection7';
-import NewsSection7 from '@/components/home-7/NewsSection7';
+
 
 export default function HomePage() {
   // Render home-2 or home-7 based on config
@@ -39,10 +39,11 @@ export default function HomePage() {
           <AboutSection7 />
           <ServiceSection7 />
           <GameCaseStudySection />
+          <CounterSection7 />
           <TestimonialSection7 />
           <TeamSection7 />
-          <CounterSection7 />
-          <NewsSection7 />
+
+        
         </div>
       </>
     );

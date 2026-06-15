@@ -3,15 +3,49 @@
 import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 
+// Light assets: images + svg used across the home-7 experience. They warm the
+// browser image cache and contribute the "light" slice of the progress bar.
 const HOME_PRELOAD_ASSETS = [
-  '/assets/img/landing-page/iphone_2.png',
+  '/assets/img/header/home-7.jpg',
   '/assets/img/home-7/about/bg-shape.png',
   '/assets/img/home-7/about/ellipse.png',
+  '/assets/img/home-2/news/news-01.jpg',
+  '/assets/img/home-2/news/news-02.jpg',
+  '/assets/img/home-2/news/news-03.jpg',
+  '/assets/img/home-3/ellipse-bg.png',
+  '/assets/img/home-3/game-case-study/game-01.jpg',
+  '/assets/img/home-3/game-case-study/game-02.jpg',
+  '/assets/img/home-3/game-case-study/game-03.jpg',
+  '/assets/img/home-3/game-case-study/game-04.jpg',
+  '/assets/img/home-3/game-case-study/game-05.jpg',
+  '/assets/img/home-3/icon/12.svg',
+  '/assets/img/home-3/icon/13.svg',
+  '/assets/img/home-3/icon/14.svg',
+  '/assets/img/home-3/top-feature.png',
+  '/assets/img/home-4/team/team-01.png',
+  '/assets/img/home-4/team/team-02.png',
+  '/assets/img/home-4/team/team-03.png',
+  '/assets/img/home-4/team/team-04.png',
+  '/assets/img/landing-page/iphone_2.png',
+  '/assets/img/landing-page/shape-2.png',
+  '/assets/img/landing-page/test_lan_thu_9.png',
   '/assets/img/logo/white-logo-2.png',
   '/assets/img/logo/white-logo-3.svg',
   '/assets/img/logo/dot.svg',
-  '/assets/img/header/home-7.jpg',
 ];
+
+// Heavy assets streamed via fetch so the bar tracks real byte progress: the
+// Draco 3D model (~3.4MB) and the looping background videos. Fetching warms the
+// HTTP cache so GLTFLoader / <video> reuse the bytes instead of refetching.
+const HOME_HEAVY_ASSETS = [
+  '/assets/img/home-7/3d/3d_4.glb',
+  '/assets/video/background_1.webm',
+  '/assets/video/background_1_pingpong.webm',
+];
+
+// The heavy bucket dominates transfer size, so it owns most of the progress bar.
+const HEAVY_PROGRESS_WEIGHT = 0.8;
+const LIGHT_PROGRESS_WEIGHT = 1 - HEAVY_PROGRESS_WEIGHT;
 
 function preloadImage(src: string) {
   return new Promise<void>((resolve) => {
@@ -31,6 +65,39 @@ function preloadAsset(src: string) {
   }
 
   return Promise.resolve();
+}
+
+// Stream a file to completion, reporting bytes received vs. its content-length.
+// Reading the whole body lands the full file in the HTTP cache. Falls back to a
+// best-effort resolve when streaming/headers are unavailable so the user is
+// never trapped behind the preloader.
+function streamAsset(src: string, onBytes: (received: number, total: number) => void) {
+  return (async () => {
+    try {
+      const response = await fetch(src, { cache: 'force-cache' });
+      if (!response.ok || !response.body) {
+        onBytes(1, 1);
+        return;
+      }
+
+      const total = Number(response.headers.get('content-length') || 0);
+      const reader = response.body.getReader();
+      let received = 0;
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value?.length ?? 0;
+        if (total > 0) onBytes(received, total);
+      }
+
+      // Ensure the bucket reads as complete even without a content-length.
+      onBytes(total || received || 1, total || received || 1);
+    } catch {
+      onBytes(1, 1);
+    }
+  })();
 }
 
 export default function Preloader() {
@@ -73,19 +140,48 @@ export default function Preloader() {
     };
 
     const loadHomepageAssets = async () => {
-      const totalAssets = HOME_PRELOAD_ASSETS.length + 1;
-      let completedAssets = 0;
+      // Light bucket: small images + fonts, counted per-item. Heavy bucket: the
+      // 3D model + background videos, summed by real bytes. The bar combines
+      // both by weight so it reflects the actual download.
+      const lightTotal = HOME_PRELOAD_ASSETS.length + 1;
+      let lightDone = 0;
+      let lightFraction = 0;
 
-      const markComplete = () => {
-        completedAssets += 1;
-        if (!cancelled) {
-          setProgress(Math.min(99, Math.round((completedAssets / totalAssets) * 100)));
-        }
+      // Track per-file byte progress for the heavy bucket and sum into a fraction.
+      const heavyReceived = new Array(HOME_HEAVY_ASSETS.length).fill(0);
+      const heavyTotals = new Array(HOME_HEAVY_ASSETS.length).fill(0);
+      let heavyFraction = 0;
+
+      const updateProgress = () => {
+        if (cancelled) return;
+        const combined =
+          lightFraction * LIGHT_PROGRESS_WEIGHT + heavyFraction * HEAVY_PROGRESS_WEIGHT;
+        setProgress(Math.min(99, Math.round(combined * 100)));
+      };
+
+      const markLightComplete = () => {
+        lightDone += 1;
+        lightFraction = lightDone / lightTotal;
+        updateProgress();
+      };
+
+      const recomputeHeavy = () => {
+        const received = heavyReceived.reduce((a, b) => a + b, 0);
+        const total = heavyTotals.reduce((a, b) => a + b, 0);
+        heavyFraction = total > 0 ? Math.min(received / total, 1) : 0;
+        updateProgress();
       };
 
       await Promise.all([
-        ...HOME_PRELOAD_ASSETS.map((asset) => preloadAsset(asset).finally(markComplete)),
-        document.fonts.ready.then(markComplete).catch(markComplete),
+        ...HOME_PRELOAD_ASSETS.map((asset) => preloadAsset(asset).finally(markLightComplete)),
+        document.fonts.ready.then(markLightComplete).catch(markLightComplete),
+        ...HOME_HEAVY_ASSETS.map((asset, index) =>
+          streamAsset(asset, (received, total) => {
+            heavyReceived[index] = received;
+            heavyTotals[index] = total;
+            recomputeHeavy();
+          })
+        ),
       ]);
 
       completePreloader();

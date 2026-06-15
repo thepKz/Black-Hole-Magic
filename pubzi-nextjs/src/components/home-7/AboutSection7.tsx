@@ -481,7 +481,9 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [shouldInit, setShouldInit] = useState(false);
 
-  // Lazy init: only boot WebGL when the section is within 1.5 viewports.
+  // Lazy init: boot WebGL when the section nears the viewport, OR as soon as the
+  // preloader finishes — by then it has already streamed the .glb into the HTTP
+  // cache, so booting early is cheap and the model is ready before the user scrolls.
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -489,16 +491,41 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
     const canInit3D = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)');
     if (!canInit3D.matches) return;
 
+    let done = false;
+    const init = () => {
+      if (done) return;
+      done = true;
+      setShouldInit(true);
+    };
+
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && canInit3D.matches) {
-          setShouldInit(true);
+          init();
           io.disconnect();
         }
       },
       { rootMargin: '150% 0px' }
     );
     io.observe(mount);
+
+    // If the preloader already completed (or completes now), the model bytes are
+    // cached — init immediately so the loading ring never flashes.
+    if (document.body.dataset.preloaderDone === 'true') {
+      init();
+      io.disconnect();
+    } else {
+      const onPreloaderComplete = () => {
+        init();
+        io.disconnect();
+      };
+      window.addEventListener('black-hole:preloader-complete', onPreloaderComplete, { once: true });
+      return () => {
+        io.disconnect();
+        window.removeEventListener('black-hole:preloader-complete', onPreloaderComplete);
+      };
+    }
+
     return () => io.disconnect();
   }, []);
 
@@ -522,6 +549,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
     const boot = async () => {
       const THREE = await import('three');
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      const { DRACOLoader } = await import('three/examples/jsm/loaders/DRACOLoader.js');
       if (disposed || !mountRef.current) return;
 
       const scene = new THREE.Scene();
@@ -592,7 +620,12 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       );
       visibilityObserver.observe(mount);
 
+      // The .glb is Draco-compressed (42MB → 3.4MB), so GLTFLoader needs a
+      // DRACOLoader wired up to decode the mesh. Decoder files live in /public.
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/assets/draco/');
       const loader = new GLTFLoader();
+      loader.setDRACOLoader(dracoLoader);
       loader.load(
         '/assets/img/home-7/3d/3d_4.glb',
         (gltf) => {
@@ -643,6 +676,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       resizeObserver.observe(mount);
 
       disposeScene = () => {
+        dracoLoader.dispose();
         renderer.dispose();
         scene.traverse((child) => {
           if (child instanceof THREE.Mesh) {

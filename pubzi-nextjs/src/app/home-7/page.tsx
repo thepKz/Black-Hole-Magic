@@ -6,7 +6,6 @@ import GameCaseStudySection from '@/components/home-7/GameCaseStudySection';
 import TeamSection7 from '@/components/home-7/TeamSection7';
 import TestimonialSection7 from '@/components/home-7/TestimonialSection7';
 import CounterSection7 from '@/components/home-7/CounterSection7';
-import NewsSection7 from '@/components/home-7/NewsSection7';
 
 export default function Home7Page() {
   return (
@@ -28,7 +27,6 @@ export default function Home7Page() {
         <CounterSection7 />
         <TestimonialSection7 />
         <TeamSection7 />
-        <NewsSection7 />
       </div>
     </>
   );
