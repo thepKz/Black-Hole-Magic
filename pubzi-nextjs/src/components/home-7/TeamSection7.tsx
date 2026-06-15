@@ -44,7 +44,7 @@ const PARTNERS = [
   {
     name: 'SPG',
     role: 'Đội tuyển · Đối tác',
-    image: '/assets/img/landing-page/kol/spg.png',
+    image: '/assets/img/landing-page/kol/SPG.png',
   },
 ];
 
