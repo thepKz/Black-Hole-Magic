@@ -123,7 +123,7 @@ export default function TeamSection7() {
           {PARTNERS.map((p) => (
             <article key={p.name} className="ptn-card" tabIndex={0}>
               <div className="ptn-photo">
-                <img src={p.image} alt={p.name} loading="lazy" />
+                <img src={p.image} alt={p.name} loading="eager" decoding="async" />
               </div>
               <div className="ptn-info">
                 <h3>{p.name}</h3>
