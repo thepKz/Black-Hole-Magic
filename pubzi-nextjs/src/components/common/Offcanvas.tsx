@@ -65,7 +65,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
               </nav>
 
               <Link href="/contact" className="offcanvas__cta" onClick={closeOffcanvas}>
-                Vào đấu trường
+                Liên hệ ngay
               </Link>
 
               <div className="offcanvas__contact">
@@ -76,7 +76,13 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                       <i className="fal fa-map-marker-alt"></i>
                     </div>
                     <div className="offcanvas__contact-text">
-                      <a target="_blank" rel="noreferrer" href="#">Hà Nội, Việt Nam</a>
+                      <a
+                        target="_blank"
+                        rel="noreferrer"
+                        href="https://www.google.com/maps/search/?api=1&query=S%E1%BB%91%20777%20Nguy%E1%BB%85n%20Thi%E1%BB%87n%20Thu%E1%BA%ADt%2C%20M%E1%BB%B9%20H%C3%A0o%2C%20H%C6%B0ng%20Y%C3%AAn"
+                      >
+                        777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên
+                      </a>
                     </div>
                   </li>
                   <li className="d-flex align-items-center">
@@ -84,7 +90,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                       <i className="fal fa-envelope"></i>
                     </div>
                     <div className="offcanvas__contact-text">
-                      <a href="mailto:hello@blackhole.gg">hello@blackhole.gg</a>
+                      <a href="mailto:contact@blackholegame.com">contact@blackholegame.com</a>
                     </div>
                   </li>
                   <li className="d-flex align-items-center">
@@ -92,7 +98,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                       <i className="far fa-phone"></i>
                     </div>
                     <div className="offcanvas__contact-text">
-                      <a href="tel:+842471000000">+84 24 7100 0000</a>
+                      <a href="tel:+84779467868">0779467868</a>
                     </div>
                   </li>
                 </ul>
