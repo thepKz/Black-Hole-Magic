@@ -788,8 +788,17 @@ export default function AboutPage() {
             transform: none !important;
           }
 
+          /* Trên mobile portrait, 133.333dvh > 100vw nên shell tràn ra 2 bên.
+             Giới hạn lại bằng 100vw để không overflow ngang. */
           .ab2-portal-frame-shell {
+            width: 100vw !important;
             transform: translate(-50%, -39.5%) !important;
+          }
+
+          /* Đảm bảo hero không tạo horizontal scroll */
+          .ab2-hero,
+          .ab2-hero-sticky {
+            overflow: hidden;
           }
 
           /* Giảm chiều cao hero section trên mobile cho gọn. */

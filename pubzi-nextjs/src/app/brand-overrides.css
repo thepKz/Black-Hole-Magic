@@ -294,6 +294,18 @@ select:focus {
   box-shadow: 0 0 20px rgba(108, 92, 231, 0.6);
 }
 
+@media (max-width: 767px) {
+  .gt-back-to-top {
+    right: 16px;
+    bottom: env(safe-area-inset-bottom, 16px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    width: 44px;
+    height: 44px;
+    line-height: 36px;
+    z-index: 9999;
+  }
+}
+
 /* ============================================
    RESPONSIVE ADJUSTMENTS
    ============================================ */

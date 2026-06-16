@@ -86,14 +86,13 @@ export default function AboutSection7() {
         ease: 'power2.inOut',
       }, 4.16);
       tl.to(track, {
-        scale: 1.65,
+        scale: 1.18,
         duration: 0.26,
         ease: 'power1.out',
       }, 4.48);
       tl.to(track, {
         y: () => window.innerHeight * 1.18,
-        scale: 1.5,
-        autoAlpha: 0,
+        scale: 1.1,
         duration: 0.44,
         ease: 'power2.in',
       }, 4.74);
@@ -155,6 +154,12 @@ export default function AboutSection7() {
         <div ref={trackRef} className="about-model-track">
           <div className="about-ellipse">
             <img src="/assets/img/home-7/about/ellipse.png" alt="" />
+          </div>
+          {/* Hào quang nhân vật — lớp glow tím pulse nhẹ đứng sau model,
+              tạo cảm giác nhân vật phát sáng từ bên trong. */}
+          <div className="about-hero-aura" aria-hidden="true">
+            <span className="aura-core" />
+            <span className="aura-ring" />
           </div>
           <div className="about-3d-stage" aria-label="Black Hole 3D model">
             <AboutGlbModel rotationRef={rotationRef} />
@@ -299,6 +304,60 @@ export default function AboutSection7() {
           width: 100%;
           filter: brightness(0.9) saturate(0.9) drop-shadow(0 0 24px rgba(108, 92, 231, 0.35));
           opacity: 0.58;
+        }
+
+        /* ===== Hào quang nhân vật ===== */
+        .about-hero-aura {
+          position: absolute;
+          left: 50%;
+          top: 46%;
+          transform: translate(-50%, -50%);
+          width: 70%;
+          aspect-ratio: 1 / 1.25;
+          z-index: 1;
+          pointer-events: none;
+          mix-blend-mode: screen;
+        }
+
+        /* Lõi sáng dọc theo thân nhân vật — pulse chậm. */
+        .aura-core {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: radial-gradient(
+            ellipse 52% 64% at 50% 48%,
+            rgba(178, 142, 255, 0.55) 0%,
+            rgba(124, 78, 245, 0.34) 32%,
+            rgba(74, 24, 204, 0.16) 56%,
+            transparent 74%
+          );
+          filter: blur(14px);
+          animation: aura-breathe 5.5s ease-in-out infinite;
+        }
+
+        /* Vầng hào quang ngoài rộng hơn, sáng yếu, lệch nhịp với lõi. */
+        .aura-ring {
+          position: absolute;
+          inset: -16%;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at 50% 42%,
+            transparent 38%,
+            rgba(155, 124, 255, 0.22) 52%,
+            rgba(108, 92, 231, 0.1) 64%,
+            transparent 78%
+          );
+          filter: blur(22px);
+          animation: aura-breathe 7s ease-in-out infinite reverse;
+        }
+
+        @keyframes aura-breathe {
+          0%, 100% { opacity: 0.7; transform: scale(0.97); }
+          50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .aura-core, .aura-ring { animation: none; }
         }
 
         .about-3d-stage {

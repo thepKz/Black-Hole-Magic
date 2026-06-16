@@ -496,6 +496,8 @@ export default function HeroSection7() {
               display: none;
             }
             .hero-section.hero-7 {
+              padding-top: 80px !important;
+              padding-bottom: 60px !important;
               background:
                 radial-gradient(circle at 50% 38%, rgba(108,92,231,0.42), rgba(40,12,118,0.14) 34%, transparent 60%),
                 linear-gradient(180deg, #0a0718 0%, #06060A 100%) !important;
