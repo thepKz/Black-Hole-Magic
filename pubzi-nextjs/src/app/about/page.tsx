@@ -7,59 +7,55 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Split a string into word spans so GSAP can light them up one by one.
-   Mirrors the project's live `.sw` reveal pattern (ServiceSection7/TeamSection7). */
+const CAPABILITIES = [
+  {
+    title: 'Bản địa hóa sản phẩm',
+    desc: 'Điều chỉnh ngôn ngữ, nhịp sự kiện, thanh toán và vận hành theo hành vi người chơi Việt Nam.',
+    media: '/assets/img/home-4/feature-game/game-01.jpg',
+  },
+  {
+    title: 'Tăng trưởng cộng đồng',
+    desc: 'Xây dựng cộng đồng thật qua creator, giải đấu, social content và chăm sóc người chơi sau ra mắt.',
+    media: '/assets/img/home-4/popular-game/game-02.jpg',
+  },
+  {
+    title: 'Đồng phát hành',
+    desc: 'Đi cùng studio từ giai đoạn chuẩn bị thị trường đến live operations, báo cáo và mở rộng doanh thu.',
+    media: '/assets/img/home-4/feature-game/game-02.jpg',
+  },
+  {
+    title: 'Hiểu thị trường Đông Nam Á',
+    desc: 'Dùng dữ liệu vận hành tại Việt Nam làm nền để mở rộng sang các cộng đồng có hành vi tương đồng.',
+    media: '/assets/img/home-7/service-bg.jpg',
+  },
+];
+
+const OPERATING_POINTS = [
+  'Đọc sản phẩm và cộng đồng mục tiêu trước khi chốt chiến lược phát hành.',
+  'Thiết kế soft launch, nội dung, creator plan và kênh hỗ trợ người chơi.',
+  'Theo dõi dữ liệu vận hành hằng tuần để tối ưu giữ chân, doanh thu và niềm tin.',
+];
+
+function PortalVideoSources() {
+  return (
+    <>
+      <source src="/assets/video/background_1_pingpong.webm" type="video/webm" />
+      <source src="/assets/video/background_1_pingpong.mp4" type="video/mp4" />
+    </>
+  );
+}
+
 function Words({ text }: { text: string }) {
   return (
     <>
-      {text.split(' ').map((w, i) => (
-        <span key={i} className="sw">
-          {w}
-          {' '}
+      {text.split(' ').map((word, index) => (
+        <span className="ab2-word" key={`${word}-${index}`}>
+          {word}{' '}
         </span>
       ))}
     </>
   );
 }
-
-const STATS = [
-  { value: 2019, suffix: '', label: 'Năm thành lập' },
-  { value: 12, suffix: '+', label: 'Bộ môn thi đấu' },
-  { value: 50, suffix: '+', label: 'Danh hiệu quốc gia' },
-  { value: 1, suffix: 'M+', label: 'Người hâm mộ' },
-];
-
-const VALUES = [
-  {
-    no: '01',
-    title: 'Chiến thắng có kỷ luật',
-    desc: 'Chúng tôi không chỉ chơi để thắng — chúng tôi xây hệ thống, luyện tập theo quy trình và bước vào mỗi trận đấu với sự chuẩn bị tuyệt đối.',
-  },
-  {
-    no: '02',
-    title: 'Minh bạch tuyệt đối',
-    desc: 'Với đối tác, nhà tài trợ và người hâm mộ — số liệu thực, báo cáo thực, không có gì bị che giấu.',
-  },
-  {
-    no: '03',
-    title: 'Đại diện Việt Nam',
-    desc: 'Từ những giải LAN tại Hà Nội đến sân khấu quốc tế, mỗi trận đấu là một cơ hội đưa tên Việt Nam lên bản đồ esports thế giới.',
-  },
-  {
-    no: '04',
-    title: 'Cộng đồng là nền tảng',
-    desc: 'Tổ chức mạnh nhất là tổ chức được cộng đồng yêu thương. Chúng tôi xây dựng kết nối trước khi xây dựng chiến thắng.',
-  },
-];
-
-const TIMELINE = [
-  { year: '2019', title: 'Khởi nguồn', desc: 'Black Hole ra đời từ một đội PUBG Mobile nghiệp dư tại Hà Nội với 5 thành viên sáng lập.' },
-  { year: '2020', title: 'Chức vô địch đầu tiên', desc: 'Vô địch giải quốc gia đầu tiên — bước ngoặt xác nhận con đường chuyên nghiệp hóa.' },
-  { year: '2021', title: 'Mở rộng bộ môn', desc: 'Ra mắt các đội Valorant, Mobile Legends và Liên Minh Huyền Thoại. Đội ngũ tăng lên 30 người.' },
-  { year: '2022', title: 'Vươn ra châu lục', desc: 'Ký kết đối tác với các nhà phát hành Hàn Quốc và Singapore, mở đường thi đấu tầm khu vực.' },
-  { year: '2023', title: 'Top 8 SEA Championship', desc: 'Lần đầu đại diện Việt Nam vào vòng knock-out giải đấu cấp Đông Nam Á.' },
-  { year: '2024', title: 'ICS Group ra đời', desc: 'Thành lập nhánh kinh doanh ICS Group — hệ sinh thái toàn diện: giải đấu, truyền thông, đào tạo.' },
-];
 
 export default function AboutPage() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -67,107 +63,81 @@ export default function AboutPage() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+
+    const videos = Array.from(root.querySelectorAll<HTMLVideoElement>('.ab2-motion-video'));
+    if (!videos.length) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion) {
+      videos.forEach((video) => video.pause());
+    } else {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            videos.forEach((video) => {
+              video.style.visibility = 'visible';
+              video.play().catch(() => undefined);
+            });
+          } else {
+            videos.forEach((video) => video.pause());
+          }
+        },
+        { rootMargin: '20% 0px' }
+      );
+      io.observe(root);
+      return () => io.disconnect();
+    }
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const ctx = gsap.context(() => {
-      // ── Hero: title letters rise + intro fades, eased entry (not scrub) ──
-      gsap.set('.ab-hero-eyebrow, .ab-hero-sub, .ab-hero-cta, .ab-hero-media', { autoAlpha: 0 });
-      const heroTl = gsap.timeline({ delay: 0.15 });
-      heroTl
-        .to('.ab-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' })
-        .fromTo('.ab-hero-title .ab-line span',
-          { yPercent: 115 },
-          { yPercent: 0, duration: 1, stagger: 0.12, ease: 'power4.out' }, '-=0.3')
-        .to('.ab-hero-sub', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
-        .to('.ab-hero-cta', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
-        .to('.ab-hero-media', { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, '-=0.9');
-
-      // subtle parallax on the hero image plate
-      gsap.to('.ab-hero-media-inner', {
-        yPercent: -12,
-        ease: 'none',
-        scrollTrigger: { trigger: '.ab-hero', start: 'top top', end: 'bottom top', scrub: 0.8 },
+      const portalTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '.ab2-hero',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.9,
+          invalidateOnRefresh: true,
+        },
       });
 
-      // ── Manifesto: word-by-word light-up on scroll (the signature beat) ──
-      const manifestoWords = gsap.utils.toArray<HTMLElement>('.ab-manifesto .sw');
-      if (manifestoWords.length) {
-        gsap.fromTo(manifestoWords,
-          { opacity: 0.12 },
-          {
-            opacity: 1,
-            stagger: 0.04,
-            ease: 'none',
-            scrollTrigger: { trigger: '.ab-manifesto', start: 'top 75%', end: 'top 18%', scrub: 0.6 },
-          });
-      }
+      portalTl
+        .to('.ab2-portal-frame', { scale: 6.4, filter: 'brightness(1.08)', ease: 'none', duration: 1, force3D: false }, 0);
 
-      // ── Stats: count up + fade, staggered ──
-      gsap.utils.toArray<HTMLElement>('.ab-stat').forEach((stat, i) => {
-        const numEl = stat.querySelector<HTMLElement>('.ab-stat-num');
-        const target = Number(numEl?.dataset.value ?? 0);
-        const proxy = { v: 0 };
-        gsap.timeline({
-          scrollTrigger: { trigger: '.ab-stats', start: 'top 78%', once: true },
-        })
-          .from(stat, { autoAlpha: 0, y: 28, duration: 0.6, delay: i * 0.08, ease: 'power3.out' }, 0)
-          .to(proxy, {
-            v: target,
-            duration: 1.4,
-            delay: i * 0.08,
-            ease: 'power2.out',
-            onUpdate: () => {
-              if (numEl) numEl.firstChild!.textContent = String(Math.round(proxy.v));
-            },
-          }, 0);
-      });
-
-      // ── Split fields (mission/vision): image clip-reveal + text rise ──
-      gsap.utils.toArray<HTMLElement>('.ab-split').forEach((split) => {
-        gsap.timeline({ scrollTrigger: { trigger: split, start: 'top 72%', once: true } })
-          .fromTo(split.querySelector('.ab-split-media-inner'),
-            { clipPath: 'inset(0 0 100% 0)', scale: 1.12 },
-            { clipPath: 'inset(0 0 0% 0)', scale: 1, duration: 1.1, ease: 'power3.out' }, 0)
-          .fromTo(split.querySelectorAll('.ab-split-copy > *'),
-            { autoAlpha: 0, y: 26 },
-            { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out' }, 0.25);
-      });
-
-      // ── Values rail: each row reveals, hairline draws across ──
-      gsap.utils.toArray<HTMLElement>('.ab-vrow').forEach((row) => {
-        gsap.timeline({ scrollTrigger: { trigger: row, start: 'top 82%', once: true } })
-          .fromTo(row.querySelector('.ab-vrow-line'),
-            { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: 'power3.inOut' }, 0)
-          .fromTo([row.querySelector('.ab-vrow-no'), row.querySelector('.ab-vrow-main')],
-            { autoAlpha: 0, y: 24 },
-            { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out' }, 0.1);
-      });
-
-      // ── Timeline: vertical line draws as you scroll, nodes pop in ──
-      gsap.fromTo('.ab-tl-line-fill',
-        { scaleY: 0 },
+      gsap.fromTo(
+        '.ab2-word',
+        { opacity: 0.18 },
         {
-          scaleY: 1,
+          opacity: 1,
+          stagger: 0.035,
           ease: 'none',
-          scrollTrigger: { trigger: '.ab-tl', start: 'top 60%', end: 'bottom 75%', scrub: 0.7 },
-        });
-      gsap.utils.toArray<HTMLElement>('.ab-tl-item').forEach((item) => {
-        gsap.timeline({ scrollTrigger: { trigger: item, start: 'top 82%', once: true } })
-          .fromTo(item.querySelector('.ab-tl-dot'),
-            { scale: 0, autoAlpha: 0 },
-            { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'back.out(2)' }, 0)
-          .fromTo(item.querySelectorAll('.ab-tl-content > *'),
-            { autoAlpha: 0, x: -22 },
-            { autoAlpha: 1, x: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out' }, 0.05);
-      });
+          scrollTrigger: {
+            trigger: '.ab2-manifesto',
+            start: 'top 72%',
+            end: 'top 20%',
+            scrub: 0.6,
+          },
+        }
+      );
 
-      // ── CTA reveal ──
-      gsap.fromTo('.ab-cta-inner > *',
-        { autoAlpha: 0, y: 30 },
-        {
-          autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: '.ab-cta', start: 'top 78%', once: true },
-        });
+      gsap.utils.toArray<HTMLElement>('.ab2-reveal').forEach((item) => {
+        gsap.fromTo(
+          item,
+          { autoAlpha: 0, y: 36 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.75,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: item, start: 'top 82%', once: true },
+          }
+        );
+      });
 
       ScrollTrigger.refresh();
     }, root);
@@ -176,635 +146,654 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="ab-root" ref={rootRef}>
+    <div className="ab2-root" ref={rootRef}>
+      <video
+        className="ab2-fixed-video ab2-motion-video"
+        muted
+        loop
+        playsInline
+        autoPlay
+        preload="auto"
+        aria-hidden="true"
+      >
+        <PortalVideoSources />
+      </video>
 
-      {/* ══ HERO — asymmetric split, pinned-feel title ══════════════════════ */}
-      <section className="ab-hero">
-        <div className="ab-hero-grain" aria-hidden="true" />
-        <div className="ab-hero-lightwell" aria-hidden="true" />
+      <section className="ab2-hero">
+        <div className="ab2-hero-sticky">
+          <div className="ab2-portal" aria-hidden="true">
+            <div className="ab2-portal-frame-shell">
+              <img className="ab2-portal-frame" src="/assets/img/landing-page/trasparent_bg.png" alt="" />
+            </div>
+          </div>
+          <div className="ab2-hero-shade" aria-hidden="true" />
 
-        <div className="ab-hero-inner">
-          <div className="ab-hero-left">
-            <nav className="ab-breadcrumb ab-hero-eyebrow">
-              <Link href="/">Trang chủ</Link>
-              <span className="ab-bc-sep">/</span>
-              <span className="ab-bc-current">Về chúng tôi</span>
-            </nav>
+        </div>
+      </section>
 
-            <h1 className="ab-hero-title">
-              <span className="ab-line"><span>Chúng tôi là</span></span>
-              <span className="ab-line ab-line-accent"><span>Black Hole</span></span>
-            </h1>
+      <main className="ab2-content">
+        <section className="ab2-proof ab2-reveal" aria-label="BlackHole focus areas">
+          <span>Publishing</span>
+          <span>Live Ops</span>
+          <span>Community</span>
+          <span>Growth</span>
+        </section>
 
-            <p className="ab-hero-sub">
-              Tổ chức eSports hàng đầu Việt Nam — dựng nên từ kỷ luật, sự minh bạch
-              và khát vọng đưa Việt Nam lên bản đồ gaming thế giới.
+        <section className="ab2-manifesto">
+          <p>
+            <Words text="BlackHole Game kết nối studio quốc tế với thị trường Việt Nam bằng năng lực bản địa hóa, vận hành cộng đồng và đồng phát hành có trách nhiệm." />
+          </p>
+        </section>
+
+        <section className="ab2-capabilities">
+          <div className="ab2-section-head ab2-reveal">
+            <h2>Chúng tôi xử lý phần khó của thị trường địa phương</h2>
+            <p>
+              Mỗi game cần một cách vào thị trường khác nhau. BlackHole biến hiểu biết bản địa thành kế hoạch vận hành cụ thể.
             </p>
+          </div>
 
-            <div className="ab-hero-cta">
-              <Link href="/contact" className="ab-btn ab-btn-primary">Hợp tác cùng chúng tôi</Link>
-              <Link href="/team" className="ab-btn ab-btn-ghost">Xem đội tuyển</Link>
+          <div className="ab2-cap-grid">
+            {CAPABILITIES.map((item, index) => (
+              <article className={`ab2-cap-card ab2-card-${index + 1} ab2-reveal`} key={item.title}>
+                <div className="ab2-card-media">
+                  <img src={item.media} alt="" />
+                </div>
+                <div className="ab2-card-copy">
+                  <h3>{item.title}</h3>
+                  <p>{item.desc}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="ab2-field ab2-reveal">
+          <div className="ab2-field-media">
+            <img src="/assets/img/home-4/hero/hero-bg.jpg" alt="Không gian gaming của BlackHole" />
+          </div>
+          <div className="ab2-field-copy">
+            <h2>Từ ra mắt đến vận hành dài hạn</h2>
+            <p>
+              Vai trò của BlackHole không dừng ở chiến dịch launch. Chúng tôi theo dõi phản hồi người chơi, điều chỉnh lịch sự kiện và giữ nhịp cộng đồng sau từng bản cập nhật.
+            </p>
+          </div>
+        </section>
+
+        <section className="ab2-operating">
+          <p className="ab2-kicker ab2-reveal">Cách làm việc</p>
+          <div className="ab2-operating-grid">
+            <h2 className="ab2-reveal">Một hệ vận hành rõ vai trò, rõ nhịp, rõ dữ liệu.</h2>
+            <div className="ab2-operating-list">
+              {OPERATING_POINTS.map((point) => (
+                <div className="ab2-operating-item ab2-reveal" key={point}>
+                  <p>{point}</p>
+                </div>
+              ))}
             </div>
           </div>
+        </section>
 
-          <div className="ab-hero-media">
-            <div className="ab-hero-media-inner">
-              <img
-                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=900&h=1200&fit=crop"
-                alt="Đội tuyển Black Hole thi đấu"
-              />
-              <div className="ab-hero-media-tint" aria-hidden="true" />
-            </div>
-            <div className="ab-hero-tag">
-              <span className="ab-hero-tag-num">EST.</span>
-              <span className="ab-hero-tag-year">2019</span>
-            </div>
+        <section className="ab2-cta ab2-reveal">
+          <h2>Cùng đưa game của bạn vào thị trường Việt Nam.</h2>
+          <p>BlackHole sẵn sàng trao đổi về phát hành, cộng đồng và live operations.</p>
+          <div className="ab2-actions">
+            <Link className="ab2-btn ab2-btn-primary" href="/contact">Liên hệ</Link>
+            <Link className="ab2-btn ab2-btn-secondary" href="/game">Danh sách game</Link>
           </div>
-        </div>
-
-        <div className="ab-hero-scrollcue" aria-hidden="true">
-          <span>Cuộn xuống</span>
-          <i />
-        </div>
-      </section>
-
-      {/* ══ MANIFESTO — word-by-word reveal band ════════════════════════════ */}
-      <section className="ab-manifesto">
-        <span className="ab-section-kicker">Tuyên ngôn</span>
-        <p className="ab-manifesto-text">
-          <Words text="Hơn cả một đội tuyển. Black Hole là một hệ sinh thái — nơi tài năng được tôi luyện, thương hiệu được dựng xây, và mỗi chiến thắng đều mang theo lá cờ Việt Nam." />
-        </p>
-      </section>
-
-      {/* ══ STATS RAIL ══════════════════════════════════════════════════════ */}
-      <section className="ab-stats">
-        {STATS.map((s) => (
-          <div className="ab-stat" key={s.label}>
-            <div className="ab-stat-num" data-value={s.value}>
-              <span>0</span>{s.suffix}
-            </div>
-            <div className="ab-stat-label">{s.label}</div>
-          </div>
-        ))}
-      </section>
-
-      {/* ══ SPLIT FIELD 1 — Sứ mệnh (media left, copy right) ════════════════ */}
-      <section className="ab-split ab-split--media-left">
-        <div className="ab-split-media">
-          <div className="ab-split-media-inner">
-            <img
-              src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=900&h=1100&fit=crop"
-              alt="Phòng tập luyện của Black Hole"
-            />
-          </div>
-        </div>
-        <div className="ab-split-copy">
-          <span className="ab-section-kicker">Sứ mệnh</span>
-          <h2 className="ab-split-title">Đưa esports Việt Nam<br />ra đấu trường thế giới</h2>
-          <p className="ab-split-body">
-            Black Hole được thành lập với một sứ mệnh rõ ràng: xây dựng tổ chức esports
-            chuyên nghiệp đủ sức cạnh tranh quốc tế — không chỉ về kỹ năng, mà về văn hóa,
-            thương hiệu và hệ thống vận hành.
-          </p>
-          <p className="ab-split-body">
-            Chúng tôi tin rằng tài năng Việt Nam không thua kém bất kỳ ai. Việc còn lại
-            là tạo ra môi trường, kỷ luật và cơ hội để tài năng ấy tỏa sáng.
-          </p>
-        </div>
-      </section>
-
-      {/* ══ SPLIT FIELD 2 — Tầm nhìn (copy left, media right) ═══════════════ */}
-      <section className="ab-split ab-split--media-right">
-        <div className="ab-split-copy">
-          <span className="ab-section-kicker">Tầm nhìn</span>
-          <h2 className="ab-split-title">Năm 2030,<br />một cái tên toàn cầu</h2>
-          <p className="ab-split-body">
-            Đến năm 2030, Black Hole định vị là một trong những tổ chức esports được nhận
-            diện trên toàn cầu — nơi các nhà phát hành quốc tế nghĩ đến đầu tiên khi muốn
-            chinh phục thị trường Đông Nam Á.
-          </p>
-          <p className="ab-split-body">
-            Một hệ sinh thái khép kín từ đào tạo tài năng trẻ, vận hành đội tuyển đỉnh cao,
-            đến truyền thông và tổ chức giải đấu mang tầm khu vực.
-          </p>
-        </div>
-        <div className="ab-split-media">
-          <div className="ab-split-media-inner">
-            <img
-              src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=900&h=1100&fit=crop"
-              alt="Sân khấu thi đấu esports"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ══ VALUES RAIL ═════════════════════════════════════════════════════ */}
-      <section className="ab-values">
-        <div className="ab-values-head">
-          <span className="ab-section-kicker">Giá trị cốt lõi</span>
-          <h2 className="ab-values-title">Những gì định nghĩa Black Hole</h2>
-        </div>
-        <div className="ab-values-rail">
-          {VALUES.map((v) => (
-            <div className="ab-vrow" key={v.no}>
-              <span className="ab-vrow-line" aria-hidden="true" />
-              <span className="ab-vrow-no">{v.no}</span>
-              <div className="ab-vrow-main">
-                <h3 className="ab-vrow-title">{v.title}</h3>
-                <p className="ab-vrow-body">{v.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ TIMELINE ════════════════════════════════════════════════════════ */}
-      <section className="ab-tl">
-        <div className="ab-tl-head">
-          <span className="ab-section-kicker">Hành trình</span>
-          <h2 className="ab-values-title">Năm năm dựng nên di sản</h2>
-        </div>
-        <div className="ab-tl-body">
-          <div className="ab-tl-line" aria-hidden="true">
-            <span className="ab-tl-line-fill" />
-          </div>
-          {TIMELINE.map((t) => (
-            <div className="ab-tl-item" key={t.year}>
-              <span className="ab-tl-dot" aria-hidden="true" />
-              <div className="ab-tl-content">
-                <span className="ab-tl-year">{t.year}</span>
-                <h3 className="ab-tl-title">{t.title}</h3>
-                <p className="ab-tl-desc">{t.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══ CTA ═════════════════════════════════════════════════════════════ */}
-      <section className="ab-cta">
-        <div className="ab-cta-lightwell" aria-hidden="true" />
-        <div className="ab-cta-inner">
-          <span className="ab-section-kicker">Hợp tác</span>
-          <h2 className="ab-cta-title">Sẵn sàng vào đấu trường?</h2>
-          <p className="ab-cta-sub">
-            Dù bạn là nhà tài trợ, đối tác phát hành, hay đơn giản là muốn cùng xây dựng
-            tương lai gaming Việt Nam — hãy bắt đầu một cuộc trò chuyện.
-          </p>
-          <div className="ab-cta-actions">
-            <Link href="/contact" className="ab-btn ab-btn-primary">Liên hệ ngay</Link>
-            <Link href="/pricing" className="ab-btn ab-btn-ghost">Xem gói hợp tác</Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <style jsx global>{`
-        /* ╔════════════════════════════════════════════════════════════════╗
-           ║  ABOUT — Dark Luxe, Black Hole brand                            ║
-           ╚════════════════════════════════════════════════════════════════╝ */
-        .ab-root {
-          --ab-bg: #08060f;
-          --ab-surface: #0d0a18;
-          --ab-purple: #6c5ce7;
-          --ab-purple-light: #8b7ae8;
-          --ab-purple-bright: #b09cff;
-          --ab-hair: rgba(139, 122, 232, 0.14);
-          --ab-text: #ffffff;
-          --ab-text-soft: rgba(255, 255, 255, 0.62);
-          --ab-text-mute: rgba(255, 255, 255, 0.38);
-          --ab-maxw: 1280px;
-          --ab-pad: clamp(20px, 5vw, 80px);
-
+        .ab2-root {
+          --ab2-bg: #08060f;
+          --ab2-panel: #0f0b1e;
+          --ab2-panel-2: #17112e;
+          --ab2-text: rgba(255, 255, 255, 0.96);
+          --ab2-soft: rgba(255, 255, 255, 0.68);
+          --ab2-muted: rgba(255, 255, 255, 0.45);
+          --ab2-line: rgba(176, 156, 255, 0.18);
+          --ab2-accent: #8b7ae8;
+          --ab2-accent-strong: #b09cff;
+          --ab2-radius: 14px;
+          --ab2-ring-x: 50%;
+          --ab2-ring-y: 39.5%;
+          --ab2-frame-y-offset: -26px;
           position: relative;
+          color: var(--ab2-text);
+          background: var(--ab2-bg);
+          overflow: clip;
+          font-family: var(--font-body-regular, Arial, sans-serif);
+        }
+
+        .ab2-root::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background: #08060f;
+        }
+
+        .ab2-fixed-video {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
           z-index: 1;
-          background: var(--ab-bg);
-          color: var(--ab-text);
-          font-family: var(--font-body-regular, 'Inter', sans-serif);
+          pointer-events: none;
+          transform: none;
+          transform-origin: 50% 50%;
+          filter: contrast(1.32) brightness(1.12) saturate(1.32);
+          visibility: visible;
+          will-change: transform, filter;
+        }
+
+        .ab2-hero {
+          position: relative;
+          height: 240dvh;
+          min-height: 1600px;
+          z-index: 3;
+          background-color: transparent !important;
+        }
+
+        .ab2-hero-sticky {
+          position: sticky;
+          top: 0;
+          min-height: max(760px, 100dvh);
+          height: 100dvh;
+          display: flex;
+          overflow: hidden;
+          isolation: isolate;
+          padding: clamp(96px, 10vh, 128px) clamp(20px, 5vw, 80px) clamp(42px, 6vh, 74px);
+          background: transparent !important;
+          background-color: transparent !important;
+        }
+
+        .ab2-portal {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
           overflow: hidden;
         }
 
-        .ab-root .ab-section-kicker {
-          display: inline-block;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: var(--ab-purple-light);
-          margin-bottom: 22px;
+        .ab2-portal-frame-shell {
+          position: absolute;
+          left: 50%;
+          top: calc(50% + var(--ab2-frame-y-offset));
+          z-index: 2;
+          width: max(100vw, 133.333dvh);
+          max-width: none;
+          transform: translate(calc(var(--ab2-ring-x) * -1), calc(var(--ab2-ring-y) * -1));
+          transform-origin: var(--ab2-ring-x) var(--ab2-ring-y);
+          will-change: transform;
         }
 
-        /* ── Shared buttons ─────────────────────────────────────────────── */
-        .ab-root .ab-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 14px 28px;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 13px;
-          font-weight: 800;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          text-decoration: none;
-          border-radius: 6px;
-          transition: transform 0.25s ease, filter 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-        }
-        .ab-root .ab-btn-primary {
-          color: #fff;
-          background: linear-gradient(135deg, var(--ab-purple), #4b22d8);
-          box-shadow: 0 10px 30px rgba(75, 34, 216, 0.4);
-        }
-        .ab-root .ab-btn-primary:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.12);
-        }
-        .ab-root .ab-btn-ghost {
-          color: var(--ab-purple-bright);
-          border: 1px solid rgba(139, 122, 232, 0.3);
-          background: rgba(139, 122, 232, 0.04);
-        }
-        .ab-root .ab-btn-ghost:hover {
-          border-color: rgba(139, 122, 232, 0.6);
-          background: rgba(139, 122, 232, 0.1);
-          transform: translateY(-2px);
+        .ab2-portal-frame {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-width: none;
+          opacity: 1;
+          filter: brightness(0.9) saturate(1.04);
+          transform-origin: var(--ab2-ring-x) var(--ab2-ring-y);
+          user-select: none;
+          will-change: transform, opacity, filter;
         }
 
-        /* ╔═══ HERO ═══╗ */
-        .ab-hero {
-          position: relative;
-          min-height: 100dvh;
+        .ab2-hero-shade {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          pointer-events: none;
+          background:
+            radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%, rgba(8, 6, 15, 0.02) 50%, rgba(8, 6, 15, 0.34) 88%),
+            linear-gradient(180deg, rgba(8, 6, 15, 0) 0%, rgba(8, 6, 15, 0.28) 100%);
+        }
+
+        .ab2-hero-caption {
+          position: absolute;
+          left: clamp(20px, 5vw, 80px);
+          bottom: clamp(28px, 5vh, 58px);
+          z-index: 3;
+          max-width: 360px;
+          pointer-events: auto;
+        }
+
+        .ab2-breadcrumb {
           display: flex;
           align-items: center;
-          padding: clamp(120px, 16vh, 200px) var(--ab-pad) clamp(80px, 10vh, 120px);
+          gap: 10px;
+          margin-bottom: 12px;
+          color: rgba(255, 255, 255, 0.55);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .ab2-breadcrumb a {
+          color: #08d8dc;
+          text-decoration: none;
+        }
+
+        .ab2-breadcrumb span:last-child {
+          color: var(--ab2-accent-strong);
+        }
+
+        .ab2-hero-caption p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.74);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: clamp(14px, 1.2vw, 17px);
+          font-weight: 700;
+          line-height: 1.55;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          text-shadow: 0 8px 26px rgba(0, 0, 0, 0.72);
+        }
+
+        .ab2-kicker {
+          margin: 0 0 18px;
+          color: var(--ab2-accent-strong);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+        }
+
+        .ab2-hero h1,
+        .ab2-section-head h2,
+        .ab2-field-copy h2,
+        .ab2-operating h2,
+        .ab2-cta h2 {
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          color: #f7f4ff;
+        }
+
+        .ab2-hero h1 {
+          max-width: 10.8ch;
+          margin: 0 0 26px;
+          font-size: clamp(46px, 7.4vw, 96px);
+          line-height: 0.98;
+          text-shadow: 0 10px 40px rgba(0, 0, 0, 0.52);
+        }
+
+        .ab2-hero-sub {
+          max-width: 46ch;
+          margin: 0 0 34px;
+          color: rgba(255, 255, 255, 0.78);
+          font-size: clamp(16px, 1.3vw, 19px);
+          line-height: 1.72;
+        }
+
+        .ab2-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px;
+        }
+
+        .ab2-btn {
+          display: inline-flex;
+          min-height: 50px;
+          align-items: center;
+          justify-content: center;
+          padding: 0 24px;
+          border-radius: 8px;
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          text-decoration: none;
+          white-space: nowrap;
+          transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        .ab2-btn:active {
+          transform: translateY(1px) scale(0.99);
+        }
+
+        .ab2-btn-primary {
+          background: linear-gradient(135deg, #8b7ae8, #5a33d6);
+          color: #fff;
+          box-shadow: 0 18px 46px rgba(67, 34, 175, 0.34);
+        }
+
+        .ab2-btn-primary:hover {
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, #a18fff, #6841e7);
+        }
+
+        .ab2-btn-secondary {
+          border: 1px solid rgba(176, 156, 255, 0.34);
+          color: #e4ddff;
+          background: rgba(14, 10, 30, 0.58);
+        }
+
+        .ab2-btn-secondary:hover {
+          transform: translateY(-2px);
+          border-color: rgba(176, 156, 255, 0.72);
+          background: rgba(139, 122, 232, 0.14);
+        }
+
+        .ab2-content {
+          position: relative;
+          z-index: 4;
           background:
-            radial-gradient(120% 80% at 78% 8%, rgba(108, 92, 231, 0.22) 0%, transparent 55%),
-            linear-gradient(180deg, #0c0820 0%, #08060f 72%);
+            linear-gradient(180deg, rgba(8, 6, 15, 0.18) 0%, rgba(8, 6, 15, 0.9) 220px, #08060f 430px),
+            #08060f;
         }
-        .ab-hero-grain {
-          position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
-          background-image:
-            linear-gradient(rgba(139,122,232,1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,122,232,1) 1px, transparent 1px);
-          background-size: 90px 90px;
-          mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
-          -webkit-mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
+
+        .ab2-proof {
+          width: min(100%, 1280px);
+          margin: 0 auto;
+          padding: 28px clamp(20px, 5vw, 80px);
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          border-top: 1px solid var(--ab2-line);
+          border-bottom: 1px solid var(--ab2-line);
+          color: rgba(255, 255, 255, 0.76);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          font-size: 12px;
         }
-        .ab-hero-lightwell {
-          position: absolute; top: -20%; right: -5%;
-          width: 60vw; height: 60vw; max-width: 760px; max-height: 760px;
-          pointer-events: none;
-          background: radial-gradient(closest-side, rgba(124, 92, 255, 0.18), transparent 70%);
-          filter: blur(20px);
+
+        .ab2-proof span + span {
+          border-left: 1px solid var(--ab2-line);
+          padding-left: clamp(16px, 3vw, 38px);
         }
-        .ab-hero-inner {
-          position: relative; z-index: 2;
-          width: 100%; max-width: var(--ab-maxw); margin: 0 auto;
+
+        .ab2-manifesto {
+          width: min(100%, 1280px);
+          margin: 0 auto;
+          padding: clamp(84px, 12vw, 156px) clamp(20px, 5vw, 80px);
+        }
+
+        .ab2-manifesto p {
+          max-width: 25ch;
+          margin: 0;
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-size: clamp(30px, 4.4vw, 60px);
+          font-weight: 900;
+          line-height: 1.18;
+          letter-spacing: -0.02em;
+          color: #fff;
+        }
+
+        .ab2-word {
+          opacity: 0.18;
+        }
+
+        .ab2-capabilities,
+        .ab2-operating,
+        .ab2-cta {
+          width: min(100%, 1280px);
+          margin: 0 auto;
+          padding: clamp(72px, 10vw, 130px) clamp(20px, 5vw, 80px);
+        }
+
+        .ab2-section-head {
+          max-width: 720px;
+          margin-bottom: clamp(36px, 6vw, 70px);
+        }
+
+        .ab2-section-head h2,
+        .ab2-field-copy h2,
+        .ab2-operating h2,
+        .ab2-cta h2 {
+          margin: 0 0 18px;
+          font-size: clamp(30px, 4vw, 54px);
+          line-height: 1.08;
+        }
+
+        .ab2-section-head p,
+        .ab2-field-copy p,
+        .ab2-operating-item p,
+        .ab2-cta p {
+          margin: 0;
+          color: var(--ab2-soft);
+          font-size: 16px;
+          line-height: 1.78;
+        }
+
+        .ab2-cap-grid {
           display: grid;
           grid-template-columns: 1.15fr 0.85fr;
-          gap: clamp(32px, 5vw, 80px);
-          align-items: center;
-        }
-        .ab-hero-left { min-width: 0; }
-
-        .ab-breadcrumb {
-          display: flex; align-items: center; gap: 10px;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
-          margin-bottom: 28px;
-          transform: translateY(8px);
-        }
-        .ab-breadcrumb a { color: var(--ab-text-mute); text-decoration: none; transition: color 0.2s; }
-        .ab-breadcrumb a:hover { color: var(--ab-purple-bright); }
-        .ab-bc-sep { color: rgba(139, 122, 232, 0.4); }
-        .ab-bc-current { color: var(--ab-purple-bright); }
-
-        .ab-hero-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(44px, 7vw, 92px);
-          line-height: 1.02;
-          letter-spacing: -0.02em;
-          margin: 0 0 28px;
-          color: #fff;
-        }
-        .ab-hero-title .ab-line {
-          display: block;
-          overflow: hidden;
-          padding-bottom: 0.06em;
-        }
-        .ab-hero-title .ab-line span { display: block; }
-        .ab-hero-title .ab-line-accent span {
-          color: var(--ab-purple-bright);
-          text-shadow: 0 0 40px rgba(139, 122, 232, 0.5);
+          grid-auto-rows: minmax(260px, auto);
+          gap: 18px;
         }
 
-        .ab-hero-sub {
-          font-size: clamp(15px, 1.4vw, 18px);
-          line-height: 1.8;
-          color: var(--ab-text-soft);
-          max-width: 46ch;
-          margin: 0 0 36px;
-          transform: translateY(16px);
-        }
-        .ab-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; transform: translateY(16px); }
-
-        .ab-hero-media { position: relative; }
-        .ab-hero-media-inner {
+        .ab2-cap-card {
           position: relative;
-          border-radius: 14px;
           overflow: hidden;
-          aspect-ratio: 4 / 5;
-          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+          min-height: 300px;
+          border-radius: var(--ab2-radius);
+          background: var(--ab2-panel);
+          border: 1px solid var(--ab2-line);
         }
-        .ab-hero-media-inner img {
-          width: 100%; height: 110%; object-fit: cover; display: block;
-        }
-        .ab-hero-media-tint {
-          position: absolute; inset: 0;
-          background: linear-gradient(180deg, rgba(108,92,231,0.12) 0%, transparent 35%, rgba(8,6,15,0.72) 100%);
-          box-shadow: inset 0 0 0 1px rgba(139, 122, 232, 0.22);
-          border-radius: 14px;
-        }
-        .ab-hero-tag {
-          position: absolute; left: -18px; bottom: 34px;
-          display: flex; flex-direction: column; align-items: flex-start;
-          padding: 14px 20px;
-          background: rgba(13, 10, 24, 0.9);
-          border: 1px solid rgba(139, 122, 232, 0.3);
-          border-radius: 10px;
-          backdrop-filter: blur(10px);
-        }
-        .ab-hero-tag-num {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 11px; letter-spacing: 0.2em; color: var(--ab-text-mute);
-        }
-        .ab-hero-tag-year {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: 30px; font-weight: 900; line-height: 1; color: var(--ab-purple-bright);
-          text-shadow: 0 0 24px rgba(139, 122, 232, 0.5);
-        }
-        .ab-hero-scrollcue {
-          position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
-          display: flex; flex-direction: column; align-items: center; gap: 10px;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
-          color: var(--ab-text-mute);
-          z-index: 2;
-        }
-        .ab-hero-scrollcue i {
-          width: 1px; height: 38px;
-          background: linear-gradient(180deg, var(--ab-purple-light), transparent);
-          animation: ab-cue 2s ease-in-out infinite;
-        }
-        @keyframes ab-cue { 0%,100%{ transform: scaleY(0.4); opacity: 0.5; } 50%{ transform: scaleY(1); opacity: 1; } }
 
-        /* ╔═══ MANIFESTO ═══╗ */
-        .ab-manifesto {
-          max-width: var(--ab-maxw); margin: 0 auto;
-          padding: clamp(90px, 13vw, 170px) var(--ab-pad);
-          text-align: left;
+        .ab2-card-1 {
+          grid-row: span 2;
         }
-        .ab-manifesto .ab-section-kicker { display: block; }
-        .ab-manifesto-text {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(24px, 3.6vw, 50px);
-          line-height: 1.32;
-          letter-spacing: -0.01em;
+
+        .ab2-card-4 {
+          background:
+            radial-gradient(circle at 20% 20%, rgba(139, 122, 232, 0.34), transparent 36%),
+            linear-gradient(135deg, #130d29, #08060f);
+        }
+
+        .ab2-card-media {
+          position: absolute;
+          inset: 0;
+        }
+
+        .ab2-card-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.54;
+          filter: saturate(0.98) contrast(1.08);
+        }
+
+        .ab2-card-copy {
+          position: relative;
+          z-index: 1;
+          min-height: inherit;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding: clamp(24px, 3vw, 38px);
+          background: linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.84) 70%);
+        }
+
+        .ab2-card-copy h3 {
+          margin: 0 0 12px;
           color: #fff;
-          max-width: 22ch;
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: clamp(22px, 2.5vw, 34px);
+          font-weight: 900;
+          line-height: 1.12;
+        }
+
+        .ab2-card-copy p {
+          max-width: 44ch;
           margin: 0;
-        }
-        .ab-manifesto-text .sw { color: inherit; font: inherit; }
-
-        /* ╔═══ STATS ═══╗ */
-        .ab-stats {
-          max-width: var(--ab-maxw); margin: 0 auto;
-          padding: clamp(40px, 6vw, 70px) var(--ab-pad);
-          display: grid; grid-template-columns: repeat(4, 1fr);
-          border-top: 1px solid var(--ab-hair);
-          border-bottom: 1px solid var(--ab-hair);
-        }
-        .ab-stat {
-          padding: clamp(16px, 2vw, 30px) clamp(8px, 2vw, 28px);
-          text-align: left;
-        }
-        .ab-stat + .ab-stat { border-left: 1px solid var(--ab-hair); }
-        .ab-stat-num {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(34px, 4.6vw, 62px);
-          line-height: 1;
-          color: var(--ab-purple-bright);
-          font-variant-numeric: tabular-nums;
-          text-shadow: 0 0 30px rgba(139, 122, 232, 0.35);
-          margin-bottom: 12px;
-        }
-        .ab-stat-label {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-          color: var(--ab-text-mute);
+          color: rgba(255, 255, 255, 0.76);
+          line-height: 1.72;
         }
 
-        /* ╔═══ SPLIT FIELDS ═══╗ */
-        .ab-split {
-          max-width: var(--ab-maxw); margin: 0 auto;
-          padding: clamp(70px, 10vw, 130px) var(--ab-pad);
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: clamp(36px, 6vw, 96px);
-          align-items: center;
-        }
-        .ab-split--media-left .ab-split-media { order: 0; }
-        .ab-split-media-inner {
-          position: relative;
-          border-radius: 14px;
-          overflow: hidden;
-          aspect-ratio: 4 / 5;
-          will-change: clip-path, transform;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
-        }
-        .ab-split-media-inner img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .ab-split-media-inner::after {
-          content: ''; position: absolute; inset: 0; border-radius: 14px;
-          box-shadow: inset 0 0 0 1px rgba(139, 122, 232, 0.2);
-          background: linear-gradient(180deg, transparent 55%, rgba(8,6,15,0.55) 100%);
-        }
-        .ab-split-copy { min-width: 0; }
-        .ab-split-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(28px, 3.4vw, 46px);
-          line-height: 1.16;
-          letter-spacing: -0.02em;
-          color: #fff;
-          margin: 0 0 26px;
-        }
-        .ab-split-body {
-          font-size: 15.5px; line-height: 1.85; color: var(--ab-text-soft);
-          max-width: 54ch; margin: 0 0 18px;
-        }
-        .ab-split-body:last-child { margin-bottom: 0; }
-
-        /* ╔═══ VALUES RAIL ═══╗ */
-        .ab-values {
-          max-width: var(--ab-maxw); margin: 0 auto;
-          padding: clamp(70px, 10vw, 130px) var(--ab-pad);
-        }
-        .ab-values-head { margin-bottom: clamp(40px, 6vw, 72px); max-width: 32ch; }
-        .ab-values-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(28px, 3.6vw, 48px);
-          line-height: 1.14;
-          letter-spacing: -0.02em;
-          color: #fff;
-          margin: 0;
-        }
-        .ab-values-rail { display: flex; flex-direction: column; }
-        .ab-vrow {
-          position: relative;
+        .ab2-field {
+          width: min(100%, 1280px);
+          margin: 0 auto;
+          padding: clamp(72px, 10vw, 130px) clamp(20px, 5vw, 80px);
           display: grid;
-          grid-template-columns: clamp(60px, 8vw, 110px) 1fr;
-          gap: clamp(20px, 4vw, 60px);
-          padding: clamp(28px, 3.5vw, 46px) 0;
+          grid-template-columns: minmax(0, 0.96fr) minmax(280px, 0.64fr);
+          align-items: end;
+          gap: clamp(28px, 5vw, 76px);
+        }
+
+        .ab2-field-media {
+          overflow: hidden;
+          border-radius: var(--ab2-radius);
+          border: 1px solid var(--ab2-line);
+          aspect-ratio: 16 / 10;
+        }
+
+        .ab2-field-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          filter: saturate(0.9) contrast(1.06) brightness(0.86);
+        }
+
+        .ab2-field-copy {
+          padding-bottom: clamp(8px, 3vw, 40px);
+        }
+
+        .ab2-operating {
+          border-top: 1px solid var(--ab2-line);
+        }
+
+        .ab2-operating-grid {
+          display: grid;
+          grid-template-columns: 0.92fr 1.08fr;
+          gap: clamp(34px, 6vw, 90px);
           align-items: start;
         }
-        .ab-vrow-line {
-          position: absolute; top: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, rgba(139,122,232,0.5), rgba(139,122,232,0.06) 70%, transparent);
-          transform-origin: left center;
-        }
-        .ab-vrow:last-child::after {
-          content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-          background: linear-gradient(90deg, rgba(139,122,232,0.5), rgba(139,122,232,0.06) 70%, transparent);
-        }
-        .ab-vrow-no {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(22px, 2.4vw, 34px);
-          color: rgba(139, 122, 232, 0.55);
-          font-variant-numeric: tabular-nums;
-          line-height: 1.2;
-        }
-        .ab-vrow-title {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: clamp(18px, 1.8vw, 24px);
-          font-weight: 700;
-          color: #fff;
-          margin: 0 0 12px;
-          letter-spacing: -0.01em;
-        }
-        .ab-vrow-body {
-          font-size: 15px; line-height: 1.8; color: var(--ab-text-soft);
-          max-width: 60ch; margin: 0;
+
+        .ab2-operating-list {
+          display: grid;
+          gap: 16px;
         }
 
-        /* ╔═══ TIMELINE ═══╗ */
-        .ab-tl {
-          max-width: var(--ab-maxw); margin: 0 auto;
-          padding: clamp(70px, 10vw, 130px) var(--ab-pad);
-        }
-        .ab-tl-head { margin-bottom: clamp(48px, 6vw, 80px); max-width: 30ch; }
-        .ab-tl-body { position: relative; padding-left: clamp(28px, 4vw, 48px); }
-        .ab-tl-line {
-          position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px;
-          background: rgba(139, 122, 232, 0.12);
-          border-radius: 2px; overflow: hidden;
-        }
-        .ab-tl-line-fill {
-          position: absolute; inset: 0;
-          background: linear-gradient(180deg, var(--ab-purple-light), rgba(108,92,231,0.2));
-          transform-origin: top center;
-          box-shadow: 0 0 12px rgba(139, 122, 232, 0.6);
-        }
-        .ab-tl-item {
-          position: relative;
-          padding: clamp(18px, 2.5vw, 30px) 0 clamp(18px, 2.5vw, 30px) clamp(28px, 4vw, 52px);
-        }
-        .ab-tl-dot {
-          position: absolute; left: calc(clamp(28px, 4vw, 48px) * -1 - 1px); top: clamp(24px, 3vw, 36px);
-          width: 12px; height: 12px; border-radius: 50%;
-          background: var(--ab-purple-bright);
-          box-shadow: 0 0 0 4px rgba(139, 122, 232, 0.16), 0 0 16px rgba(139, 122, 232, 0.8);
-          transform: translateX(-50%);
-          left: clamp(-44px, -4vw, -28px);
-        }
-        .ab-tl-year {
-          display: inline-block;
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: 13px; letter-spacing: 0.08em;
-          color: var(--ab-purple-light);
-          font-variant-numeric: tabular-nums;
-          margin-bottom: 8px;
-        }
-        .ab-tl-title {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: clamp(17px, 1.7vw, 22px); font-weight: 700;
-          color: #fff; margin: 0 0 8px; letter-spacing: -0.01em;
-        }
-        .ab-tl-desc {
-          font-size: 14.5px; line-height: 1.8; color: var(--ab-text-soft);
-          max-width: 58ch; margin: 0;
+        .ab2-operating-item {
+          border-radius: var(--ab2-radius);
+          border: 1px solid var(--ab2-line);
+          background: rgba(255, 255, 255, 0.035);
+          padding: clamp(20px, 2.5vw, 30px);
         }
 
-        /* ╔═══ CTA ═══╗ */
-        .ab-cta {
-          position: relative; overflow: hidden;
-          padding: clamp(90px, 12vw, 150px) var(--ab-pad);
+        .ab2-cta {
           text-align: center;
+          padding-bottom: clamp(94px, 12vw, 150px);
         }
-        .ab-cta-lightwell {
-          position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-          width: 90vw; height: 60vh; max-width: 900px;
-          pointer-events: none;
-          background: radial-gradient(closest-side, rgba(108, 92, 231, 0.16), transparent 70%);
-          filter: blur(10px);
-        }
-        .ab-cta-inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
-        .ab-cta-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900;
-          font-size: clamp(32px, 5vw, 62px);
-          line-height: 1.08;
-          letter-spacing: -0.02em;
-          color: #fff;
-          margin: 0 0 20px;
-          text-shadow: 0 0 50px rgba(139, 122, 232, 0.35);
-        }
-        .ab-cta-sub {
-          font-size: 16px; line-height: 1.8; color: var(--ab-text-soft);
-          max-width: 52ch; margin: 0 auto 38px;
-        }
-        .ab-cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-        /* ╔═══ RESPONSIVE ═══╗ */
+        .ab2-cta h2 {
+          max-width: 780px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .ab2-cta p {
+          max-width: 54ch;
+          margin: 0 auto 34px;
+        }
+
+        .ab2-cta .ab2-actions {
+          justify-content: center;
+        }
+
         @media (max-width: 991px) {
-          .ab-hero-inner { grid-template-columns: 1fr; gap: 48px; }
-          .ab-hero-media { max-width: 460px; }
-          .ab-split { grid-template-columns: 1fr; gap: 36px; }
-          /* media always below copy on mobile for a clean reading order */
-          .ab-split--media-left .ab-split-media,
-          .ab-split--media-right .ab-split-media { order: 2; }
-          .ab-split-media-inner { aspect-ratio: 16 / 11; max-width: 560px; }
-          .ab-stats { grid-template-columns: repeat(2, 1fr); }
-          .ab-stat:nth-child(3) { border-left: none; }
-          .ab-stat:nth-child(3), .ab-stat:nth-child(4) { border-top: 1px solid var(--ab-hair); }
+          .ab2-hero-sticky {
+            padding-top: 100px;
+          }
+
+          .ab2-operating-grid,
+          .ab2-field {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-proof {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+          }
+
+          .ab2-proof span {
+            padding: 16px 0;
+          }
+
+          .ab2-proof span + span {
+            border-left: 0;
+            padding-left: 0;
+          }
+
+          .ab2-proof span:nth-child(even) {
+            border-left: 1px solid var(--ab2-line);
+            padding-left: 18px;
+          }
+
+          .ab2-proof span:nth-child(n + 3) {
+            border-top: 1px solid var(--ab2-line);
+          }
+
+          .ab2-cap-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-card-1 {
+            grid-row: auto;
+          }
         }
 
         @media (max-width: 575px) {
-          .ab-hero-tag { left: 12px; }
-          .ab-stats { grid-template-columns: 1fr 1fr; }
-          .ab-vrow { grid-template-columns: 1fr; gap: 10px; }
-          .ab-vrow-no { font-size: 20px; }
+          .ab2-hero {
+            min-height: 100dvh;
+            height: 190dvh;
+          }
+
+          .ab2-portal-frame-shell {
+            width: max(170vw, 133.333dvh);
+          }
+
+          .ab2-hero-caption {
+            right: 20px;
+          }
+
+          .ab2-breadcrumb {
+            font-size: 12px;
+          }
+
+          .ab2-actions {
+            width: 100%;
+          }
+
+          .ab2-btn {
+            width: 100%;
+          }
+
+          .ab2-cap-card {
+            min-height: 260px;
+          }
         }
 
-        /* Reduced motion: everything visible, no transform jank */
+        @media (max-width: 767px) {
+          .ab2-fixed-video {
+            position: absolute;
+            height: 100dvh;
+            transform: none !important;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .ab-hero-eyebrow, .ab-hero-sub, .ab-hero-cta, .ab-hero-media { opacity: 1 !important; visibility: visible !important; transform: none !important; }
-          .ab-hero-title .ab-line span { transform: none !important; }
-          .ab-manifesto-text .sw { opacity: 1 !important; }
-          .ab-hero-scrollcue i { animation: none; }
+          .ab2-portal-frame,
+          .ab2-reveal {
+            opacity: 1 !important;
+            visibility: visible !important;
+            filter: none !important;
+          }
+
+          .ab2-word {
+            opacity: 1 !important;
+          }
         }
       `}</style>
     </div>

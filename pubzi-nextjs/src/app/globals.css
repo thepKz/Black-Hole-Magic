@@ -16,6 +16,9 @@ body {
      the "hidden" line stays as fallback for browsers without clip support. */
   overflow-x: hidden;
   overflow-x: clip;
+  /* Dark backdrop so transparent sections (e.g. the About hero, which lets the
+     fixed portal/video plate show through) never flash white. */
+  background: #08060f;
 }
 
 a {
