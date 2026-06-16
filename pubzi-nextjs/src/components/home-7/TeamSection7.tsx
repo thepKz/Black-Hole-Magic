@@ -355,6 +355,10 @@ export default function TeamSection7() {
           .ptn-section {
             margin-top: -58px;
             padding: 116px 0 100px;
+            background:
+              radial-gradient(ellipse 75% 35% at 15% 20%, rgba(139, 122, 232, 0.11), transparent 55%),
+              radial-gradient(ellipse 50% 28% at 88% 70%, rgba(0, 206, 201, 0.07), transparent 50%),
+              linear-gradient(180deg, #080614 0%, #080614 26%, #090716 58%, #080614 100%);
           }
 
           .ptn-container {

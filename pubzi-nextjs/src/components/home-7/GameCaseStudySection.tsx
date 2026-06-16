@@ -542,9 +542,16 @@ export default function GameCaseStudySection() {
             height: 230px;
           }
 
-          .game-panel-meta {
-            opacity: 1;
-            transform: none;
+          /* The key-art already has the game title baked in, so the overlay
+             title + meta read as duplicate text on small panels — hide them
+             and let the art (plus the index number) carry the panel. */
+          .game-panel-info,
+          .game-panel-tint {
+            display: none;
+          }
+
+          .game-panel-art {
+            background-position: center;
           }
         }
 
@@ -559,6 +566,15 @@ export default function GameCaseStudySection() {
 
           .games-head {
             margin-bottom: 44px;
+          }
+
+          /* Tone down the all-caps marquee on mobile so it doesn't shout. */
+          .games-marquee-item {
+            text-transform: none;
+            letter-spacing: 1px;
+            font-size: 13px;
+            gap: 18px;
+            padding-right: 18px;
           }
         }
       `}</style>

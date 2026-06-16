@@ -580,6 +580,10 @@ export default function TestimonialSection7() {
         @media (max-width: 760px) {
           .tst-section {
             padding: 44px 0 64px;
+            background:
+              radial-gradient(ellipse 65% 30% at 20% 15%, rgba(139, 122, 232, 0.12), transparent 55%),
+              radial-gradient(ellipse 45% 25% at 80% 85%, rgba(82, 74, 160, 0.09), transparent 50%),
+              linear-gradient(180deg, #080614 0%, #07050f 54%, #080614 100%);
           }
 
           .tst-scroll-rail {

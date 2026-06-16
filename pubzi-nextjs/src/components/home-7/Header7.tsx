@@ -600,9 +600,9 @@ export default function Header7() {
         #header-sticky.bh-header .bh-burger .sidebar__toggle {
           width: 44px;
           height: 44px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           padding: 0;
           cursor: pointer;
           appearance: none;
@@ -620,9 +620,12 @@ export default function Header7() {
         #header-sticky.bh-header .bh-burger-bars {
           display: inline-flex;
           flex-direction: column;
+          align-items: center;
           justify-content: center;
           gap: 4px;
           width: 20px;
+          height: 16px;
+          line-height: 0;
         }
 
         #header-sticky.bh-header .bh-burger-bars span {
@@ -639,6 +642,16 @@ export default function Header7() {
         }
 
         @media (max-width: 1199px) {
+          /* Trên mobile header luôn có nền đặc dù ở top — tránh content phía
+             sau lòi qua header trong suốt. */
+          #header-sticky.bh-header.is-at-top,
+          #header-sticky.bh-header.is-at-top.header-7,
+          #header-sticky.bh-header.is-at-top.header-2 {
+            background-color: rgba(6, 6, 10, 0.94) !important;
+            background-image: none !important;
+            border-bottom-color: rgba(112, 90, 255, 0.18) !important;
+          }
+
           #header-sticky.bh-header {
             height: 66px !important;
             min-height: 66px !important;
@@ -675,6 +688,10 @@ export default function Header7() {
 
           #header-sticky.bh-header .header-wordmark {
             font-size: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
           }
 
           #header-sticky .header-electric-btn,
@@ -686,6 +703,8 @@ export default function Header7() {
           /* show the hamburger on mobile/tablet */
           #header-sticky.bh-header .bh-burger {
             display: inline-flex !important;
+            align-items: center;
+            align-self: center;
           }
         }
 

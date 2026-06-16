@@ -125,6 +125,19 @@ export default function AboutSection7() {
 
   return (
     <section ref={wrapperRef} className="about-story about-section-purple">
+      {/* Decorative tech backdrop — mobile only (hidden ≥768px). Faint grid,
+          thin diagonal beams and small particles, all kept at low opacity so
+          it reads as texture, not decoration. */}
+      <div className="about-tech-fx" aria-hidden="true">
+        <span className="atf-grid" />
+        <span className="atf-beam atf-beam-1" />
+        <span className="atf-beam atf-beam-2" />
+        <span className="atf-dot atf-dot-1" />
+        <span className="atf-dot atf-dot-2" />
+        <span className="atf-dot atf-dot-3" />
+        <span className="atf-dot atf-dot-4" />
+        <span className="atf-dot atf-dot-5" />
+      </div>
       <div className="about-sticky">
         <div ref={trackRef} className="about-model-track">
           <div className="about-ellipse">
@@ -139,8 +152,8 @@ export default function AboutSection7() {
           <div className="stage-inner">
             <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <h2 className="glow-text stage-finale">
-              Local Partner chiến lược
-              <br />
+              Local Partner chiến lược{' '}
+              <br className="finale-break" />
               cho thị trường game Việt Nam
             </h2>
           </div>
@@ -191,6 +204,11 @@ export default function AboutSection7() {
 
         .about-sticky {
           position: relative;
+        }
+
+        /* Tech backdrop hidden by default; only shown in stacked/mobile mode. */
+        .about-tech-fx {
+          display: none;
         }
 
         .stage-kicker {
@@ -388,27 +406,110 @@ export default function AboutSection7() {
         /* ===== Stacked mode: mobile or reduced motion ===== */
         @media (max-width: 767px), (prefers-reduced-motion: reduce) {
           .about-story {
+            position: relative;
+            overflow: hidden;
             padding: 72px 0 56px;
-            /* solid backdrop on stacked mode — backdrop-filter is too heavy here */
-            background: #0a0718;
+            /* Stacked backdrop bridging both seams on mobile: top fades in from
+               the hero's end color (#06060A), bottom settles to the next
+               section's top color (#080614 — ServiceSection), so hero→about and
+               about→service both read as one continuous gradient, no hard line. */
+            background: linear-gradient(180deg, #06060a 0%, #0a0718 220px, #0a0718 calc(100% - 200px), #080614 100%);
+          }
+
+          /* ---- Tech backdrop (mobile only) ---- */
+          .about-tech-fx {
+            display: block;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+          }
+
+          /* Keep all real content above the texture. */
+          .about-sticky {
+            position: relative;
+            z-index: 1;
+          }
+
+          /* Faint technical grid. */
+          .atf-grid {
+            position: absolute;
+            inset: -2px;
+            background-image:
+              linear-gradient(rgba(176, 156, 255, 0.5) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(176, 156, 255, 0.5) 1px, transparent 1px);
+            background-size: 46px 46px;
+            opacity: 0.06;
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 0%, transparent 78%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 0%, transparent 78%);
+          }
+
+          /* Thin purple beams drifting on a diagonal. */
+          .atf-beam {
+            position: absolute;
+            top: -20%;
+            width: 1px;
+            height: 140%;
+            background: linear-gradient(180deg, transparent, rgba(176, 156, 255, 0.9), transparent);
+            opacity: 0.12;
+            filter: blur(0.4px);
+            transform: rotate(18deg);
+            will-change: transform;
+          }
+
+          .atf-beam-1 {
+            left: 26%;
+            animation: atf-beam-drift 13s ease-in-out infinite;
+          }
+
+          .atf-beam-2 {
+            left: 68%;
+            height: 120%;
+            opacity: 0.08;
+            animation: atf-beam-drift 17s ease-in-out infinite reverse;
+            animation-delay: -4s;
+          }
+
+          @keyframes atf-beam-drift {
+            0%, 100% { transform: rotate(18deg) translateX(-10px); }
+            50% { transform: rotate(18deg) translateX(18px); }
+          }
+
+          /* Small particles. */
+          .atf-dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(199, 186, 255, 0.9);
+            box-shadow: 0 0 6px rgba(139, 122, 232, 0.8);
+            opacity: 0.14;
+            will-change: transform, opacity;
+            animation: atf-dot-float 9s ease-in-out infinite;
+          }
+
+          .atf-dot-1 { left: 14%; top: 22%; animation-delay: 0s; }
+          .atf-dot-2 { left: 82%; top: 16%; animation-delay: -2s; width: 2px; height: 2px; }
+          .atf-dot-3 { left: 38%; top: 64%; animation-delay: -4s; }
+          .atf-dot-4 { left: 70%; top: 72%; animation-delay: -6s; width: 2px; height: 2px; }
+          .atf-dot-5 { left: 54%; top: 40%; animation-delay: -1.5s; }
+
+          @keyframes atf-dot-float {
+            0%, 100% { transform: translateY(0); opacity: 0.06; }
+            50% { transform: translateY(-14px); opacity: 0.16; }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .atf-beam, .atf-dot { animation: none; }
           }
 
           .about-model-track {
-            position: relative;
-            width: min(100%, 520px);
-            height: 46vh;
-            min-height: 320px;
-            margin: 0 auto;
+            display: none;
           }
 
           .about-ellipse {
-            width: min(92vw, 420px);
-            bottom: 8%;
-          }
-
-          .about-ellipse img {
-            opacity: 0.82;
-            filter: brightness(1.04) saturate(1.05) drop-shadow(0 0 34px rgba(108, 92, 231, 0.45));
+            display: none;
           }
 
           .about-3d-stage {
@@ -418,6 +519,35 @@ export default function AboutSection7() {
           .about-stage {
             position: static;
             padding: 30px 24px 0;
+          }
+
+          /* Each stage carries its own "VỀ BLACKHOLE GAME" kicker so it reads
+             correctly while only one is visible at a time on desktop. Stacked
+             on mobile they all show at once — keep the first, drop the repeats. */
+          .stage-1 .stage-kicker,
+          .stage-2 .stage-kicker,
+          .stage-3 .stage-kicker {
+            display: none;
+          }
+
+          /* Body copy on mobile: normal case (not all-caps), left-aligned.
+             Justify is avoided — the body font is monospace, so justify blows
+             the word gaps wide open and the text reads ragged. */
+          .stage-statement,
+          .stage-body {
+            text-transform: none;
+            text-align: left;
+          }
+
+          /* The hard <br> inside the finale heading drops "lược" onto its own
+             line on narrow screens — collapse it to a normal space (the {' '}
+             before it keeps the words apart) and let the heading wrap cleanly. */
+          .stage-finale .finale-break {
+            display: none;
+          }
+
+          .stage-finale {
+            text-wrap: balance;
           }
 
           .stage-finale {

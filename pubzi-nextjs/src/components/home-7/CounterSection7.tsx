@@ -173,7 +173,7 @@ export default function CounterSection7() {
       <div className="ops-container">
         <div className="ops-ledger">
           <div className="ops-ledger-copy">
-            <span className="ops-kicker">SECTION 04 · OPERATING CAPACITY</span>
+         
             <h2 id="ops-title" className="ops-scroll-text">
               <ScrollWords>Năng lực vận hành, bằng số.</ScrollWords>
             </h2>
@@ -456,6 +456,10 @@ export default function CounterSection7() {
         @media (max-width: 760px) {
           .ops-section {
             padding: 82px 0 44px;
+            background:
+              radial-gradient(ellipse 80% 35% at 50% 0%, rgba(139, 122, 232, 0.12), transparent 55%),
+              radial-gradient(ellipse 40% 25% at 90% 75%, rgba(108, 92, 231, 0.08), transparent 50%),
+              linear-gradient(180deg, #080614 0%, #090716 48%, #080614 100%);
           }
 
           .ops-scroll-rail {

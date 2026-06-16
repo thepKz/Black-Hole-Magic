@@ -11,22 +11,22 @@ const CAPABILITIES = [
   {
     title: 'Bản địa hóa sản phẩm',
     desc: 'Điều chỉnh ngôn ngữ, nhịp sự kiện, thanh toán và vận hành theo hành vi người chơi Việt Nam.',
-    media: '/assets/img/home-4/feature-game/game-01.jpg',
+    media: 'https://picsum.photos/seed/bh-localize/800/1000',
   },
   {
     title: 'Tăng trưởng cộng đồng',
     desc: 'Xây dựng cộng đồng thật qua creator, giải đấu, social content và chăm sóc người chơi sau ra mắt.',
-    media: '/assets/img/home-4/popular-game/game-02.jpg',
+    media: 'https://picsum.photos/seed/bh-community/800/1000',
   },
   {
     title: 'Đồng phát hành',
     desc: 'Đi cùng studio từ giai đoạn chuẩn bị thị trường đến live operations, báo cáo và mở rộng doanh thu.',
-    media: '/assets/img/home-4/feature-game/game-02.jpg',
+    media: 'https://picsum.photos/seed/bh-copublish/800/1000',
   },
   {
     title: 'Hiểu thị trường Đông Nam Á',
     desc: 'Dùng dữ liệu vận hành tại Việt Nam làm nền để mở rộng sang các cộng đồng có hành vi tương đồng.',
-    media: '/assets/img/home-7/service-bg.jpg',
+    media: 'https://picsum.photos/seed/bh-sea/800/1000',
   },
 ];
 
@@ -210,7 +210,7 @@ export default function AboutPage() {
 
         <section className="ab2-field ab2-reveal">
           <div className="ab2-field-media">
-            <img src="/assets/img/home-4/hero/hero-bg.jpg" alt="Không gian gaming của BlackHole" />
+            <img src="https://picsum.photos/seed/bh-field/1200/750" alt="Không gian gaming của BlackHole" />
           </div>
           <div className="ab2-field-copy">
             <h2>Từ ra mắt đến vận hành dài hạn</h2>
@@ -780,6 +780,35 @@ export default function AboutPage() {
             position: absolute;
             height: 100dvh;
             transform: none !important;
+          }
+
+          /* Portal: giữ lại ảnh ring nhưng tắt scroll-driven zoom trên mobile —
+             chỉ hiện static, không scale 6.4x gây chiếm toàn màn hình. */
+          .ab2-portal-frame {
+            transform: none !important;
+          }
+
+          .ab2-portal-frame-shell {
+            transform: translate(-50%, -39.5%) !important;
+          }
+
+          /* Giảm chiều cao hero section trên mobile cho gọn. */
+          .ab2-hero {
+            height: 100dvh;
+            min-height: unset;
+          }
+
+          /* Ẩn hàng proof (PUBLISHING / LIVE OPS...) — 4 cột bị ép xuống
+             2x2, border-top/bottom tạo đường line ngang cứng ngay dưới hero. */
+          .ab2-proof {
+            display: none;
+          }
+
+          /* Blend content vào hero không có seam cứng. */
+          .ab2-content {
+            background:
+              linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.7) 120px, #08060f 300px),
+              #08060f;
           }
         }
 

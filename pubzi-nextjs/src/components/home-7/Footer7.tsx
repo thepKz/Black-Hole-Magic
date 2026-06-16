@@ -755,7 +755,7 @@ export default function Footer7() {
           margin: 0;
         }
         .bhf-desc, .bhf-copy {
-          color: #D8D8E0;
+          color: #ffffff;
           font-family: var(--font-body-regular);
           text-transform: none;
           font-size: 15px;
@@ -997,6 +997,16 @@ export default function Footer7() {
           pointer-events: none;
         }
         @media (max-width: 767px) {
+          .bhf-footer {
+            background-image: radial-gradient(ellipse 90% 30% at 50% 0%, rgba(139, 122, 232, 0.10), transparent 50%);
+          }
+
+          /* Word light-up animation may not trigger on mobile touch scroll —
+             force full opacity so text reads white, not the dim starting state. */
+          .bhf-desc .sw {
+            opacity: 1 !important;
+          }
+
           .bhf-legal {
             grid-template-columns: 1fr;
             padding: 24px 22px;

@@ -133,10 +133,28 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
         }
         .offcanvas__brand span {
           font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 800;
           color: #fff;
           text-shadow: 0 0 16px rgba(108, 92, 231, 0.4);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 140px;
+        }
+
+        .offcanvas__top {
+          gap: 12px;
+        }
+
+        .offcanvas__logo {
+          min-width: 0;
+          flex: 1;
+          overflow: hidden;
+        }
+
+        .offcanvas__close {
+          flex-shrink: 0;
         }
 
         .offcanvas__nav {
@@ -162,7 +180,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
           font-size: 16px;
           font-weight: 700;
           letter-spacing: 0.02em;
-          text-transform: uppercase;
+          text-transform: none;
           color: rgba(243, 241, 255, 0.82) !important;
           text-decoration: none;
           transition: color 0.25s ease, padding-left 0.25s ease;
@@ -197,7 +215,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
           font-size: 14px;
           font-weight: 800;
           letter-spacing: 0.08em;
-          text-transform: uppercase;
+          text-transform: none;
           color: #fff !important;
           text-decoration: none;
           background: linear-gradient(135deg, #6c5ce7, #4b22d8);

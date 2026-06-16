@@ -402,6 +402,21 @@ export default function HeroSection7() {
       }}>
         <div className="hero-contrast-layer" />
 
+        {/* Tech backdrop — mobile only (display:none ≥768px). Grid, diagonal
+            beams, particles. All opacity ≤0.15 so it reads as texture. */}
+        <div className="hero-tech-fx" aria-hidden="true">
+          <span className="htf-grid" />
+          <span className="htf-beam htf-beam-1" />
+          <span className="htf-beam htf-beam-2" />
+          <span className="htf-beam htf-beam-3" />
+          <span className="htf-dot htf-dot-1" />
+          <span className="htf-dot htf-dot-2" />
+          <span className="htf-dot htf-dot-3" />
+          <span className="htf-dot htf-dot-4" />
+          <span className="htf-dot htf-dot-5" />
+          <span className="htf-dot htf-dot-6" />
+        </div>
+
         {/* Corner frame SVG */}
         <svg style={{
           position: 'absolute',
@@ -482,8 +497,102 @@ export default function HeroSection7() {
             }
             .hero-section.hero-7 {
               background:
-                radial-gradient(circle at 50% 38%, rgba(108,92,231,0.30), rgba(40,12,118,0.14) 34%, transparent 60%),
+                radial-gradient(circle at 50% 38%, rgba(108,92,231,0.42), rgba(40,12,118,0.14) 34%, transparent 60%),
                 linear-gradient(180deg, #0a0718 0%, #06060A 100%) !important;
+            }
+          }
+
+          /* Tech backdrop — hidden on desktop, activated only on mobile. */
+          .hero-tech-fx { display: none; }
+
+          @media (max-width: 767px) {
+            .hero-tech-fx {
+              display: block;
+              position: absolute;
+              inset: 0;
+              z-index: 1;
+              pointer-events: none;
+              overflow: hidden;
+            }
+
+            /* Faint technical grid fading out toward edges. */
+            .htf-grid {
+              position: absolute;
+              inset: -1px;
+              background-image:
+                linear-gradient(rgba(176, 156, 255, 0.55) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(176, 156, 255, 0.55) 1px, transparent 1px);
+              background-size: 44px 44px;
+              opacity: 0.14;
+              -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 42%, #000 0%, transparent 82%);
+              mask-image: radial-gradient(ellipse 90% 70% at 50% 42%, #000 0%, transparent 82%);
+            }
+
+            /* Thin diagonal light-purple beams. */
+            .htf-beam {
+              position: absolute;
+              top: -10%;
+              width: 1px;
+              height: 130%;
+              background: linear-gradient(180deg, transparent 0%, rgba(176, 156, 255, 0.95) 50%, transparent 100%);
+              filter: blur(0.5px);
+              transform: rotate(22deg);
+              transform-origin: top center;
+              will-change: transform;
+            }
+
+            .htf-beam-1 {
+              left: 18%;
+              opacity: 0.22;
+              animation: htf-beam-drift 14s ease-in-out infinite;
+            }
+
+            .htf-beam-2 {
+              left: 52%;
+              opacity: 0.14;
+              height: 110%;
+              animation: htf-beam-drift 19s ease-in-out infinite reverse;
+              animation-delay: -5s;
+            }
+
+            .htf-beam-3 {
+              left: 78%;
+              opacity: 0.18;
+              animation: htf-beam-drift 11s ease-in-out infinite;
+              animation-delay: -8s;
+            }
+
+            @keyframes htf-beam-drift {
+              0%, 100% { transform: rotate(22deg) translateX(-12px); }
+              50%       { transform: rotate(22deg) translateX(16px); }
+            }
+
+            /* Small glowing particles. */
+            .htf-dot {
+              position: absolute;
+              width: 2px;
+              height: 2px;
+              border-radius: 50%;
+              background: #c4b8ff;
+              box-shadow: 0 0 5px 1px rgba(139, 122, 232, 0.9);
+              will-change: transform, opacity;
+              animation: htf-dot-float 9s ease-in-out infinite;
+            }
+
+            .htf-dot-1 { left: 9%;  top: 18%; opacity: 0.15; animation-delay: 0s; }
+            .htf-dot-2 { left: 31%; top: 72%; opacity: 0.10; animation-delay: -2s;  width: 3px; height: 3px; }
+            .htf-dot-3 { left: 61%; top: 24%; opacity: 0.13; animation-delay: -4s; }
+            .htf-dot-4 { left: 85%; top: 60%; opacity: 0.09; animation-delay: -1s;  width: 3px; height: 3px; }
+            .htf-dot-5 { left: 47%; top: 50%; opacity: 0.12; animation-delay: -6s; }
+            .htf-dot-6 { left: 73%; top: 36%; opacity: 0.08; animation-delay: -3s; }
+
+            @keyframes htf-dot-float {
+              0%, 100% { transform: translateY(0px);   opacity: 0.10; }
+              50%       { transform: translateY(-12px); opacity: 0.22; }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+              .htf-beam, .htf-dot { animation: none; }
             }
           }
 

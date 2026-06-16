@@ -415,6 +415,13 @@ export default function ServiceSection7() {
         }
 
         @media (max-width: 767px) {
+          .values-section {
+            background:
+              radial-gradient(ellipse 70% 40% at 85% 12%, rgba(139, 122, 232, 0.14), transparent 60%),
+              radial-gradient(ellipse 50% 30% at 10% 80%, rgba(82, 74, 160, 0.10), transparent 55%),
+              linear-gradient(180deg, #080614 0%, #090716 58%, #070512 100%);
+          }
+
           .values-title {
             font-size: clamp(36px, 10vw, 52px);
           }
