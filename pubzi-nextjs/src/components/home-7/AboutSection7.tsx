@@ -76,15 +76,28 @@ export default function AboutSection7() {
       fadeOut(2, 3.35);
       fadeIn(3, 3.61); // fully in right as the next section starts its wipe
       fadeOut(3, 4.22);
+
+      // Exit: model glides to viewport center, punches up in scale, then
+      // drops off the bottom so the next section reveals cleanly underneath.
       tl.to(track, {
-        x: () => window.innerWidth * 1.08,
-        autoAlpha: 0,
-        scale: 0.88,
-        filter: 'blur(10px)',
-        duration: 0.38,
-        ease: 'power2.in',
+        x: () => (window.innerWidth / 2) - (track!.offsetWidth / 2) - (4 / 100 * window.innerWidth),
+        y: () => (window.innerHeight / 2) - (track!.offsetHeight / 2) - (11 / 100 * window.innerHeight),
+        duration: 0.32,
+        ease: 'power2.inOut',
       }, 4.16);
-      tl.to({}, { duration: 0.4 }, 4.6);
+      tl.to(track, {
+        scale: 1.65,
+        duration: 0.26,
+        ease: 'power1.out',
+      }, 4.48);
+      tl.to(track, {
+        y: () => window.innerHeight * 1.18,
+        scale: 1.5,
+        autoAlpha: 0,
+        duration: 0.44,
+        ease: 'power2.in',
+      }, 4.74);
+      tl.to({}, { duration: 0.18 }, 5.12);
     };
 
     mm.add('(min-width: 1200px) and (prefers-reduced-motion: no-preference)', () => {
@@ -289,17 +302,17 @@ export default function AboutSection7() {
         }
 
         .about-3d-stage {
-          position: relative;
+          position: absolute;
+          inset: -30%;
           z-index: 2;
-          width: 100%;
-          height: 100%;
           filter: contrast(1.12) brightness(1.04)
             drop-shadow(0 0 22px rgba(108, 92, 231, 0.5))
             drop-shadow(0 0 62px rgba(139, 122, 232, 0.42));
         }
 
         .about-3d-stage canvas {
-          position: relative;
+          position: absolute;
+          inset: 0;
           z-index: 1;
           display: block;
           width: 100% !important;
@@ -307,6 +320,8 @@ export default function AboutSection7() {
         }
 
         .about-model-mount {
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
         }
@@ -328,7 +343,7 @@ export default function AboutSection7() {
                client wants it locked. The story now releases naturally and
                the next section follows in normal flow. Height trimmed so the
                final stage doesn't hold a long dead stretch before release. */
-            height: 500vh;
+            height: 560vh;
             margin-bottom: 0;
           }
 
@@ -336,13 +351,7 @@ export default function AboutSection7() {
             position: sticky;
             top: 0;
             height: 100vh;
-            overflow: hidden;
-            /* Glass panel: the video behind is blurred by the hero-exit tween
-               (see HeroSection7) — this layer only tints. No backdrop-filter:
-               re-sampling the whole stack each frame is what melted the GPU. */
-            /* Uniform tint with a small FIXED-SIZE soft top edge (90px) —
-               soft enough that the rising panel has no hard line, small
-               enough that it reads as an edge, not a traveling gradient */
+            overflow: visible;
             background: linear-gradient(180deg, rgba(8, 5, 20, 0) 0, rgba(8, 5, 20, 0.4) 90px, rgba(8, 5, 20, 0.4) 100%);
           }
 
@@ -352,9 +361,10 @@ export default function AboutSection7() {
             top: 11vh;
             width: 38vw;
             height: 78vh;
-            z-index: 3;
+            z-index: 100;
             pointer-events: none;
             will-change: transform;
+            overflow: visible;
           }
 
           .about-model-mount,
@@ -697,7 +707,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       renderer.toneMappingExposure = 1.28;
       mount.appendChild(renderer.domElement);
 
-      camera.position.set(0, 0.16, 6.2);
+      camera.position.set(0, 0.16, 9.5);
       scene.add(modelGroup);
       scene.add(new THREE.AmbientLight(0xffffff, 1.75));
 
@@ -718,8 +728,9 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       scene.add(softFill);
 
       const resize = () => {
-        const width = Math.max(mount.clientWidth, 1);
-        const height = Math.max(mount.clientHeight, 1);
+        const stage = mount.parentElement ?? mount;
+        const width = Math.max(stage.clientWidth, 1);
+        const height = Math.max(stage.clientHeight, 1);
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
@@ -757,7 +768,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       const loader = new GLTFLoader();
       loader.setDRACOLoader(dracoLoader);
       loader.load(
-        '/assets/img/home-7/3d/3d_4.glb',
+        '/assets/img/home-7/3d/3d_9.glb',
         (gltf) => {
           if (disposed) return;
 
@@ -778,7 +789,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
           model.position.sub(center);
           const maxDimension = Math.max(size.x, size.y, size.z);
           if (maxDimension > 0) {
-            model.scale.setScalar(2.75 / maxDimension);
+            model.scale.setScalar(3.4 / maxDimension);
           }
 
           model.rotation.set(0.08, 0, 0);

@@ -39,7 +39,7 @@ const HOME_PRELOAD_ASSETS = [
 // Draco 3D model (~3.4MB) and the looping background videos. Fetching warms the
 // HTTP cache so GLTFLoader / <video> reuse the bytes instead of refetching.
 const HOME_HEAVY_ASSETS = [
-  '/assets/img/home-7/3d/3d_4.glb',
+  '/assets/img/home-7/3d/3d_9.glb',
   '/assets/video/background_1.webm',
   '/assets/video/background_1_pingpong.webm',
 ];
