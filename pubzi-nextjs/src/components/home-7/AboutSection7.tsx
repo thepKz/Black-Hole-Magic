@@ -871,7 +871,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       const loader = new GLTFLoader();
       loader.setDRACOLoader(dracoLoader);
       loader.load(
-        '/assets/img/home-7/3d/3d_9.glb',
+        '/assets/img/home-7/3d/3d_10.glb',
         (gltf) => {
           if (disposed) return;
 

@@ -14,12 +14,46 @@ export default function ScrollReset() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const lenis = window.__lenis;
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true, force: true });
-    } else {
-      window.scrollTo(0, 0);
-    }
+    if (!('scrollRestoration' in window.history)) return;
+
+    const previous = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+
+    return () => {
+      window.history.scrollRestoration = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    let frameOne = 0;
+    let frameTwo = 0;
+    const timers: number[] = [];
+
+    const reset = () => {
+      const lenis = window.__lenis;
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true, force: true });
+      }
+
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+
+    reset();
+    frameOne = window.requestAnimationFrame(() => {
+      reset();
+      frameTwo = window.requestAnimationFrame(reset);
+    });
+    timers.push(window.setTimeout(reset, 80));
+    timers.push(window.setTimeout(reset, 240));
+
+    return () => {
+      window.cancelAnimationFrame(frameOne);
+      window.cancelAnimationFrame(frameTwo);
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
   }, [pathname]);
 
   return null;
