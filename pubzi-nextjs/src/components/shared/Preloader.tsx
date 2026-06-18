@@ -38,6 +38,7 @@ const HOME_PRELOAD_ASSETS = [
 // Heavy assets streamed via fetch so the bar tracks real byte progress. Keep
 // below-the-fold 3D out of this list so the first load is not blocked by WebGL.
 const HOME_HEAVY_ASSETS = [
+    '/assets/img/home-7/3d/3d_10.glb',
   '/assets/video/background_1.webm',
   '/assets/video/background_1_pingpong.webm',
 ];
