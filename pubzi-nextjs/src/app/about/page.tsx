@@ -7,33 +7,60 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CAPABILITIES = [
+const ABOUT_CHAPTERS = [
   {
-    title: 'Bản địa hóa sản phẩm',
-    desc: 'Điều chỉnh ngôn ngữ, nhịp sự kiện, thanh toán và vận hành theo hành vi người chơi Việt Nam.',
-    media: 'https://picsum.photos/seed/bh-localize/800/1000',
+    title: 'Đọc thị trường trước khi nói về launch',
+    role: 'Vào thị trường',
+    copy: 'BlackHole bắt đầu từ hành vi người chơi, gu cộng đồng, kênh thanh toán và nhịp nội dung tại Việt Nam.',
+    image: '/assets/img/landing-page/game/tlbb.png',
   },
   {
-    title: 'Tăng trưởng cộng đồng',
-    desc: 'Xây dựng cộng đồng thật qua creator, giải đấu, social content và chăm sóc người chơi sau ra mắt.',
-    media: 'https://picsum.photos/seed/bh-community/800/1000',
+    title: 'Bản địa hóa cảm giác chơi',
+    role: 'Bản địa hóa',
+    copy: 'Không chỉ dịch chữ. Chúng tôi điều chỉnh thông điệp, onboarding, sự kiện và cách người chơi gặp sản phẩm.',
+    image: '/assets/img/landing-page/iphone_1.png',
   },
   {
-    title: 'Đồng phát hành',
-    desc: 'Đi cùng studio từ giai đoạn chuẩn bị thị trường đến live operations, báo cáo và mở rộng doanh thu.',
-    media: 'https://picsum.photos/seed/bh-copublish/800/1000',
+    title: 'Kích hoạt cộng đồng có nhịp',
+    role: 'Community',
+    copy: 'Người sáng tạo nội dung, bang hội, giải đấu và social content được nối thành một lịch vận hành có điểm hẹn rõ ràng.',
+    image: '/assets/img/landing-page/game/kiem-the.png',
   },
   {
-    title: 'Hiểu thị trường Đông Nam Á',
-    desc: 'Dùng dữ liệu vận hành tại Việt Nam làm nền để mở rộng sang các cộng đồng có hành vi tương đồng.',
-    media: 'https://picsum.photos/seed/bh-sea/800/1000',
+    title: 'Live ops sau từng bản cập nhật',
+    role: 'Live operations',
+    copy: 'Dữ liệu giữ chân, phản hồi người chơi và doanh thu được đưa ngược về lịch sự kiện hằng tuần.',
+    image: '/assets/img/landing-page/iphone_2.png',
   },
 ];
 
-const OPERATING_POINTS = [
-  'Đọc sản phẩm và cộng đồng mục tiêu trước khi chốt chiến lược phát hành.',
-  'Thiết kế soft launch, nội dung, creator plan và kênh hỗ trợ người chơi.',
-  'Theo dõi dữ liệu vận hành hằng tuần để tối ưu giữ chân, doanh thu và niềm tin.',
+const OPERATING_SYSTEM = [
+  {
+    title: 'Định vị thị trường',
+    copy: 'Chọn đúng thông điệp, đúng nhóm người chơi và đúng khoảnh khắc để game không bị trôi trong ngày ra mắt.',
+    image: '/assets/img/landing-page/game/tlbb.png',
+  },
+  {
+    title: 'Vận hành cộng đồng',
+    copy: 'Giữ nhịp nội dung, giải đấu, bang hội và chăm sóc người chơi để cộng đồng có lý do quay lại mỗi tuần.',
+    image: '/assets/img/landing-page/iphone_1.png',
+  },
+  {
+    title: 'Live operations',
+    copy: 'Theo dõi phản hồi, doanh thu và giữ chân để điều chỉnh lịch sự kiện, ưu đãi và nội dung sau từng bản cập nhật.',
+    image: '/assets/img/landing-page/iphone_2.png',
+  },
+];
+
+const VISION_POINTS = [
+  {
+    title: 'Tầm nhìn 2030',
+    copy: 'Trở thành đối tác đồng phát hành được các studio quốc tế nghĩ đến đầu tiên khi bước vào Đông Nam Á.',
+  },
+  {
+    title: 'Sứ mệnh',
+    copy: 'Kết nối game quốc tế với người chơi bản địa bằng vận hành tử tế, cộng đồng thật và tăng trưởng dài hạn.',
+  },
 ];
 
 function PortalVideoSources() {
@@ -95,6 +122,7 @@ export default function AboutPage() {
     if (!root) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+    const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
       const portalTl = gsap.timeline({
         scrollTrigger: {
@@ -139,10 +167,58 @@ export default function AboutPage() {
         );
       });
 
+      gsap.utils.toArray<HTMLElement>('.ab2-depth-card').forEach((card) => {
+        gsap.fromTo(
+          card,
+          { autoAlpha: 0.48, y: 72, scale: 0.96 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 88%',
+              end: 'top 46%',
+              scrub: 0.7,
+            },
+          }
+        );
+      });
+
+      mm.add('(min-width: 992px)', () => {
+        const showcase = root.querySelector<HTMLElement>('.ab2-showcase');
+        const windowEl = root.querySelector<HTMLElement>('.ab2-showcase-window');
+        const track = root.querySelector<HTMLElement>('.ab2-showcase-track');
+        if (!showcase || !windowEl || !track) return;
+
+        const travel = () => Math.max(0, track.scrollWidth - windowEl.clientWidth);
+        const tween = gsap.to(track, {
+          x: () => -travel(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: showcase,
+            start: 'top top',
+            end: () => `+=${Math.max(travel(), 1)}`,
+            pin: true,
+            scrub: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        return () => {
+          tween.scrollTrigger?.kill();
+          tween.kill();
+        };
+      });
+
       ScrollTrigger.refresh();
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      mm.revert();
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -172,70 +248,105 @@ export default function AboutPage() {
       </section>
 
       <main className="ab2-content">
-        <section className="ab2-proof ab2-reveal" aria-label="BlackHole focus areas">
-          <span>Publishing</span>
-          <span>Live Ops</span>
-          <span>Community</span>
-          <span>Growth</span>
-        </section>
-
         <section className="ab2-manifesto">
+          <div className="ab2-manifesto-mark ab2-reveal">BlackHole Game</div>
           <p>
-            <Words text="BlackHole Game kết nối studio quốc tế với thị trường Việt Nam bằng năng lực bản địa hóa, vận hành cộng đồng và đồng phát hành có trách nhiệm." />
+            <Words text="Chúng tôi biến game quốc tế thành trải nghiệm có nhịp, có cộng đồng và có lý do để người chơi Việt quay lại." />
           </p>
         </section>
 
-        <section className="ab2-capabilities">
-          <div className="ab2-section-head ab2-reveal">
-            <h2>Chúng tôi xử lý phần khó của thị trường địa phương</h2>
+        <section className="ab2-showcase" aria-label="Vai trò của BlackHole">
+          <div className="ab2-showcase-sticky">
+            <div className="ab2-showcase-copy ab2-reveal">
+              <span>Vai trò của BlackHole</span>
+              <h2>Đứng giữa studio và người chơi bản địa.</h2>
+              <p>
+                Chúng tôi biến một sản phẩm tốt thành một hành trình thị trường có ngữ cảnh, cộng đồng và nhịp vận hành.
+              </p>
+            </div>
+
+            <div className="ab2-showcase-window">
+              <div className="ab2-showcase-track">
+                {ABOUT_CHAPTERS.map((chapter) => (
+                  <article className="ab2-game-card" key={chapter.title}>
+                    <div className="ab2-game-image">
+                      <img src={chapter.image} alt={chapter.title} />
+                    </div>
+                    <div className="ab2-game-copy">
+                      <span>{chapter.role}</span>
+                      <h3>{chapter.title}</h3>
+                      <p>{chapter.copy}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="ab2-system">
+          <div className="ab2-system-copy ab2-reveal">
+            <h2>Một hệ vận hành có chủ đích.</h2>
             <p>
-              Mỗi game cần một cách vào thị trường khác nhau. BlackHole biến hiểu biết bản địa thành kế hoạch vận hành cụ thể.
+              Mỗi đội trong BlackHole cùng nhìn vào một bản đồ: sản phẩm, cộng đồng, dữ liệu và lịch vận hành.
             </p>
           </div>
 
-          <div className="ab2-cap-grid">
-            {CAPABILITIES.map((item, index) => (
-              <article className={`ab2-cap-card ab2-card-${index + 1} ab2-reveal`} key={item.title}>
-                <div className="ab2-card-media">
-                  <img src={item.media} alt="" />
+          <div className="ab2-system-board">
+            {OPERATING_SYSTEM.map((item) => (
+              <article className="ab2-depth-card" key={item.title}>
+                <div className="ab2-depth-media">
+                  <img src={item.image} alt={item.title} />
                 </div>
-                <div className="ab2-card-copy">
+                <div>
                   <h3>{item.title}</h3>
-                  <p>{item.desc}</p>
+                  <p>{item.copy}</p>
                 </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="ab2-field ab2-reveal">
-          <div className="ab2-field-media">
-            <img src="https://picsum.photos/seed/bh-field/1200/750" alt="Không gian gaming của BlackHole" />
-          </div>
-          <div className="ab2-field-copy">
-            <h2>Từ ra mắt đến vận hành dài hạn</h2>
+        <section className="ab2-network ab2-vision">
+          <div className="ab2-network-copy ab2-reveal">
+            <h2>Không chạy theo tiếng ồn ngắn hạn.</h2>
             <p>
-              Vai trò của BlackHole không dừng ở chiến dịch launch. Chúng tôi theo dõi phản hồi người chơi, điều chỉnh lịch sự kiện và giữ nhịp cộng đồng sau từng bản cập nhật.
+              BlackHole xây năng lực phát hành để game có đời sống dài hơn một chiến dịch launch.
             </p>
+          </div>
+
+          <div className="ab2-vision-board">
+            <div className="ab2-vision-art ab2-reveal">
+              <img src="/assets/img/landing-page/list_game_doc/TLBB.png" alt="Thế giới game BlackHole phát hành" />
+            </div>
+            {VISION_POINTS.map((point) => (
+              <article className="ab2-vision-note ab2-reveal" key={point.title}>
+                <h3>{point.title}</h3>
+                <p>{point.copy}</p>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section className="ab2-operating">
-          <p className="ab2-kicker ab2-reveal">Cách làm việc</p>
-          <div className="ab2-operating-grid">
-            <h2 className="ab2-reveal">Một hệ vận hành rõ vai trò, rõ nhịp, rõ dữ liệu.</h2>
-            <div className="ab2-operating-list">
-              {OPERATING_POINTS.map((point) => (
-                <div className="ab2-operating-item ab2-reveal" key={point}>
-                  <p>{point}</p>
-                </div>
-              ))}
-            </div>
+        <section className="ab2-command ab2-reveal">
+          <div>
+            <h2>Một local partner, nhiều điểm chạm.</h2>
+            <p>
+              Studio có sản phẩm. BlackHole xây cầu nối từ sản phẩm đó đến thị trường, cộng đồng và đội vận hành bản địa.
+            </p>
+          </div>
+          <div className="ab2-command-grid" aria-label="BlackHole operating model">
+            <span>Phát hành</span>
+            <span>Đồng phát hành</span>
+            <span>Bản địa hóa</span>
+            <span>Cộng đồng</span>
+            <span>Live Ops</span>
+            <span>Tăng trưởng</span>
           </div>
         </section>
 
         <section className="ab2-cta ab2-reveal">
-          <h2>Cùng đưa game của bạn vào thị trường Việt Nam.</h2>
+          <h2>Đưa game vào thị trường Việt Nam bằng một kế hoạch có lực.</h2>
           <p>BlackHole sẵn sàng trao đổi về phát hành, cộng đồng và live operations.</p>
           <div className="ab2-actions">
             <Link className="ab2-btn ab2-btn-primary" href="/contact">Liên hệ</Link>
@@ -255,7 +366,7 @@ export default function AboutPage() {
           --ab2-line: rgba(176, 156, 255, 0.18);
           --ab2-accent: #8b7ae8;
           --ab2-accent-strong: #b09cff;
-          --ab2-radius: 14px;
+          --ab2-radius: 8px;
           --ab2-ring-x: 50%;
           --ab2-ring-y: 39.5%;
           --ab2-frame-y-offset: -26px;
@@ -354,102 +465,354 @@ export default function AboutPage() {
             linear-gradient(180deg, rgba(8, 6, 15, 0) 0%, rgba(8, 6, 15, 0.28) 100%);
         }
 
-        .ab2-hero-caption {
-          position: absolute;
-          left: clamp(20px, 5vw, 80px);
-          bottom: clamp(28px, 5vh, 58px);
-          z-index: 3;
-          max-width: 360px;
-          pointer-events: auto;
+        .ab2-content {
+          position: relative;
+          z-index: 4;
+          overflow: hidden;
+          background:
+            linear-gradient(180deg, rgba(8, 6, 15, 0.08) 0%, rgba(8, 6, 15, 0.92) 220px, #08060f 440px),
+            linear-gradient(145deg, #08060f 0%, #0f0921 42%, #070511 100%);
         }
 
-        .ab2-breadcrumb {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
-          color: rgba(255, 255, 255, 0.55);
-          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .ab2-breadcrumb a {
-          color: #08d8dc;
-          text-decoration: none;
-        }
-
-        .ab2-breadcrumb span:last-child {
-          color: var(--ab2-accent-strong);
-        }
-
-        .ab2-hero-caption p {
+        .ab2-content h2,
+        .ab2-content h3 {
           margin: 0;
-          color: rgba(255, 255, 255, 0.74);
-          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-size: clamp(14px, 1.2vw, 17px);
-          font-weight: 700;
-          line-height: 1.55;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          text-shadow: 0 8px 26px rgba(0, 0, 0, 0.72);
+          color: #f7f4ff;
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          letter-spacing: 0;
         }
 
-        .ab2-kicker {
-          margin: 0 0 18px;
+        .ab2-content p {
+          margin: 0;
+          color: var(--ab2-soft);
+          font-size: 16px;
+          line-height: 1.72;
+        }
+
+        .ab2-manifesto {
+          width: min(100%, 1320px);
+          margin: 0 auto;
+          padding: clamp(92px, 13vw, 170px) clamp(20px, 5vw, 80px) clamp(80px, 10vw, 132px);
+          display: grid;
+          grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr);
+          gap: clamp(30px, 6vw, 92px);
+          align-items: end;
+        }
+
+        .ab2-manifesto-mark {
+          max-width: 14ch;
+          color: var(--ab2-accent-strong);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: clamp(18px, 2vw, 28px);
+          font-weight: 900;
+          line-height: 1.04;
+        }
+
+        .ab2-manifesto p {
+          max-width: 22ch;
+          color: #fff;
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-size: clamp(36px, 5.2vw, 76px);
+          font-weight: 900;
+          line-height: 1.04;
+          letter-spacing: 0;
+        }
+
+        .ab2-word {
+          opacity: 0.18;
+        }
+
+        .ab2-showcase {
+          position: relative;
+          min-height: 100dvh;
+          background:
+            linear-gradient(180deg, rgba(8, 6, 15, 0) 0%, rgba(18, 11, 39, 0.86) 52%, rgba(8, 6, 15, 0) 100%);
+        }
+
+        .ab2-showcase-sticky {
+          min-height: 100dvh;
+          padding: clamp(72px, 8vw, 112px) clamp(20px, 5vw, 80px);
+          display: grid;
+          grid-template-columns: minmax(280px, 0.34fr) minmax(0, 1fr);
+          gap: clamp(30px, 5vw, 70px);
+          align-items: center;
+        }
+
+        .ab2-showcase-copy {
+          max-width: 390px;
+        }
+
+        .ab2-showcase-copy span,
+        .ab2-game-copy span {
+          display: inline-flex;
+          margin-bottom: 14px;
           color: var(--ab2-accent-strong);
           font-family: var(--font-subtitle-krafting, Arial, sans-serif);
           font-size: 13px;
           font-weight: 800;
-          letter-spacing: 0.24em;
-          text-transform: uppercase;
         }
 
-        .ab2-hero h1,
-        .ab2-section-head h2,
-        .ab2-field-copy h2,
-        .ab2-operating h2,
+        .ab2-showcase-copy h2,
+        .ab2-system-copy h2,
+        .ab2-network-copy h2,
+        .ab2-command h2,
         .ab2-cta h2 {
-          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-size: clamp(34px, 4.4vw, 62px);
+          line-height: 1.02;
+          text-wrap: balance;
+        }
+
+        .ab2-showcase-copy p,
+        .ab2-system-copy p,
+        .ab2-network-copy p,
+        .ab2-command p,
+        .ab2-cta p {
+          max-width: 48ch;
+          margin-top: 20px;
+        }
+
+        .ab2-showcase-window {
+          overflow: hidden;
+          min-width: 0;
+        }
+
+        .ab2-showcase-track {
+          display: flex;
+          gap: clamp(18px, 2vw, 28px);
+          width: max-content;
+          will-change: transform;
+        }
+
+        .ab2-game-card {
+          flex: 0 0 min(72vw, 820px);
+          border-radius: var(--ab2-radius);
+          overflow: hidden;
+          border: 1px solid rgba(176, 156, 255, 0.22);
+          background: #0d0a19;
+          box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
+        }
+
+        .ab2-game-image {
+          aspect-ratio: 16 / 9;
+          overflow: hidden;
+          background: #05040a;
+        }
+
+        .ab2-game-image img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(1.08) contrast(1.04) brightness(0.92);
+          transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .ab2-game-card:hover .ab2-game-image img {
+          transform: scale(1.04);
+        }
+
+        .ab2-game-copy {
+          padding: clamp(22px, 2.7vw, 34px);
+        }
+
+        .ab2-game-copy h3 {
+          font-size: clamp(28px, 3.4vw, 48px);
+          line-height: 1.02;
+        }
+
+        .ab2-game-copy p {
+          margin-top: 14px;
+          max-width: 44ch;
+        }
+
+        .ab2-system,
+        .ab2-network,
+        .ab2-command,
+        .ab2-cta {
+          width: min(100%, 1320px);
+          margin: 0 auto;
+          padding: clamp(82px, 10vw, 140px) clamp(20px, 5vw, 80px);
+        }
+
+        .ab2-system {
+          display: grid;
+          grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1fr);
+          gap: clamp(34px, 6vw, 92px);
+          align-items: start;
+        }
+
+        .ab2-system-copy {
+          position: sticky;
+          top: 110px;
+        }
+
+        .ab2-system-board {
+          display: grid;
+          gap: clamp(20px, 2vw, 28px);
+        }
+
+        .ab2-depth-card {
+          display: grid;
+          grid-template-columns: minmax(220px, 0.84fr) minmax(0, 1fr);
+          gap: clamp(20px, 3vw, 44px);
+          align-items: center;
+          padding: clamp(18px, 2.4vw, 30px);
+          border-radius: var(--ab2-radius);
+          border: 1px solid rgba(176, 156, 255, 0.18);
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+            rgba(13, 9, 28, 0.84);
+        }
+
+        .ab2-depth-card:nth-child(even) {
+          grid-template-columns: minmax(0, 1fr) minmax(220px, 0.84fr);
+        }
+
+        .ab2-depth-card:nth-child(even) .ab2-depth-media {
+          order: 2;
+        }
+
+        .ab2-depth-media {
+          overflow: hidden;
+          border-radius: var(--ab2-radius);
+          background: #05040a;
+          aspect-ratio: 16 / 10;
+        }
+
+        .ab2-depth-media img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(1.02) contrast(1.04) brightness(0.86);
+        }
+
+        .ab2-depth-card h3 {
+          margin-bottom: 12px;
+          font-size: clamp(24px, 2.4vw, 36px);
+          line-height: 1.04;
+        }
+
+        .ab2-network {
+          display: grid;
+          grid-template-columns: minmax(260px, 0.62fr) minmax(0, 1fr);
+          gap: clamp(32px, 6vw, 86px);
+          align-items: center;
+        }
+
+        .ab2-vision-board {
+          display: grid;
+          grid-template-columns: minmax(220px, 0.74fr) minmax(0, 1fr);
+          gap: clamp(18px, 2.5vw, 30px);
+          align-items: stretch;
+        }
+
+        .ab2-vision-art {
+          grid-row: span 2;
+          min-height: 520px;
+          overflow: hidden;
+          border-radius: var(--ab2-radius);
+          border: 1px solid rgba(176, 156, 255, 0.22);
+          background: #05040a;
+        }
+
+        .ab2-vision-art img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(1.02) contrast(1.04) brightness(0.88);
+        }
+
+        .ab2-vision-note {
+          min-height: 245px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding: clamp(24px, 3vw, 38px);
+          border-radius: var(--ab2-radius);
+          border: 1px solid rgba(176, 156, 255, 0.18);
+          background:
+            radial-gradient(circle at 18% 12%, rgba(139, 122, 232, 0.22), transparent 36%),
+            rgba(13, 9, 28, 0.82);
+        }
+
+        .ab2-vision-note h3 {
+          margin-bottom: 14px;
+          font-size: clamp(26px, 3vw, 42px);
+          line-height: 1.02;
+        }
+
+        .ab2-command {
+          display: grid;
+          grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1fr);
+          gap: clamp(26px, 5vw, 70px);
+          align-items: center;
+          border: 1px solid rgba(176, 156, 255, 0.18);
+          border-radius: var(--ab2-radius);
+          background:
+            linear-gradient(135deg, rgba(139, 122, 232, 0.16), rgba(8, 6, 15, 0.72) 42%, rgba(255, 255, 255, 0.04));
+        }
+
+        .ab2-command-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 1px;
+          overflow: hidden;
+          border-radius: var(--ab2-radius);
+          border: 1px solid rgba(176, 156, 255, 0.2);
+          background: rgba(176, 156, 255, 0.14);
+        }
+
+        .ab2-command-grid span {
+          min-height: clamp(86px, 9vw, 124px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px;
+          color: rgba(255, 255, 255, 0.88);
+          background: rgba(10, 7, 22, 0.94);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: clamp(13px, 1.3vw, 17px);
           font-weight: 900;
-          letter-spacing: -0.02em;
-          color: #f7f4ff;
+          text-align: center;
         }
 
-        .ab2-hero h1 {
-          max-width: 10.8ch;
-          margin: 0 0 26px;
-          font-size: clamp(46px, 7.4vw, 96px);
-          line-height: 0.98;
-          text-shadow: 0 10px 40px rgba(0, 0, 0, 0.52);
+        .ab2-cta {
+          text-align: center;
+          padding-bottom: clamp(96px, 12vw, 160px);
         }
 
-        .ab2-hero-sub {
-          max-width: 46ch;
-          margin: 0 0 34px;
-          color: rgba(255, 255, 255, 0.78);
-          font-size: clamp(16px, 1.3vw, 19px);
-          line-height: 1.72;
+        .ab2-cta h2 {
+          max-width: 840px;
+          margin: 0 auto;
+        }
+
+        .ab2-cta p {
+          margin-left: auto;
+          margin-right: auto;
+          margin-bottom: 34px;
         }
 
         .ab2-actions {
           display: flex;
           flex-wrap: wrap;
+          justify-content: center;
           gap: 14px;
         }
 
         .ab2-btn {
           display: inline-flex;
-          min-height: 50px;
+          min-height: 52px;
           align-items: center;
           justify-content: center;
           padding: 0 24px;
-          border-radius: 8px;
+          border-radius: var(--ab2-radius);
           font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-size: 13px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
+          font-size: 15px;
+          font-weight: 900;
+          letter-spacing: 0;
           text-decoration: none;
           white-space: nowrap;
           transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
@@ -482,296 +845,51 @@ export default function AboutPage() {
           background: rgba(139, 122, 232, 0.14);
         }
 
-        .ab2-content {
-          position: relative;
-          z-index: 4;
-          background:
-            linear-gradient(180deg, rgba(8, 6, 15, 0.18) 0%, rgba(8, 6, 15, 0.9) 220px, #08060f 430px),
-            #08060f;
-        }
-
-        .ab2-proof {
-          width: min(100%, 1280px);
-          margin: 0 auto;
-          padding: 28px clamp(20px, 5vw, 80px);
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          border-top: 1px solid var(--ab2-line);
-          border-bottom: 1px solid var(--ab2-line);
-          color: rgba(255, 255, 255, 0.76);
-          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-weight: 800;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          font-size: 12px;
-        }
-
-        .ab2-proof span + span {
-          border-left: 1px solid var(--ab2-line);
-          padding-left: clamp(16px, 3vw, 38px);
-        }
-
-        .ab2-manifesto {
-          width: min(100%, 1280px);
-          margin: 0 auto;
-          padding: clamp(84px, 12vw, 156px) clamp(20px, 5vw, 80px);
-        }
-
-        .ab2-manifesto p {
-          max-width: 25ch;
-          margin: 0;
-          font-family: var(--font-title-extra, Arial, sans-serif);
-          font-size: clamp(30px, 4.4vw, 60px);
-          font-weight: 900;
-          line-height: 1.18;
-          letter-spacing: -0.02em;
-          color: #fff;
-        }
-
-        .ab2-word {
-          opacity: 0.18;
-        }
-
-        .ab2-capabilities,
-        .ab2-operating,
-        .ab2-cta {
-          width: min(100%, 1280px);
-          margin: 0 auto;
-          padding: clamp(72px, 10vw, 130px) clamp(20px, 5vw, 80px);
-        }
-
-        .ab2-section-head {
-          max-width: 720px;
-          margin-bottom: clamp(36px, 6vw, 70px);
-        }
-
-        .ab2-section-head h2,
-        .ab2-field-copy h2,
-        .ab2-operating h2,
-        .ab2-cta h2 {
-          margin: 0 0 18px;
-          font-size: clamp(30px, 4vw, 54px);
-          line-height: 1.08;
-        }
-
-        .ab2-section-head p,
-        .ab2-field-copy p,
-        .ab2-operating-item p,
-        .ab2-cta p {
-          margin: 0;
-          color: var(--ab2-soft);
-          font-size: 16px;
-          line-height: 1.78;
-        }
-
-        .ab2-cap-grid {
-          display: grid;
-          grid-template-columns: 1.15fr 0.85fr;
-          grid-auto-rows: minmax(260px, auto);
-          gap: 18px;
-        }
-
-        .ab2-cap-card {
-          position: relative;
-          overflow: hidden;
-          min-height: 300px;
-          border-radius: var(--ab2-radius);
-          background: var(--ab2-panel);
-          border: 1px solid var(--ab2-line);
-        }
-
-        .ab2-card-1 {
-          grid-row: span 2;
-        }
-
-        .ab2-card-4 {
-          background:
-            radial-gradient(circle at 20% 20%, rgba(139, 122, 232, 0.34), transparent 36%),
-            linear-gradient(135deg, #130d29, #08060f);
-        }
-
-        .ab2-card-media {
-          position: absolute;
-          inset: 0;
-        }
-
-        .ab2-card-media img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          opacity: 0.54;
-          filter: saturate(0.98) contrast(1.08);
-        }
-
-        .ab2-card-copy {
-          position: relative;
-          z-index: 1;
-          min-height: inherit;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          padding: clamp(24px, 3vw, 38px);
-          background: linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.84) 70%);
-        }
-
-        .ab2-card-copy h3 {
-          margin: 0 0 12px;
-          color: #fff;
-          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-size: clamp(22px, 2.5vw, 34px);
-          font-weight: 900;
-          line-height: 1.12;
-        }
-
-        .ab2-card-copy p {
-          max-width: 44ch;
-          margin: 0;
-          color: rgba(255, 255, 255, 0.76);
-          line-height: 1.72;
-        }
-
-        .ab2-field {
-          width: min(100%, 1280px);
-          margin: 0 auto;
-          padding: clamp(72px, 10vw, 130px) clamp(20px, 5vw, 80px);
-          display: grid;
-          grid-template-columns: minmax(0, 0.96fr) minmax(280px, 0.64fr);
-          align-items: end;
-          gap: clamp(28px, 5vw, 76px);
-        }
-
-        .ab2-field-media {
-          overflow: hidden;
-          border-radius: var(--ab2-radius);
-          border: 1px solid var(--ab2-line);
-          aspect-ratio: 16 / 10;
-        }
-
-        .ab2-field-media img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          filter: saturate(0.9) contrast(1.06) brightness(0.86);
-        }
-
-        .ab2-field-copy {
-          padding-bottom: clamp(8px, 3vw, 40px);
-        }
-
-        .ab2-operating {
-          border-top: 1px solid var(--ab2-line);
-        }
-
-        .ab2-operating-grid {
-          display: grid;
-          grid-template-columns: 0.92fr 1.08fr;
-          gap: clamp(34px, 6vw, 90px);
-          align-items: start;
-        }
-
-        .ab2-operating-list {
-          display: grid;
-          gap: 16px;
-        }
-
-        .ab2-operating-item {
-          border-radius: var(--ab2-radius);
-          border: 1px solid var(--ab2-line);
-          background: rgba(255, 255, 255, 0.035);
-          padding: clamp(20px, 2.5vw, 30px);
-        }
-
-        .ab2-cta {
-          text-align: center;
-          padding-bottom: clamp(94px, 12vw, 150px);
-        }
-
-        .ab2-cta h2 {
-          max-width: 780px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .ab2-cta p {
-          max-width: 54ch;
-          margin: 0 auto 34px;
-        }
-
-        .ab2-cta .ab2-actions {
-          justify-content: center;
-        }
-
         @media (max-width: 991px) {
           .ab2-hero-sticky {
             padding-top: 100px;
           }
 
-          .ab2-operating-grid,
-          .ab2-field {
+          .ab2-manifesto,
+          .ab2-system,
+          .ab2-network,
+          .ab2-command {
             grid-template-columns: 1fr;
           }
 
-          .ab2-proof {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0;
+          .ab2-system-copy {
+            position: static;
           }
 
-          .ab2-proof span {
-            padding: 16px 0;
+          .ab2-showcase {
+            min-height: auto;
           }
 
-          .ab2-proof span + span {
-            border-left: 0;
-            padding-left: 0;
+          .ab2-showcase-sticky {
+            min-height: auto;
+            display: block;
           }
 
-          .ab2-proof span:nth-child(even) {
-            border-left: 1px solid var(--ab2-line);
-            padding-left: 18px;
+          .ab2-showcase-copy {
+            max-width: 680px;
+            margin-bottom: 30px;
           }
 
-          .ab2-proof span:nth-child(n + 3) {
-            border-top: 1px solid var(--ab2-line);
+          .ab2-showcase-window {
+            overflow-x: auto;
+            padding-bottom: 12px;
           }
 
-          .ab2-cap-grid {
-            grid-template-columns: 1fr;
+          .ab2-showcase-track {
+            padding-right: 20px;
           }
 
-          .ab2-card-1 {
-            grid-row: auto;
-          }
-        }
-
-        @media (max-width: 575px) {
-          .ab2-hero {
-            min-height: 100dvh;
-            height: 190dvh;
+          .ab2-game-card {
+            flex-basis: min(82vw, 620px);
           }
 
-          .ab2-portal-frame-shell {
-            width: max(170vw, 133.333dvh);
-          }
-
-          .ab2-hero-caption {
-            right: 20px;
-          }
-
-          .ab2-breadcrumb {
-            font-size: 12px;
-          }
-
-          .ab2-actions {
-            width: 100%;
-          }
-
-          .ab2-btn {
-            width: 100%;
-          }
-
-          .ab2-cap-card {
-            min-height: 260px;
+          .ab2-vision-art {
+            min-height: 460px;
           }
         }
 
@@ -782,55 +900,102 @@ export default function AboutPage() {
             transform: none !important;
           }
 
-          /* Portal: giữ lại ảnh ring nhưng tắt scroll-driven zoom trên mobile —
-             chỉ hiện static, không scale 6.4x gây chiếm toàn màn hình. */
           .ab2-portal-frame {
             transform: none !important;
           }
 
-          /* Trên mobile portrait, 133.333dvh > 100vw nên shell tràn ra 2 bên.
-             Giới hạn lại bằng 100vw để không overflow ngang. */
           .ab2-portal-frame-shell {
             width: 100vw !important;
             transform: translate(-50%, -39.5%) !important;
           }
 
-          /* Đảm bảo hero không tạo horizontal scroll */
           .ab2-hero,
           .ab2-hero-sticky {
             overflow: hidden;
           }
 
-          /* Giảm chiều cao hero section trên mobile cho gọn. */
           .ab2-hero {
             height: 100dvh;
             min-height: unset;
           }
 
-          /* Ẩn hàng proof (PUBLISHING / LIVE OPS...) — 4 cột bị ép xuống
-             2x2, border-top/bottom tạo đường line ngang cứng ngay dưới hero. */
-          .ab2-proof {
-            display: none;
-          }
-
-          /* Blend content vào hero không có seam cứng. */
           .ab2-content {
             background:
               linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.7) 120px, #08060f 300px),
               #08060f;
           }
+
+          .ab2-manifesto,
+          .ab2-showcase-sticky,
+          .ab2-system,
+          .ab2-network,
+          .ab2-command,
+          .ab2-cta {
+            padding-left: 20px;
+            padding-right: 20px;
+          }
+
+          .ab2-manifesto {
+            padding-top: 74px;
+            padding-bottom: 58px;
+            gap: 18px;
+          }
+
+          .ab2-showcase-copy h2,
+          .ab2-system-copy h2,
+          .ab2-network-copy h2,
+          .ab2-command h2,
+          .ab2-cta h2 {
+            font-size: clamp(30px, 10vw, 42px);
+          }
+
+          .ab2-depth-card,
+          .ab2-depth-card:nth-child(even) {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-depth-card:nth-child(even) .ab2-depth-media {
+            order: 0;
+          }
+
+          .ab2-vision-board {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-vision-art {
+            grid-row: auto;
+            min-height: 440px;
+          }
+
+          .ab2-command-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .ab2-actions {
+            width: 100%;
+          }
+
+          .ab2-btn {
+            width: 100%;
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .ab2-portal-frame,
-          .ab2-reveal {
+          .ab2-reveal,
+          .ab2-depth-card {
             opacity: 1 !important;
             visibility: visible !important;
             filter: none !important;
+            transform: none !important;
           }
 
           .ab2-word {
             opacity: 1 !important;
+          }
+
+          .ab2-showcase-track {
+            transform: none !important;
           }
         }
       `}</style>

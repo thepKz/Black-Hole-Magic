@@ -109,27 +109,27 @@ export default function AboutSection7() {
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduceMotion) return;
 
-      // Slow idle spin instead of scroll-driven rotation.
-      const tick = () => {
-        rotationRef.current += gsap.ticker.deltaRatio() * 0.0045;
-      };
-      gsap.ticker.add(tick);
-
       const inners = gsap.utils.toArray<HTMLElement>('.stage-inner', wrapper);
       inners.forEach((el) => {
-        gsap.from(el, {
-          opacity: 0,
-          y: 36,
-          filter: 'blur(8px)',
-          duration: 0.7,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: el, start: 'top 86%' },
-        });
+        const pieces = Array.from(el.children) as HTMLElement[];
+        gsap.fromTo(
+          pieces,
+          {
+            autoAlpha: 0,
+            y: 24,
+            filter: 'blur(8px)',
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.68,
+            ease: 'power3.out',
+            stagger: 0.1,
+            scrollTrigger: { trigger: el, start: 'top 86%', once: true },
+          }
+        );
       });
-
-      return () => {
-        gsap.ticker.remove(tick);
-      };
     });
 
     return () => mm.revert();
@@ -587,7 +587,22 @@ export default function AboutSection7() {
 
           .about-stage {
             position: static;
-            padding: 30px 24px 0;
+            padding: 26px clamp(22px, 6vw, 28px) 0;
+          }
+
+          .about-stage + .about-stage {
+            margin-top: 10px;
+          }
+
+          .stage-inner {
+            max-width: 34rem;
+            margin: 0 auto;
+          }
+
+          .stage-kicker {
+            margin-bottom: 10px;
+            font-size: 10px;
+            letter-spacing: 0.18em;
           }
 
           /* Each stage carries its own "VỀ BLACKHOLE GAME" kicker so it reads
@@ -599,13 +614,17 @@ export default function AboutSection7() {
             display: none;
           }
 
-          /* Body copy on mobile: normal case (not all-caps), left-aligned.
-             Justify is avoided — the body font is monospace, so justify blows
-             the word gaps wide open and the text reads ragged. */
+          /* Body copy on mobile: normal case, justified with conservative
+             spacing so the monospace rhythm still feels intentional. */
           .stage-statement,
           .stage-body {
             text-transform: none;
-            text-align: left;
+            text-align: justify;
+            text-align-last: left;
+            text-justify: inter-word;
+            hyphens: auto;
+            word-spacing: 0.02em;
+            letter-spacing: 0;
           }
 
           /* The hard <br> inside the finale heading drops "lược" onto its own
@@ -619,16 +638,41 @@ export default function AboutSection7() {
             text-wrap: balance;
           }
 
+          .glow-text {
+            text-shadow:
+              0 0 14px rgba(255, 255, 255, 0.38),
+              0 0 28px rgba(139, 122, 232, 0.42),
+              0 8px 24px rgba(0, 0, 0, 0.76);
+            filter: drop-shadow(0 0 14px rgba(139, 122, 232, 0.34));
+          }
+
+          .glow-text-subtle {
+            text-shadow:
+              0 0 10px rgba(139, 122, 232, 0.22),
+              0 6px 20px rgba(0, 0, 0, 0.7);
+          }
+
           .stage-finale {
-            font-size: 28px;
+            font-size: clamp(27px, 7.8vw, 32px);
+            line-height: 1.18;
+            margin-bottom: 16px;
           }
 
           .stage-statement {
-            font-size: 18px;
+            font-size: clamp(15px, 4.35vw, 17px);
+            line-height: 1.72;
           }
 
           .stage-title {
-            font-size: 26px;
+            font-size: clamp(24px, 7.1vw, 30px);
+            line-height: 1.18;
+            margin-bottom: 14px;
+            text-wrap: balance;
+          }
+
+          .stage-body {
+            font-size: clamp(15px, 4.35vw, 17px);
+            line-height: 1.72;
           }
         }
 

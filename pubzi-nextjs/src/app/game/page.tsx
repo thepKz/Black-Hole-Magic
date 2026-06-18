@@ -1,153 +1,238 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { ArrowUpRight, Gamepad2, Globe2, Layers3, Monitor, ShieldCheck, Smartphone } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Word-span split for the scrubbed text reveal — matches the project's `.sw` pattern. */
-function Words({ text }: { text: string }) {
+type FilterKey = 'all' | 'PC' | 'Mobile';
+
+type Game = {
+  code: string;
+  title: string;
+  shortTitle: string;
+  genre: string;
+  platform: 'PC' | 'Mobile' | 'PC & Mobile';
+  filters: FilterKey[];
+  poster: string;
+  backdrop: string;
+  backdropSource?: 'portrait';
+  intro: string;
+  details: string[];
+};
+
+const posterDir = '/assets/img/landing-page/list_game_doc';
+const backdropDir = '/assets/img/landing-page/game';
+
+const GAMES: Game[] = [
+  {
+    code: 'VLTK2',
+    title: 'Võ Lâm Truyền Kỳ 2',
+    shortTitle: 'VLTK2',
+    genre: 'Kiếm hiệp MMORPG',
+    platform: 'PC',
+    filters: ['PC'],
+    poster: `${posterDir}/VLTK2.png`,
+    backdrop: `${backdropDir}/vltk.png`,
+    intro: 'Bang hội, chiến trường và những cuộc săn boss lớn được dựng như một thế giới sống.',
+    details: ['Đấu phái', 'Bang hội', 'Giao thương'],
+  },
+  {
+    code: 'KT',
+    title: 'Kiếm Thế',
+    shortTitle: 'Kiếm Thế',
+    genre: 'Nhập vai võ hiệp',
+    platform: 'PC',
+    filters: ['PC'],
+    poster: `${posterDir}/Kiếm Thế.png`,
+    backdrop: `${backdropDir}/kiem-the.png`,
+    intro: 'Nhịp chiến đấu nhanh, chất kiếm hiệp rõ và vòng lặp cộng đồng giữ chân người chơi lâu dài.',
+    details: ['Tống Kim', 'Gia tộc', 'Sự kiện mùa'],
+  },
+  {
+    code: 'TLBB',
+    title: 'Thiên Long Bát Bộ',
+    shortTitle: 'TLBB',
+    genre: 'MMORPG võ hiệp',
+    platform: 'PC & Mobile',
+    filters: ['PC', 'Mobile'],
+    poster: `${posterDir}/TLBB.png`,
+    backdrop: `${backdropDir}/Thiên Long Bát Bộ.png`,
+    intro: 'Một huyền thoại võ hiệp trở lại với khung hình lớn, kỹ năng rõ và nhịp vận hành hiện đại.',
+    details: ['Môn phái', 'PvP lớn', 'Ra mắt 2026'],
+  },
+  {
+    code: 'TNGH',
+    title: 'Tiếu Ngạo Giang Hồ',
+    shortTitle: 'TNGH',
+    genre: 'Hành động nhập vai',
+    platform: 'PC',
+    filters: ['PC'],
+    poster: `${posterDir}/Tiếu Ngạo Giang Hồ.png`,
+    backdrop: `${backdropDir}/tieu-ngao-giang-ho.png`,
+    intro: 'Không khí giang hồ đậm màu điện ảnh, tập trung vào tốc độ, thế võ và cuộc đấu phe phái.',
+    details: ['Combo võ học', 'Thế lực', 'Chiến trường'],
+  },
+  {
+    code: 'TT',
+    title: 'Tru Tiên',
+    shortTitle: 'Tru Tiên',
+    genre: 'Tiên hiệp MMORPG',
+    platform: 'Mobile',
+    filters: ['Mobile'],
+    poster: `${posterDir}/Tru Tiên.png`,
+    backdrop: `${posterDir}/Tru Tiên.png`,
+    backdropSource: 'portrait',
+    intro: 'Tiên hiệp kỳ ảo với mood tím sâu, dựng trải nghiệm theo hướng lãng mạn và đại cảnh.',
+    details: ['Tiên môn', 'Thú cưỡi', 'Boss thế giới'],
+  },
+  {
+    code: 'SRO',
+    title: 'Con Đường Tơ Lụa',
+    shortTitle: 'Silkroad',
+    genre: 'MMORPG thương lộ',
+    platform: 'PC',
+    filters: ['PC'],
+    poster: `${posterDir}/Con Đường Tơ luaj.png`,
+    backdrop: `${backdropDir}/con-duong-to-lua.png`,
+    intro: 'Thương nhân, đạo tặc và bảo tiêu va chạm trong một bản đồ rộng có nhiều rủi ro thật.',
+    details: ['Trading', 'Job war', 'Boss săn chung'],
+  },
+];
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'PC', label: 'PC' },
+  { key: 'Mobile', label: 'Mobile' },
+];
+
+function PlatformIcon({ platform }: { platform: Game['platform'] }) {
+  if (platform === 'Mobile') return <Smartphone size={17} strokeWidth={1.8} aria-hidden="true" />;
+  if (platform === 'PC & Mobile') return <Layers3 size={17} strokeWidth={1.8} aria-hidden="true" />;
+  return <Monitor size={17} strokeWidth={1.8} aria-hidden="true" />;
+}
+
+function SplitWords({ text }: { text: string }) {
   return (
     <>
-      {text.split(' ').map((w, i) => (
-        <span key={i} className="sw">
-          {w}
-          {' '}
+      {text.split(' ').map((word, index) => (
+        <span className="gm-word" key={`${word}-${index}`}>
+          {word}
         </span>
       ))}
     </>
   );
 }
 
-type Game = {
-  code: string;
-  title: string;
-  genre: string;
-  platform: string;
-  tag: 'PC' | 'Mobile' | 'Global';
-  status: string;
-  accent: string;
-  image: string;
-};
-
-const GAMES: Game[] = [
-  { code: 'VL2', title: 'Võ Lâm Truyền Kỳ 2', genre: 'MMORPG Kiếm Hiệp', platform: 'PC', tag: 'PC', status: 'Đang phát hành', accent: '#8b7ae8', image: 'https://picsum.photos/seed/blackhole-vl2/800/1000' },
-  { code: 'JX2', title: 'Võ Lâm JX2 Global', genre: 'MMORPG Kiếm Hiệp', platform: 'Toàn cầu', tag: 'Global', status: 'Đang phát hành', accent: '#6fa8ff', image: 'https://picsum.photos/seed/blackhole-jx2/800/1000' },
-  { code: 'KT', title: 'Kiếm Thế Mobile', genre: 'MMORPG', platform: 'Mobile', tag: 'Mobile', status: 'Đang phát hành', accent: '#b07ae8', image: 'https://picsum.photos/seed/blackhole-kt/800/1000' },
-  { code: 'TL', title: 'Con Đường Tơ Lụa', genre: 'MMORPG', platform: 'PC', tag: 'PC', status: 'Sắp ra mắt', accent: '#7adcff', image: 'https://picsum.photos/seed/blackhole-tl/800/1000' },
-  { code: 'TLBB', title: 'Thiên Long Bát Bộ', genre: 'MMORPG', platform: 'PC & Mobile', tag: 'PC', status: 'Đang phát hành', accent: '#9d7aff', image: 'https://picsum.photos/seed/blackhole-tlbb/800/1000' },
-  { code: 'HHGH', title: 'Hàng Hải Giang Hồ', genre: 'Hành động phiêu lưu', platform: 'Mobile', tag: 'Mobile', status: 'Sắp ra mắt', accent: '#c79bff', image: 'https://picsum.photos/seed/blackhole-hhgh/1200/900' },
-];
-
-const FILTERS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'PC', label: 'PC' },
-  { key: 'Mobile', label: 'Mobile' },
-  { key: 'Global', label: 'Toàn cầu' },
-];
-
-const FEATURED = GAMES[0];
-
-/* ── 3D-tilt + magnetic glow card (mouse-tracked, GSAP quickTo) ───────────── */
-function GameCard({ game, index }: { game: Game; index: number }) {
-  const cardRef = useRef<HTMLDivElement>(null);
+function GameCard({
+  game,
+  active,
+  onActivate,
+}: {
+  game: Game;
+  active: boolean;
+  onActivate: (code: string) => void;
+}) {
+  const cardRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const card = cardRef.current;
     if (!card) return;
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
-    if (!fine.matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
-    const inner = card.querySelector<HTMLElement>('.gc-inner');
-    const glow = card.querySelector<HTMLElement>('.gc-glow');
-    const media = card.querySelector<HTMLElement>('.gc-media-img');
-    if (!inner || !glow || !media) return;
+    const media = card.querySelector<HTMLElement>('.gm-card-media');
+    const image = card.querySelector<HTMLElement>('.gm-card-img');
+    if (!media || !image) return;
 
-    const rotX = gsap.quickTo(inner, 'rotationX', { duration: 0.5, ease: 'power3' });
-    const rotY = gsap.quickTo(inner, 'rotationY', { duration: 0.5, ease: 'power3' });
-    const gx = gsap.quickTo(glow, 'x', { duration: 0.4, ease: 'power3' });
-    const gy = gsap.quickTo(glow, 'y', { duration: 0.4, ease: 'power3' });
+    const rotateX = gsap.quickTo(media, 'rotationX', { duration: 0.45, ease: 'power3.out' });
+    const rotateY = gsap.quickTo(media, 'rotationY', { duration: 0.45, ease: 'power3.out' });
 
-    const onMove = (e: PointerEvent) => {
-      const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      rotY(gsap.utils.clamp(-9, 9, (px - 0.5) * 18));
-      rotX(gsap.utils.clamp(-9, 9, (0.5 - py) * 18));
-      gx(e.clientX - r.left);
-      gy(e.clientY - r.top);
-    };
-    const onEnter = () => {
-      gsap.to(glow, { autoAlpha: 1, duration: 0.3 });
-      gsap.to(media, { scale: 1.08, duration: 0.6, ease: 'power3.out' });
-    };
-    const onLeave = () => {
-      rotX(0); rotY(0);
-      gsap.to(glow, { autoAlpha: 0, duration: 0.4 });
-      gsap.to(media, { scale: 1, duration: 0.6, ease: 'power3.out' });
+    const handleMove = (event: PointerEvent) => {
+      const rect = card.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width;
+      const py = (event.clientY - rect.top) / rect.height;
+      rotateY(gsap.utils.clamp(-6, 6, (px - 0.5) * 12));
+      rotateX(gsap.utils.clamp(-6, 6, (0.5 - py) * 12));
     };
 
-    card.addEventListener('pointermove', onMove);
-    card.addEventListener('pointerenter', onEnter);
-    card.addEventListener('pointerleave', onLeave);
+    const handleEnter = () => {
+      gsap.to(image, { scale: 1.06, duration: 0.65, ease: 'power3.out' });
+      gsap.to(card, { y: -6, duration: 0.35, ease: 'power3.out' });
+    };
+
+    const handleLeave = () => {
+      rotateX(0);
+      rotateY(0);
+      gsap.to(image, { scale: 1, duration: 0.65, ease: 'power3.out' });
+      gsap.to(card, { y: 0, duration: 0.35, ease: 'power3.out' });
+    };
+
+    card.addEventListener('pointermove', handleMove);
+    card.addEventListener('pointerenter', handleEnter);
+    card.addEventListener('pointerleave', handleLeave);
+
     return () => {
-      card.removeEventListener('pointermove', onMove);
-      card.removeEventListener('pointerenter', onEnter);
-      card.removeEventListener('pointerleave', onLeave);
+      card.removeEventListener('pointermove', handleMove);
+      card.removeEventListener('pointerenter', handleEnter);
+      card.removeEventListener('pointerleave', handleLeave);
     };
   }, []);
 
   return (
-    <div className="gc" ref={cardRef} data-tag={game.tag} style={{ ['--gc-accent' as string]: game.accent }}>
-      <div className="gc-inner">
-        <div className="gc-glow" aria-hidden="true" />
-        <div className="gc-media">
-          <div
-            className="gc-media-img"
-            style={{ backgroundImage: `url(${game.image})` }}
-            role="img"
-            aria-label={game.title}
+    <article className={`gm-card ${active ? 'is-active' : ''}`} ref={cardRef}>
+      <button
+        type="button"
+        className="gm-card-link"
+        aria-pressed={active}
+        aria-label={`Chọn ${game.title}`}
+        onClick={() => onActivate(game.code)}
+        onFocus={() => onActivate(game.code)}
+        onMouseEnter={() => onActivate(game.code)}
+      >
+        <span className="gm-card-media">
+          <Image
+            className="gm-card-img"
+            src={game.poster}
+            alt={game.title}
+            fill
+            sizes="(max-width: 767px) 180px, 210px"
           />
-          <span className="gc-tag">{game.platform}</span>
-          <span className="gc-code">{game.code}</span>
-          <span className={`gc-status ${game.status === 'Sắp ra mắt' ? 'is-soon' : ''}`}>
-            {game.status}
+          <span className="gm-card-shade" aria-hidden="true" />
+        </span>
+        <span className="gm-card-copy">
+          <span className="gm-card-code">{game.code}</span>
+          <span className="gm-card-title">{game.shortTitle}</span>
+          <span className="gm-card-meta">
+            <PlatformIcon platform={game.platform} />
+            {game.platform}
           </span>
-        </div>
-        <div className="gc-body">
-          <span className="gc-no">{String(index + 1).padStart(2, '0')}</span>
-          <div className="gc-text">
-            <h3 className="gc-title">{game.title}</h3>
-            <p className="gc-genre">{game.genre}</p>
-          </div>
-          <Link href="/game-details" className="gc-cta" aria-label={`Chơi ${game.title}`}>
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-              <path d="M9.41 8.47 1.88 16 0 14.12l7.53-7.53L.94 0H16v15.06z" fill="currentColor" />
-            </svg>
-          </Link>
-        </div>
-      </div>
-    </div>
+        </span>
+      </button>
+    </article>
   );
 }
 
 export default function GamePage() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [filter, setFilter] = useState('all');
+  const panWrapRef = useRef<HTMLElement>(null);
+  const panTrackRef = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const [activeCode, setActiveCode] = useState(GAMES[0].code);
 
-  const visible = GAMES.filter((g) => filter === 'all' || g.tag === filter);
+  const visibleGames = useMemo(
+    () => GAMES.filter((game) => filter === 'all' || game.filters.includes(filter)),
+    [filter],
+  );
 
-  // Re-run reveal when the filter changes (cards remount, refresh triggers).
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const cards = gsap.utils.toArray<HTMLElement>('.gc');
-    gsap.fromTo(cards,
-      { autoAlpha: 0, y: 30 },
-      { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.07, ease: 'power3.out', overwrite: true });
-    ScrollTrigger.refresh();
-  }, [filter]);
+  const activeGame = useMemo(
+    () => visibleGames.find((game) => game.code === activeCode) ?? visibleGames[0] ?? GAMES[0],
+    [activeCode, visibleGames],
+  );
 
   useEffect(() => {
     const root = rootRef.current;
@@ -155,551 +240,1408 @@ export default function GamePage() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const ctx = gsap.context(() => {
-      // ── Hero entry ──
-      gsap.set('.gm-hero-eyebrow, .gm-hero-sub, .gm-hero-cta, .gm-hero-stats, .gm-hero-art', { autoAlpha: 0 });
-      gsap.timeline({ delay: 0.12 })
-        .to('.gm-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' })
-        .fromTo('.gm-hero-title .gm-line span', { yPercent: 115 },
-          { yPercent: 0, duration: 1, stagger: 0.12, ease: 'power4.out' }, '-=0.3')
-        .to('.gm-hero-sub', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
-        .to('.gm-hero-stats', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
-        .to('.gm-hero-cta', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.45')
-        .to('.gm-hero-art', { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, '-=0.9');
-
-      // featured art clip-reveal + parallax
-      gsap.fromTo('.gm-hero-art-img',
-        { clipPath: 'inset(0 0 100% 0)', scale: 1.15 },
-        { clipPath: 'inset(0 0 0% 0)', scale: 1, duration: 1.2, ease: 'power3.out', delay: 0.5 });
-      gsap.to('.gm-hero-art-img', {
-        yPercent: -10, ease: 'none',
-        scrollTrigger: { trigger: '.gm-hero', start: 'top top', end: 'bottom top', scrub: 0.8 },
+      gsap.set('.gm-hero-copy > *, .gm-stage-backdrop, .gm-stage-poster, .gm-stage-rail', {
+        autoAlpha: 0,
+        y: 28,
       });
 
-      // ── Section title word reveal ──
-      const titleWords = gsap.utils.toArray<HTMLElement>('.gm-catalog-head .sw');
-      if (titleWords.length) {
-        gsap.fromTo(titleWords, { opacity: 0.14 },
-          { opacity: 1, stagger: 0.05, ease: 'none',
-            scrollTrigger: { trigger: '.gm-catalog-head', start: 'top 85%', end: 'top 40%', scrub: 0.6 } });
-      }
+      gsap.timeline({ delay: 0.08 })
+        .to('.gm-hero-copy > *', {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: 'power3.out',
+        })
+        .to('.gm-stage-backdrop', {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+        }, '-=0.55')
+        .to('.gm-stage-poster', {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.09,
+          ease: 'power3.out',
+        }, '-=0.62')
+        .to('.gm-stage-rail', {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'power3.out',
+        }, '-=0.5');
 
-      // ── Initial card reveal ──
-      gsap.fromTo('.gc',
-        { autoAlpha: 0, y: 36 },
-        { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out',
-          scrollTrigger: { trigger: '.gm-grid', start: 'top 80%', once: true } });
+      gsap.to('.gm-stage-backdrop-img', {
+        scale: 1.08,
+        yPercent: -5,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.gm-hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      });
 
-      // ── Marquee kinetic band ──
-      gsap.to('.gm-marquee-track', { xPercent: -50, duration: 26, ease: 'none', repeat: -1 });
+      gsap.to('.gm-stage-poster.is-main', {
+        yPercent: -8,
+        rotate: -2,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.gm-hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+        },
+      });
 
-      // ── Spotlight band ──
-      gsap.fromTo('.gm-spot-media-img',
-        { clipPath: 'inset(0 100% 0 0)', scale: 1.12 },
-        { clipPath: 'inset(0 0% 0 0)', scale: 1, duration: 1.1, ease: 'power3.out',
-          scrollTrigger: { trigger: '.gm-spot', start: 'top 72%', once: true } });
-      gsap.fromTo('.gm-spot-copy > *',
-        { autoAlpha: 0, y: 26 },
-        { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power3.out',
-          scrollTrigger: { trigger: '.gm-spot', start: 'top 68%', once: true } });
+      gsap.fromTo('.gm-showcase-head .gm-word',
+        { opacity: 0.16, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.035,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.gm-showcase-head',
+            start: 'top 78%',
+            end: 'top 34%',
+            scrub: 0.8,
+          },
+        });
 
-      // ── CTA ──
-      gsap.fromTo('.gm-cta-inner > *',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: { trigger: '.gm-cta', start: 'top 80%', once: true } });
+      gsap.fromTo('.gm-catalog-head, .gm-card',
+        { autoAlpha: 0, y: 34 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.75,
+          stagger: 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.gm-catalog',
+            start: 'top 78%',
+            once: true,
+          },
+        });
 
-      ScrollTrigger.refresh();
+      gsap.fromTo('.gm-cta-copy > *',
+        { autoAlpha: 0, y: 34 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.75,
+          stagger: 0.08,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.gm-cta',
+            start: 'top 72%',
+            once: true,
+          },
+        });
+
+      gsap.fromTo('.gm-cta-visual',
+        { clipPath: 'inset(0 0 100% 0)', scale: 1.08 },
+        {
+          clipPath: 'inset(0 0 0% 0)',
+          scale: 1,
+          duration: 1.05,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.gm-cta',
+            start: 'top 72%',
+            once: true,
+          },
+        });
+    }, root);
+
+    const media = gsap.matchMedia();
+    media.add('(min-width: 768px)', () => {
+      const wrap = panWrapRef.current;
+      const track = panTrackRef.current;
+      if (!wrap || !track) return undefined;
+
+      const getDistance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+
+      const tween = gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top top',
+          end: () => `+=${getDistance()}`,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+        },
+      });
+
+      gsap.to('.gm-panel-poster', {
+        yPercent: -7,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap,
+          start: 'top top',
+          end: () => `+=${getDistance()}`,
+          scrub: 1,
+        },
+      });
+
+      return () => tween.kill();
+    });
+
+    ScrollTrigger.refresh();
+
+    return () => {
+      media.revert();
+      ctx.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.gm-card',
+        { autoAlpha: 0, y: 22 },
+        { autoAlpha: 1, y: 0, duration: 0.45, stagger: 0.045, ease: 'power3.out', overwrite: true });
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [filter]);
 
   return (
-    <div className="gm-root" ref={rootRef}>
-
-      {/* ══ HERO ════════════════════════════════════════════════════════════ */}
+    <main className="gm-root" ref={rootRef}>
       <section className="gm-hero">
-        <div className="gm-hero-grid-bg" aria-hidden="true" />
-        <div className="gm-hero-lightwell" aria-hidden="true" />
-
+        <div className="gm-hero-ambient" aria-hidden="true" />
         <div className="gm-hero-inner">
-          <div className="gm-hero-left">
-            <nav className="gm-breadcrumb gm-hero-eyebrow">
+          <div className="gm-hero-copy">
+            <nav className="gm-breadcrumb" aria-label="Breadcrumb">
               <Link href="/">Trang chủ</Link>
-              <span className="gm-bc-sep">/</span>
-              <span className="gm-bc-current">Danh sách game</span>
+              <span>/</span>
+              <span>Danh sách game</span>
             </nav>
-
             <h1 className="gm-hero-title">
-              <span className="gm-line"><span>Thế giới game</span></span>
-              <span className="gm-line gm-line-accent"><span>do Black Hole</span></span>
-              <span className="gm-line"><span>phát hành</span></span>
+              <span>Game của</span>
+              <span>Black Hole</span>
             </h1>
-
             <p className="gm-hero-sub">
-              Nhà phát hành game hàng đầu Việt Nam — mang những tựa game đỉnh cao về cho
-              cộng đồng, bản địa hóa trọn vẹn và vận hành chuẩn quốc tế.
+              Tựa kiếm hiệp và nhập vai được bản địa hóa kỹ, vận hành ổn định cho cộng đồng Việt.
             </p>
-
-            <div className="gm-hero-stats">
-              <div className="gm-hs">
-                <span className="gm-hs-num">{GAMES.length}+</span>
-                <span className="gm-hs-label">Tựa game phát hành</span>
-              </div>
-              <div className="gm-hs">
-                <span className="gm-hs-num">8M+</span>
-                <span className="gm-hs-label">Người chơi</span>
-              </div>
-              <div className="gm-hs">
-                <span className="gm-hs-num">2019</span>
-                <span className="gm-hs-label">Từ năm</span>
-              </div>
+            <div className="gm-hero-facts" aria-label="Thông tin catalog">
+              <span>
+                <Gamepad2 size={18} strokeWidth={1.8} aria-hidden="true" />
+                {GAMES.length} tựa game
+              </span>
+              <span>
+                <Layers3 size={18} strokeWidth={1.8} aria-hidden="true" />
+                PC và Mobile
+              </span>
+              <span>
+                <ShieldCheck size={18} strokeWidth={1.8} aria-hidden="true" />
+                Vận hành nội địa
+              </span>
             </div>
-
-            <div className="gm-hero-cta">
-              <a href="#catalog" className="gm-btn gm-btn-primary">Khám phá catalog</a>
-              <Link href="/contact" className="gm-btn gm-btn-ghost">Đề xuất phát hành</Link>
+            <div className="gm-hero-actions">
+              <a href="#showcase" className="gm-btn gm-btn-primary">
+                Xem game
+                <ArrowUpRight size={17} strokeWidth={1.8} aria-hidden="true" />
+              </a>
+              <Link href="/contact" className="gm-btn gm-btn-secondary">
+                Hợp tác
+              </Link>
             </div>
           </div>
 
-          <div className="gm-hero-art">
-            <div className="gm-hero-art-frame">
-              <div className="gm-hero-art-img" style={{ backgroundImage: `url(${FEATURED.image})` }} />
-              <div className="gm-hero-art-tint" aria-hidden="true" />
-              <div className="gm-hero-art-badge">
-                <span className="gm-hero-art-kicker">Nổi bật</span>
-                <span className="gm-hero-art-title">{FEATURED.title}</span>
-                <span className="gm-hero-art-genre">{FEATURED.genre}</span>
-              </div>
+          <div className="gm-stage" aria-label="Ảnh nổi bật của catalog game">
+            <div className="gm-stage-backdrop">
+              <Image
+                className="gm-stage-backdrop-img"
+                src={GAMES[0].backdrop}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 767px) 92vw, 760px"
+              />
+            </div>
+            <div className="gm-stage-poster is-main">
+              <Image
+                src={GAMES[0].poster}
+                alt={GAMES[0].title}
+                fill
+                priority
+                sizes="(max-width: 767px) 62vw, 330px"
+              />
+            </div>
+            <div className="gm-stage-poster is-secondary">
+              <Image
+                src={GAMES[2].poster}
+                alt={GAMES[2].title}
+                fill
+                sizes="(max-width: 767px) 36vw, 180px"
+              />
+            </div>
+            <div className="gm-stage-rail" aria-hidden="true">
+              {GAMES.slice(1, 5).map((game) => (
+                <span className="gm-rail-poster" key={game.code}>
+                  <Image src={game.poster} alt="" fill sizes="92px" />
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ══ MARQUEE ═════════════════════════════════════════════════════════ */}
-      <div className="gm-marquee" aria-hidden="true">
-        <div className="gm-marquee-track">
-          {[...GAMES, ...GAMES].map((g, i) => (
-            <span key={i} className="gm-marquee-item">
-              {g.title}<i className="gm-marquee-dot" />
-            </span>
+      <section className="gm-showcase-head" id="showcase">
+        <p className="gm-mini-label">Catalog chính</p>
+        <h2>
+          <SplitWords text="Duyệt từng thế giới bằng nhịp cuộn" />
+        </h2>
+        <p>
+          Mỗi slide dùng ảnh ngang làm bối cảnh và poster dọc làm tâm điểm, để người chơi nhận ra game ngay trong vài giây.
+        </p>
+      </section>
+
+      <section className="gm-pan" ref={panWrapRef} aria-label="Showcase game theo scroll">
+        <div className="gm-pan-track" ref={panTrackRef}>
+          {GAMES.map((game, index) => (
+            <article className="gm-panel" key={game.code}>
+              <div className={`gm-panel-visual ${game.backdropSource === 'portrait' ? 'is-portrait-source' : ''}`}>
+                <Image
+                  src={game.backdrop}
+                  alt=""
+                  fill
+                  sizes="(max-width: 767px) 92vw, 760px"
+                />
+              </div>
+              <div className="gm-panel-copy">
+                <span className="gm-panel-count">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{game.title}</h3>
+                <p>{game.intro}</p>
+                <div className="gm-panel-meta">
+                  <span>
+                    <PlatformIcon platform={game.platform} />
+                    {game.platform}
+                  </span>
+                  <span>
+                    <Globe2 size={17} strokeWidth={1.8} aria-hidden="true" />
+                    {game.genre}
+                  </span>
+                </div>
+                <div className="gm-panel-tags">
+                  {game.details.map((detail) => (
+                    <span key={detail}>{detail}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="gm-panel-poster">
+                <Image
+                  src={game.poster}
+                  alt={game.title}
+                  fill
+                  sizes="(max-width: 767px) 64vw, 280px"
+                />
+              </div>
+            </article>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* ══ CATALOG ═════════════════════════════════════════════════════════ */}
       <section className="gm-catalog" id="catalog">
         <div className="gm-catalog-head">
           <div>
-            <span className="gm-section-kicker">Catalog</span>
-            <h2 className="gm-catalog-title">
-              <Words text="Chọn cuộc phiêu lưu của bạn" />
-            </h2>
+            <p className="gm-mini-label">Chọn nhanh</p>
+            <h2>Tất cả tựa game</h2>
           </div>
-
-          <div className="gm-filters" role="tablist" aria-label="Lọc theo nền tảng">
-            {FILTERS.map((f) => (
+          <div className="gm-filters" aria-label="Lọc game theo nền tảng">
+            {FILTERS.map((item) => (
               <button
-                key={f.key}
+                key={item.key}
                 type="button"
-                role="tab"
-                aria-selected={filter === f.key}
-                className={`gm-filter ${filter === f.key ? 'is-active' : ''}`}
-                onClick={() => setFilter(f.key)}
+                className={`gm-filter ${filter === item.key ? 'is-active' : ''}`}
+                aria-pressed={filter === item.key}
+                onClick={() => setFilter(item.key)}
               >
-                {f.label}
+                {item.label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="gm-grid">
-          {visible.map((g, i) => (
-            <GameCard key={g.code} game={g} index={i} />
-          ))}
-        </div>
-      </section>
+        {visibleGames.length > 0 ? (
+          <div className="gm-catalog-stage">
+            <article className="gm-catalog-preview">
+              <Image
+                key={activeGame.backdrop}
+                className="gm-catalog-preview-bg"
+                src={activeGame.backdrop}
+                alt=""
+                fill
+                sizes="(max-width: 991px) 92vw, 760px"
+              />
+              <div className="gm-catalog-preview-shade" aria-hidden="true" />
+              <div className="gm-catalog-preview-copy">
+                <span className="gm-preview-code">{activeGame.code}</span>
+                <h3>{activeGame.title}</h3>
+                <p>{activeGame.intro}</p>
+                <div className="gm-preview-meta">
+                  <span>
+                    <PlatformIcon platform={activeGame.platform} />
+                    {activeGame.platform}
+                  </span>
+                  <span>{activeGame.genre}</span>
+                </div>
+                <Link href="/game-details" className="gm-preview-link">
+                  Chi tiết
+                  <ArrowUpRight size={16} strokeWidth={1.8} aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="gm-catalog-preview-poster">
+                <Image
+                  key={activeGame.poster}
+                  src={activeGame.poster}
+                  alt={activeGame.title}
+                  fill
+                  sizes="(max-width: 767px) 170px, 260px"
+                />
+              </div>
+            </article>
 
-      {/* ══ SPOTLIGHT BAND ══════════════════════════════════════════════════ */}
-      <section className="gm-spot">
-        <div className="gm-spot-media">
-          <div className="gm-spot-media-img" style={{ backgroundImage: `url(${GAMES[4].image})` }} />
-        </div>
-        <div className="gm-spot-copy">
-          <span className="gm-section-kicker">Tâm điểm</span>
-          <h2 className="gm-spot-title">{GAMES[4].title}</h2>
-          <p className="gm-spot-body">
-            Huyền thoại kiếm hiệp trở lại trên cả PC và Mobile — đồ họa nâng cấp, lối chơi
-            kinh điển được tái hiện trọn vẹn, vận hành bởi đội ngũ Black Hole với máy chủ
-            đặt tại Việt Nam và hỗ trợ 24/7.
-          </p>
-          <div className="gm-spot-meta">
-            <div><span className="gm-spot-meta-k">Thể loại</span><span className="gm-spot-meta-v">{GAMES[4].genre}</span></div>
-            <div><span className="gm-spot-meta-k">Nền tảng</span><span className="gm-spot-meta-v">{GAMES[4].platform}</span></div>
-            <div><span className="gm-spot-meta-k">Trạng thái</span><span className="gm-spot-meta-v">{GAMES[4].status}</span></div>
+            <div className="gm-grid" aria-label="Danh sách game">
+              {visibleGames.map((game) => (
+                <GameCard
+                  key={game.code}
+                  game={game}
+                  active={game.code === activeGame.code}
+                  onActivate={setActiveCode}
+                />
+              ))}
+            </div>
           </div>
-          <Link href="/game-details" className="gm-btn gm-btn-primary">Vào game</Link>
-        </div>
+        ) : (
+          <div className="gm-empty">
+            Hiện chưa có game trong nhóm này.
+          </div>
+        )}
       </section>
 
-      {/* ══ CTA ═════════════════════════════════════════════════════════════ */}
       <section className="gm-cta">
-        <div className="gm-cta-lightwell" aria-hidden="true" />
-        <div className="gm-cta-inner">
-          <span className="gm-section-kicker">Đối tác phát hành</span>
-          <h2 className="gm-cta-title">Bạn có một tựa game tuyệt vời?</h2>
-          <p className="gm-cta-sub">
-            Black Hole giúp các nhà phát triển quốc tế chinh phục thị trường Việt Nam và
-            Đông Nam Á — từ bản địa hóa, pháp lý, đến vận hành và marketing.
+        <div className="gm-cta-visual">
+          <Image
+            src={GAMES[5].backdrop}
+            alt=""
+            fill
+            sizes="100vw"
+          />
+        </div>
+        <div className="gm-cta-copy">
+          <p className="gm-mini-label">Đối tác phát hành</p>
+          <h2>Có game cần vào thị trường Việt?</h2>
+          <p>
+            Black Hole hỗ trợ bản địa hóa, vận hành cộng đồng, chiến dịch ra mắt và kênh phân phối cho game PC lẫn Mobile.
           </p>
-          <div className="gm-cta-actions">
-            <Link href="/contact" className="gm-btn gm-btn-primary">Hợp tác phát hành</Link>
-            <Link href="/service" className="gm-btn gm-btn-ghost">Tìm hiểu ICS Group</Link>
-          </div>
+          <Link href="/contact" className="gm-btn gm-btn-primary">
+            Hợp tác
+            <ArrowUpRight size={17} strokeWidth={1.8} aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
       <style jsx global>{`
-        /* ╔══════════════════════════════════════════════════════════════════╗
-           ║  GAME CATALOG — Dark Luxe, Black Hole (game publisher)            ║
-           ╚══════════════════════════════════════════════════════════════════╝ */
         .gm-root {
           --gm-bg: #08060f;
-          --gm-purple: #6c5ce7;
-          --gm-purple-light: #8b7ae8;
-          --gm-purple-bright: #b09cff;
-          --gm-hair: rgba(139, 122, 232, 0.14);
-          --gm-text-soft: rgba(255, 255, 255, 0.62);
-          --gm-text-mute: rgba(255, 255, 255, 0.4);
-          --gm-maxw: 1280px;
-          --gm-pad: clamp(20px, 5vw, 80px);
-
-          position: relative; z-index: 1;
-          background: var(--gm-bg);
-          color: #fff;
-          font-family: var(--font-body-regular, 'Inter', sans-serif);
+          --gm-surface: rgba(18, 14, 34, 0.74);
+          --gm-surface-strong: rgba(25, 20, 46, 0.92);
+          --gm-line: rgba(154, 132, 255, 0.2);
+          --gm-line-strong: rgba(172, 154, 255, 0.42);
+          --gm-text: rgba(255, 255, 255, 0.94);
+          --gm-soft: rgba(255, 255, 255, 0.68);
+          --gm-muted: rgba(255, 255, 255, 0.5);
+          --gm-accent: #8b7ae8;
+          --gm-accent-strong: #b8a7ff;
+          --gm-max: 1320px;
+          --gm-pad: clamp(20px, 5vw, 76px);
+          position: relative;
           overflow: hidden;
-        }
-
-        .gm-root .gm-section-kicker {
-          display: inline-block;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
-          color: var(--gm-purple-light); margin-bottom: 20px;
-        }
-
-        /* buttons */
-        .gm-root .gm-btn {
-          display: inline-flex; align-items: center; justify-content: center;
-          padding: 14px 28px;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 13px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-          text-decoration: none; border-radius: 6px;
-          transition: transform 0.25s ease, filter 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-        }
-        .gm-root .gm-btn-primary {
-          color: #fff; background: linear-gradient(135deg, var(--gm-purple), #4b22d8);
-          box-shadow: 0 10px 30px rgba(75, 34, 216, 0.4);
-        }
-        .gm-root .gm-btn-primary:hover { transform: translateY(-2px); filter: brightness(1.12); }
-        .gm-root .gm-btn-ghost {
-          color: var(--gm-purple-bright); border: 1px solid rgba(139, 122, 232, 0.3);
-          background: rgba(139, 122, 232, 0.04);
-        }
-        .gm-root .gm-btn-ghost:hover {
-          border-color: rgba(139, 122, 232, 0.6); background: rgba(139, 122, 232, 0.1); transform: translateY(-2px);
-        }
-
-        /* ╔═══ HERO ═══╗ */
-        .gm-hero {
-          position: relative; min-height: 100dvh; display: flex; align-items: center;
-          padding: clamp(120px, 16vh, 200px) var(--gm-pad) clamp(70px, 9vh, 110px);
           background:
-            radial-gradient(120% 80% at 80% 6%, rgba(108, 92, 231, 0.24) 0%, transparent 55%),
-            linear-gradient(180deg, #0c0820 0%, #08060f 74%);
+            radial-gradient(circle at 82% 4%, rgba(139, 122, 232, 0.2), transparent 34rem),
+            linear-gradient(180deg, #0d0920 0%, var(--gm-bg) 30%, #090710 100%);
+          color: var(--gm-text);
+          font-family: var(--font-body-regular, 'Chakra Petch', sans-serif);
         }
-        .gm-hero-grid-bg {
-          position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
-          background-image:
-            linear-gradient(rgba(139,122,232,1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139,122,232,1) 1px, transparent 1px);
-          background-size: 92px 92px;
-          mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
-          -webkit-mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 80%);
+
+        .gm-root img {
+          object-fit: cover;
         }
-        .gm-hero-lightwell {
-          position: absolute; top: -18%; right: -6%;
-          width: 60vw; height: 60vw; max-width: 780px; max-height: 780px; pointer-events: none;
-          background: radial-gradient(closest-side, rgba(124, 92, 255, 0.2), transparent 70%);
-          filter: blur(20px);
+
+        .gm-root a {
+          color: inherit;
+          text-decoration: none;
         }
+
+        .gm-hero {
+          position: relative;
+          min-height: 100dvh;
+          display: flex;
+          align-items: center;
+          padding: clamp(88px, 10vh, 96px) var(--gm-pad) clamp(48px, 7vh, 76px);
+        }
+
+        .gm-hero-ambient {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0.72;
+          background:
+            linear-gradient(rgba(139, 122, 232, 0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139, 122, 232, 0.07) 1px, transparent 1px);
+          background-size: 72px 72px;
+          mask-image: radial-gradient(circle at 68% 40%, black 0%, transparent 72%);
+          -webkit-mask-image: radial-gradient(circle at 68% 40%, black 0%, transparent 72%);
+        }
+
         .gm-hero-inner {
-          position: relative; z-index: 2; width: 100%; max-width: var(--gm-maxw); margin: 0 auto;
-          display: grid; grid-template-columns: 1.08fr 0.92fr; gap: clamp(32px, 5vw, 80px); align-items: center;
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: var(--gm-max);
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: minmax(0, 0.86fr) minmax(420px, 1.14fr);
+          gap: clamp(28px, 5vw, 72px);
+          align-items: center;
         }
-        .gm-hero-left { min-width: 0; }
+
+        .gm-hero-copy {
+          min-width: 0;
+        }
 
         .gm-breadcrumb {
-          display: flex; align-items: center; gap: 10px;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 0 22px;
+          color: var(--gm-muted);
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 28px;
-          transform: translateY(8px);
+          font-size: 13px;
+          letter-spacing: 0.02em;
         }
-        .gm-breadcrumb a { color: var(--gm-text-mute); text-decoration: none; transition: color 0.2s; }
-        .gm-breadcrumb a:hover { color: var(--gm-purple-bright); }
-        .gm-bc-sep { color: rgba(139, 122, 232, 0.4); }
-        .gm-bc-current { color: var(--gm-purple-bright); }
+
+        .gm-breadcrumb a,
+        .gm-breadcrumb span {
+          color: var(--gm-muted) !important;
+        }
+
+        .gm-breadcrumb span:last-child {
+          color: var(--gm-accent-strong) !important;
+        }
+
+        .gm-breadcrumb a:hover {
+          color: var(--gm-accent-strong) !important;
+        }
 
         .gm-hero-title {
+          margin: 0;
           font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(40px, 6.2vw, 84px); line-height: 1.02;
-          letter-spacing: -0.02em; margin: 0 0 26px; color: #fff;
+          font-size: clamp(40px, 5.35vw, 72px);
+          line-height: 1.02;
+          letter-spacing: 0;
+          color: #f7f4ff !important;
+          background: transparent !important;
+          -webkit-text-fill-color: #f7f4ff !important;
+          text-shadow: none !important;
+          text-transform: none !important;
         }
-        .gm-hero-title .gm-line { display: block; overflow: hidden; padding-bottom: 0.05em; }
-        .gm-hero-title .gm-line span { display: block; }
-        .gm-hero-title .gm-line-accent span {
-          color: var(--gm-purple-bright); text-shadow: 0 0 40px rgba(139, 122, 232, 0.5);
+
+        .gm-hero-title span {
+          display: block;
+        }
+
+        .gm-hero-title span:last-child {
+          color: var(--gm-accent-strong) !important;
+          -webkit-text-fill-color: var(--gm-accent-strong) !important;
+          white-space: nowrap;
         }
 
         .gm-hero-sub {
-          font-size: clamp(15px, 1.4vw, 18px); line-height: 1.8; color: var(--gm-text-soft);
-          max-width: 48ch; margin: 0 0 32px; transform: translateY(16px);
+          max-width: 48ch;
+          margin: 24px 0 0;
+          color: var(--gm-soft);
+          font-size: clamp(15px, 1.4vw, 18px);
+          line-height: 1.72;
         }
 
-        .gm-hero-stats { display: flex; gap: clamp(24px, 4vw, 52px); margin-bottom: 36px; transform: translateY(16px); }
-        .gm-hs { display: flex; flex-direction: column; }
-        .gm-hs-num {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(26px, 2.8vw, 38px); line-height: 1;
-          color: var(--gm-purple-bright); font-variant-numeric: tabular-nums;
-          text-shadow: 0 0 26px rgba(139, 122, 232, 0.35); margin-bottom: 8px;
+        .gm-hero-facts {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin: 28px 0 0;
         }
-        .gm-hs-label {
+
+        .gm-hero-facts span,
+        .gm-panel-meta span,
+        .gm-card-meta {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .gm-hero-facts span {
+          min-height: 40px;
+          padding: 8px 12px;
+          border: 1px solid var(--gm-line);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.035);
+          color: rgba(255, 255, 255, 0.78);
+          font-size: 13px;
+          letter-spacing: 0 !important;
+          text-transform: none !important;
+        }
+
+        .gm-hero-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin: 30px 0 0;
+        }
+
+        .gm-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 48px;
+          padding: 12px 20px;
+          border-radius: 999px;
+          border: 1px solid transparent;
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gm-text-mute);
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1;
+          letter-spacing: 0 !important;
+          text-transform: none !important;
+          word-spacing: 0.08em;
+          white-space: nowrap;
+          transition: transform 0.24s ease, border-color 0.24s ease, background 0.24s ease, color 0.24s ease;
         }
 
-        .gm-hero-cta { display: flex; flex-wrap: wrap; gap: 14px; transform: translateY(16px); }
+        .gm-btn:hover {
+          transform: translateY(-2px);
+        }
 
-        .gm-hero-art { position: relative; perspective: 1200px; }
-        .gm-hero-art-frame {
-          position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 5;
-          box-shadow: 0 36px 90px rgba(0, 0, 0, 0.65);
+        .gm-btn:active {
+          transform: translateY(1px) scale(0.98);
         }
-        .gm-hero-art-img {
-          position: absolute; inset: 0; background-size: cover; background-position: center;
-          will-change: transform, clip-path;
+
+        .gm-root .gm-btn-primary {
+          background: #eee8ff;
+          color: #150f2d !important;
+          border-color: rgba(255, 255, 255, 0.28);
+          box-shadow: 0 18px 44px rgba(96, 72, 210, 0.36);
         }
-        .gm-hero-art-tint {
-          position: absolute; inset: 0;
-          background: linear-gradient(180deg, rgba(108,92,231,0.1) 0%, transparent 30%, rgba(8,6,15,0.9) 100%);
-          box-shadow: inset 0 0 0 1px rgba(139, 122, 232, 0.25); border-radius: 16px;
+
+        .gm-root .gm-btn-secondary {
+          background: rgba(255, 255, 255, 0.05);
+          color: #f3efff !important;
+          border-color: var(--gm-line-strong);
         }
-        .gm-hero-art-badge { position: absolute; left: 26px; bottom: 26px; right: 26px; display: flex; flex-direction: column; }
-        .gm-hero-art-kicker {
+
+        .gm-stage {
+          position: relative;
+          min-height: min(660px, calc(100dvh - 158px));
+          perspective: 1200px;
+        }
+
+        .gm-stage-backdrop {
+          position: absolute;
+          inset: 7% 0 8% 10%;
+          overflow: hidden;
+          border-radius: 24px;
+          border: 1px solid var(--gm-line-strong);
+          background: var(--gm-surface);
+          box-shadow: 0 32px 90px rgba(0, 0, 0, 0.58);
+        }
+
+        .gm-stage-backdrop::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(8, 6, 15, 0.72), rgba(8, 6, 15, 0.08) 52%, rgba(8, 6, 15, 0.84)),
+            linear-gradient(180deg, transparent, rgba(8, 6, 15, 0.72));
+        }
+
+        .gm-stage-poster {
+          position: absolute;
+          overflow: hidden;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: var(--gm-surface-strong);
+          box-shadow: 0 28px 80px rgba(0, 0, 0, 0.72);
+        }
+
+        .gm-stage-poster.is-main {
+          left: 0;
+          bottom: 2%;
+          width: min(46%, 340px);
+          aspect-ratio: 1122 / 1402;
+          transform: rotate(-4deg);
+        }
+
+        .gm-stage-poster.is-secondary {
+          right: 4%;
+          top: 2%;
+          width: min(29%, 200px);
+          aspect-ratio: 1122 / 1402;
+          transform: rotate(6deg);
+          opacity: 0.86;
+        }
+
+        .gm-stage-rail {
+          position: absolute;
+          left: 33%;
+          right: 10%;
+          bottom: 0;
+          display: flex;
+          gap: 12px;
+          padding: 12px;
+          border: 1px solid var(--gm-line);
+          border-radius: 18px;
+          background: rgba(10, 7, 22, 0.72);
+          backdrop-filter: blur(18px);
+        }
+
+        .gm-rail-poster {
+          position: relative;
+          display: block;
+          flex: 1;
+          min-width: 0;
+          aspect-ratio: 1122 / 1402;
+          overflow: hidden;
+          border-radius: 12px;
+          opacity: 0.86;
+        }
+
+        .gm-showcase-head,
+        .gm-catalog,
+        .gm-cta-copy {
+          max-width: var(--gm-max);
+          margin: 0 auto;
+          padding-left: var(--gm-pad);
+          padding-right: var(--gm-pad);
+        }
+
+        .gm-showcase-head {
+          padding-top: clamp(76px, 10vw, 130px);
+          padding-bottom: clamp(36px, 5vw, 64px);
+        }
+
+        .gm-mini-label {
+          margin: 0 0 14px;
+          color: var(--gm-accent-strong);
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gm-purple-bright); margin-bottom: 8px;
-        }
-        .gm-hero-art-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: clamp(20px, 2vw, 28px); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 4px;
-        }
-        .gm-hero-art-genre { font-size: 12.5px; color: var(--gm-text-soft); letter-spacing: 0.04em; }
-
-        /* ╔═══ MARQUEE ═══╗ */
-        .gm-marquee {
-          overflow: hidden; border-top: 1px solid var(--gm-hair); border-bottom: 1px solid var(--gm-hair);
-          padding: 22px 0; background: rgba(13, 10, 24, 0.5);
-        }
-        .gm-marquee-track { display: flex; width: max-content; will-change: transform; }
-        .gm-marquee-item {
-          display: inline-flex; align-items: center;
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: clamp(20px, 2.4vw, 34px); font-weight: 900; letter-spacing: -0.01em;
-          color: rgba(255, 255, 255, 0.16); white-space: nowrap; padding: 0 6px;
-        }
-        .gm-marquee-dot {
-          width: 7px; height: 7px; border-radius: 50%; background: var(--gm-purple-light);
-          margin: 0 34px; box-shadow: 0 0 12px rgba(139, 122, 232, 0.8);
+          font-size: 13px;
+          letter-spacing: 0.04em;
         }
 
-        /* ╔═══ CATALOG ═══╗ */
-        .gm-catalog { max-width: var(--gm-maxw); margin: 0 auto; padding: clamp(70px, 10vw, 130px) var(--gm-pad); scroll-margin-top: 90px; }
+        .gm-showcase-head h2,
+        .gm-catalog-head h2,
+        .gm-cta-copy h2 {
+          margin: 0;
+          max-width: 820px;
+          color: #f7f4ff;
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: clamp(34px, 5.1vw, 70px);
+          line-height: 1.02;
+          letter-spacing: 0;
+        }
+
+        .gm-showcase-head p:last-child,
+        .gm-cta-copy p:not(.gm-mini-label) {
+          max-width: 62ch;
+          margin: 18px 0 0;
+          color: var(--gm-soft);
+          font-size: 15.5px;
+          line-height: 1.75;
+        }
+
+        .gm-word {
+          display: inline-block;
+          margin-right: 0.28em;
+        }
+
+        .gm-pan {
+          position: relative;
+          min-height: 100dvh;
+          overflow: hidden;
+        }
+
+        .gm-pan-track {
+          display: flex;
+          align-items: center;
+          gap: clamp(18px, 3vw, 34px);
+          width: max-content;
+          height: 100dvh;
+          padding: 0 var(--gm-pad);
+          will-change: transform;
+        }
+
+        .gm-panel {
+          position: relative;
+          flex: 0 0 min(1120px, calc(100vw - (var(--gm-pad) * 2)));
+          height: min(690px, calc(100dvh - 138px));
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(250px, 0.56fr);
+          gap: clamp(20px, 3vw, 34px);
+          align-items: stretch;
+          overflow: hidden;
+          border: 1px solid var(--gm-line);
+          border-radius: 26px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+          box-shadow: 0 34px 86px rgba(0, 0, 0, 0.5);
+        }
+
+        .gm-panel-visual {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          background: #0b0814;
+        }
+
+        .gm-panel-visual img {
+          object-position: center;
+        }
+
+        .gm-panel-visual.is-portrait-source img {
+          filter: blur(8px) saturate(1.08);
+          transform: scale(1.08);
+        }
+
+        .gm-panel-visual::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(8, 6, 15, 0.22), rgba(8, 6, 15, 0.86)),
+            linear-gradient(180deg, rgba(8, 6, 15, 0), rgba(8, 6, 15, 0.62));
+        }
+
+        .gm-panel-copy {
+          position: absolute;
+          z-index: 2;
+          left: clamp(22px, 4vw, 52px);
+          bottom: clamp(24px, 4vw, 52px);
+          width: min(52ch, 48%);
+        }
+
+        .gm-panel-count {
+          display: block;
+          margin-bottom: 14px;
+          color: rgba(255, 255, 255, 0.52);
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 15px;
+        }
+
+        .gm-panel-copy h3 {
+          margin: 0;
+          color: #fff;
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: clamp(32px, 4vw, 58px);
+          line-height: 1.02;
+        }
+
+        .gm-panel-copy p {
+          margin: 16px 0 0;
+          color: rgba(255, 255, 255, 0.76);
+          font-size: 15px;
+          line-height: 1.7;
+        }
+
+        .gm-panel-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .gm-panel-meta span,
+        .gm-panel-tags span {
+          min-height: 36px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(10, 7, 22, 0.66);
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 12.5px;
+          backdrop-filter: blur(14px);
+        }
+
+        .gm-panel-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .gm-panel-poster {
+          position: relative;
+          z-index: 3;
+          grid-column: 2;
+          align-self: center;
+          justify-self: center;
+          width: min(78%, 310px);
+          aspect-ratio: 1122 / 1402;
+          overflow: hidden;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: var(--gm-surface-strong);
+          box-shadow: 0 28px 76px rgba(0, 0, 0, 0.65);
+          will-change: transform;
+        }
+
+        .gm-catalog {
+          padding-top: clamp(68px, 8vw, 112px);
+          padding-bottom: clamp(84px, 10vw, 138px);
+        }
+
         .gm-catalog-head {
-          display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap;
-          margin-bottom: clamp(36px, 5vw, 64px);
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 20px;
+          align-items: center;
+          margin-bottom: clamp(24px, 4vw, 42px);
         }
-        .gm-catalog-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(28px, 3.6vw, 50px); line-height: 1.12;
-          letter-spacing: -0.02em; color: #fff; margin: 0; max-width: 18ch;
-        }
-        .gm-catalog-title .sw { color: inherit; font: inherit; }
 
-        /* filter pills */
-        .gm-filters { display: inline-flex; gap: 6px; padding: 5px; border: 1px solid var(--gm-hair); border-radius: 10px; background: rgba(255,255,255,0.02); }
-        .gm-filter {
-          appearance: none; cursor: pointer; border: 0; background: transparent;
-          padding: 9px 18px; border-radius: 7px;
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-          color: var(--gm-text-mute); transition: color 0.25s ease, background 0.25s ease;
+        .gm-catalog-head h2 {
+          max-width: none;
+          background: transparent !important;
+          color: #f7f4ff !important;
+          -webkit-text-fill-color: #f7f4ff !important;
+          text-shadow: none !important;
+          font-size: clamp(34px, 4.15vw, 56px);
         }
-        .gm-filter:hover { color: var(--gm-purple-bright); }
+
+        .gm-filters {
+          display: inline-flex;
+          gap: 6px;
+          padding: 6px;
+          border-radius: 999px;
+          border: 1px solid var(--gm-line);
+          background: rgba(255, 255, 255, 0.045);
+          backdrop-filter: blur(16px);
+        }
+
+        .gm-filter {
+          appearance: none;
+          border: 0;
+          min-height: 38px;
+          padding: 8px 15px;
+          border-radius: 999px;
+          background: transparent;
+          color: var(--gm-soft);
+          cursor: pointer;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 13px;
+          transition: background 0.22s ease, color 0.22s ease, transform 0.22s ease;
+        }
+
+        .gm-filter:hover {
+          color: #fff;
+        }
+
+        .gm-filter:active {
+          transform: scale(0.98);
+        }
+
         .gm-filter.is-active {
-          color: #fff; background: linear-gradient(135deg, rgba(108,92,231,0.85), rgba(75,34,216,0.85));
-          box-shadow: 0 6px 18px rgba(75, 34, 216, 0.35);
+          background: #eee8ff;
+          color: #150f2d !important;
+        }
+
+        .gm-catalog-stage {
+          display: grid;
+          grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.74fr);
+          gap: clamp(16px, 2vw, 26px);
+          align-items: stretch;
+        }
+
+        .gm-catalog-preview {
+          position: relative;
+          min-height: clamp(420px, 42vw, 520px);
+          overflow: hidden;
+          border-radius: 26px;
+          border: 1px solid var(--gm-line-strong);
+          background: rgba(255, 255, 255, 0.035);
+          box-shadow: 0 34px 82px rgba(0, 0, 0, 0.52);
+          isolation: isolate;
+        }
+
+        .gm-catalog-preview-bg {
+          object-position: center;
+          transition: opacity 0.32s ease, transform 0.5s ease;
+        }
+
+        .gm-catalog-preview-shade {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background:
+            linear-gradient(90deg, rgba(8, 6, 15, 0.9), rgba(8, 6, 15, 0.22) 48%, rgba(8, 6, 15, 0.76)),
+            linear-gradient(180deg, rgba(8, 6, 15, 0.08), rgba(8, 6, 15, 0.82));
+        }
+
+        .gm-catalog-preview-copy {
+          position: absolute;
+          z-index: 3;
+          left: clamp(22px, 4vw, 48px);
+          bottom: clamp(22px, 3vw, 38px);
+          width: min(48ch, 54%);
+        }
+
+        .gm-preview-code {
+          display: inline-flex;
+          margin-bottom: 14px;
+          color: var(--gm-accent-strong);
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 14px;
+        }
+
+        .gm-catalog-preview-copy h3 {
+          margin: 0;
+          color: #fff;
+          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
+          font-size: clamp(32px, 3.6vw, 50px);
+          line-height: 1.03;
+          letter-spacing: 0;
+        }
+
+        .gm-catalog-preview-copy p {
+          margin: 16px 0 0;
+          color: rgba(255, 255, 255, 0.78);
+          font-size: 14.5px;
+          line-height: 1.72;
+        }
+
+        .gm-preview-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 18px;
+        }
+
+        .gm-preview-meta span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 36px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(10, 7, 22, 0.6);
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 12.5px;
+          backdrop-filter: blur(14px);
+        }
+
+        .gm-preview-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          min-height: 42px;
+          margin-top: 20px;
+          padding: 10px 16px;
+          border-radius: 999px;
+          background: #eee8ff;
+          color: #150f2d !important;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 13px;
+          font-weight: 700;
+          transition: transform 0.24s ease;
+        }
+
+        .gm-preview-link:hover {
+          transform: translateY(-2px);
+        }
+
+        .gm-catalog-preview-poster {
+          position: absolute;
+          z-index: 2;
+          right: clamp(18px, 4vw, 44px);
+          top: 50%;
+          width: min(31%, 270px);
+          aspect-ratio: 1122 / 1402;
+          overflow: hidden;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: var(--gm-surface-strong);
+          box-shadow: 0 28px 76px rgba(0, 0, 0, 0.66);
+          transform: translateY(-50%) rotate(2deg);
         }
 
         .gm-grid {
-          display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 26px);
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
         }
 
-        /* ╔═══ GAME CARD (3D tilt) ═══╗ */
-        .gc { perspective: 1000px; }
-        .gc-inner {
-          position: relative; border-radius: 14px; overflow: hidden;
-          background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
-          border: 1px solid var(--gm-hair);
-          transform-style: preserve-3d; will-change: transform;
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .gc:hover .gc-inner {
-          border-color: color-mix(in srgb, var(--gc-accent) 55%, transparent);
-          box-shadow: 0 26px 60px rgba(0, 0, 0, 0.55), 0 0 40px color-mix(in srgb, var(--gc-accent) 22%, transparent);
-        }
-        .gc-glow {
-          position: absolute; top: 0; left: 0; width: 320px; height: 320px;
-          margin: -160px 0 0 -160px; border-radius: 50%; pointer-events: none; z-index: 4;
-          opacity: 0; visibility: hidden;
-          background: radial-gradient(circle, color-mix(in srgb, var(--gc-accent) 35%, transparent) 0%, transparent 60%);
-          mix-blend-mode: screen;
-        }
-        .gc-media {
-          position: relative; aspect-ratio: 4 / 5; overflow: hidden;
-        }
-        .gc-media-img {
-          position: absolute; inset: 0; background-size: cover; background-position: center;
+        .gm-card {
+          min-width: 0;
           will-change: transform;
         }
-        .gc-media::after {
-          content: ''; position: absolute; inset: 0;
-          background: linear-gradient(180deg, transparent 45%, rgba(8,6,15,0.92) 100%);
+
+        .gm-card-link {
+          appearance: none;
+          width: 100%;
+          height: 100%;
+          min-height: 172px;
+          position: relative;
+          display: block;
+          overflow: hidden;
+          padding: 0;
+          border: 1px solid var(--gm-line);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.035);
+          color: inherit;
+          cursor: pointer;
+          text-align: left;
+          transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
         }
-        .gc-tag {
-          position: absolute; top: 14px; left: 14px; z-index: 3;
+
+        .gm-card-link:hover,
+        .gm-card.is-active .gm-card-link {
+          border-color: var(--gm-line-strong);
+          background: rgba(255, 255, 255, 0.06);
+          box-shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
+        }
+
+        .gm-card-media {
+          position: absolute;
+          inset: 0;
+          display: block;
+          transform-style: preserve-3d;
+          will-change: transform;
+        }
+
+        .gm-card-img {
+          will-change: transform;
+        }
+
+        .gm-card-shade {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, rgba(8, 6, 15, 0.02), rgba(8, 6, 15, 0.16) 44%, rgba(8, 6, 15, 0.92)),
+            linear-gradient(90deg, rgba(8, 6, 15, 0.5), transparent 45%);
+        }
+
+        .gm-card-copy {
+          position: absolute;
+          inset: auto 14px 14px;
+          z-index: 2;
+          display: grid;
+          gap: 5px;
+          min-width: 0;
+        }
+
+        .gm-card-code {
+          color: var(--gm-accent-strong);
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-          color: #fff; padding: 5px 11px; border-radius: 5px;
-          background: rgba(13, 10, 24, 0.72); border: 1px solid rgba(139, 122, 232, 0.3); backdrop-filter: blur(6px);
+          font-size: 12px;
         }
-        .gc-code {
-          position: absolute; top: 14px; right: 14px; z-index: 3;
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: 13px; font-weight: 900; letter-spacing: 0.06em;
-          color: color-mix(in srgb, var(--gc-accent) 88%, white);
-          text-shadow: 0 0 14px color-mix(in srgb, var(--gc-accent) 60%, transparent);
-        }
-        .gc-status {
-          position: absolute; left: 14px; bottom: 78px; z-index: 3;
-          display: inline-flex; align-items: center; gap: 6px;
+
+        .gm-card-title {
+          color: #fff;
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #9ff5c0;
+          font-size: 18px;
+          font-weight: 700;
+          line-height: 1.12;
         }
-        .gc-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #38e08a; box-shadow: 0 0 8px #38e08a; }
-        .gc-status.is-soon { color: #ffd479; }
-        .gc-status.is-soon::before { background: #ffb938; box-shadow: 0 0 8px #ffb938; }
 
-        .gc-body {
-          position: relative; z-index: 3; display: flex; align-items: center; gap: 14px;
-          padding: 18px 18px 20px; margin-top: -60px;
+        .gm-card-meta {
+          color: rgba(255, 255, 255, 0.66);
+          font-size: 12px;
         }
-        .gc-no {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-size: 13px; font-weight: 900; color: rgba(139, 122, 232, 0.55);
-          font-variant-numeric: tabular-nums; align-self: flex-start; padding-top: 3px;
-        }
-        .gc-text { flex: 1; min-width: 0; }
-        .gc-title {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 4px; letter-spacing: -0.01em;
-          line-height: 1.2;
-        }
-        .gc-genre { font-size: 12.5px; color: var(--gm-text-mute); margin: 0; letter-spacing: 0.02em; }
-        .gc-cta {
-          flex: 0 0 auto; width: 42px; height: 42px; border-radius: 8px;
-          display: inline-flex; align-items: center; justify-content: center;
-          color: #fff; text-decoration: none;
-          background: rgba(139, 122, 232, 0.12); border: 1px solid rgba(139, 122, 232, 0.28);
-          transition: background 0.25s ease, transform 0.25s ease;
-        }
-        .gc-cta:hover { background: color-mix(in srgb, var(--gc-accent) 55%, transparent); transform: translateY(-2px); }
 
-        /* ╔═══ SPOTLIGHT ═══╗ */
-        .gm-spot {
-          max-width: var(--gm-maxw); margin: 0 auto; padding: clamp(60px, 8vw, 110px) var(--gm-pad);
-          display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(36px, 5vw, 80px); align-items: center;
+        .gm-empty {
+          min-height: 180px;
+          display: grid;
+          place-items: center;
+          border: 1px solid var(--gm-line);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.035);
+          color: var(--gm-soft);
         }
-        .gm-spot-media-img {
-          aspect-ratio: 16 / 11; border-radius: 16px; background-size: cover; background-position: center;
-          will-change: transform, clip-path;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); position: relative;
-        }
-        .gm-spot-media-img::after {
-          content: ''; position: absolute; inset: 0; border-radius: 16px;
-          box-shadow: inset 0 0 0 1px rgba(139, 122, 232, 0.2);
-        }
-        .gm-spot-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(28px, 3.4vw, 46px); line-height: 1.12;
-          letter-spacing: -0.02em; color: #fff; margin: 0 0 22px;
-        }
-        .gm-spot-body { font-size: 15.5px; line-height: 1.85; color: var(--gm-text-soft); max-width: 54ch; margin: 0 0 28px; }
-        .gm-spot-meta { display: flex; gap: clamp(20px, 3vw, 40px); margin-bottom: 32px; flex-wrap: wrap; }
-        .gm-spot-meta > div { display: flex; flex-direction: column; gap: 5px; }
-        .gm-spot-meta-k { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gm-text-mute); font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif); }
-        .gm-spot-meta-v { font-size: 14px; color: #fff; font-weight: 600; }
 
-        /* ╔═══ CTA ═══╗ */
-        .gm-cta { position: relative; overflow: hidden; padding: clamp(90px, 12vw, 150px) var(--gm-pad); text-align: center; border-top: 1px solid var(--gm-hair); }
-        .gm-cta-lightwell {
-          position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-          width: 90vw; height: 60vh; max-width: 900px; pointer-events: none;
-          background: radial-gradient(closest-side, rgba(108, 92, 231, 0.16), transparent 70%); filter: blur(10px);
+        .gm-cta {
+          position: relative;
+          min-height: min(720px, 100dvh);
+          display: grid;
+          align-items: center;
+          overflow: hidden;
+          border-top: 1px solid var(--gm-line);
         }
-        .gm-cta-inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
-        .gm-cta-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(30px, 4.6vw, 56px); line-height: 1.08;
-          letter-spacing: -0.02em; color: #fff; margin: 0 0 20px; text-shadow: 0 0 50px rgba(139, 122, 232, 0.35);
-        }
-        .gm-cta-sub { font-size: 16px; line-height: 1.8; color: var(--gm-text-soft); max-width: 52ch; margin: 0 auto 38px; }
-        .gm-cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-        /* ╔═══ RESPONSIVE ═══╗ */
+        .gm-cta-visual {
+          position: absolute;
+          inset: 0;
+          will-change: clip-path, transform;
+        }
+
+        .gm-cta-visual::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(8, 6, 15, 0.92), rgba(8, 6, 15, 0.52), rgba(8, 6, 15, 0.92)),
+            linear-gradient(180deg, rgba(8, 6, 15, 0.2), rgba(8, 6, 15, 0.9));
+        }
+
+        .gm-cta-copy {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+        }
+
+        .gm-cta-copy h2 {
+          max-width: 760px;
+        }
+
+        @media (max-width: 1199px) {
+          .gm-catalog-stage {
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 0.62fr);
+          }
+
+          .gm-card-link {
+            min-height: 170px;
+          }
+        }
+
         @media (max-width: 991px) {
-          .gm-hero-inner { grid-template-columns: 1fr; gap: 44px; }
-          .gm-hero-art { max-width: 420px; }
-          .gm-grid { grid-template-columns: repeat(2, 1fr); }
-          .gm-spot { grid-template-columns: 1fr; gap: 32px; }
-          .gm-spot-media-img { max-width: 560px; }
+          .gm-hero-inner {
+            grid-template-columns: 1fr;
+          }
+
+          .gm-stage {
+            min-height: 560px;
+          }
+
+          .gm-catalog-stage {
+            grid-template-columns: 1fr;
+          }
+
+          .gm-catalog-preview {
+            min-height: 500px;
+          }
+
+          .gm-catalog-preview-poster {
+            width: min(28%, 220px);
+          }
+
+          .gm-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
         }
-        @media (max-width: 575px) {
-          .gm-grid { grid-template-columns: 1fr; }
-          .gm-hero-stats { gap: 22px; }
-          .gm-catalog-head { flex-direction: column; align-items: flex-start; }
-          .gm-filters { width: 100%; overflow-x: auto; }
+
+        @media (max-width: 767px) {
+          .gm-root {
+            --gm-pad: 20px;
+          }
+
+          .gm-hero {
+            padding-top: 92px;
+          }
+
+          .gm-hero-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 800;
+            font-size: clamp(32px, 9.2vw, 40px);
+            line-height: 1.14;
+          }
+
+          .gm-stage {
+            min-height: 460px;
+          }
+
+          .gm-stage-backdrop {
+            inset: 8% 0 19% 0;
+          }
+
+          .gm-stage-poster.is-main {
+            width: min(56%, 240px);
+          }
+
+          .gm-stage-poster.is-secondary {
+            width: min(33%, 150px);
+            right: 1%;
+          }
+
+          .gm-stage-rail {
+            left: 16%;
+            right: 0;
+            bottom: 1%;
+            gap: 8px;
+            padding: 8px;
+          }
+
+          .gm-showcase-head {
+            padding-top: 72px;
+          }
+
+          .gm-pan {
+            min-height: auto;
+            overflow: visible;
+          }
+
+          .gm-pan-track {
+            width: auto;
+            height: auto;
+            display: grid;
+            padding: 0 var(--gm-pad) 76px;
+          }
+
+          .gm-panel {
+            flex: none;
+            height: auto;
+            min-height: 620px;
+            grid-template-columns: 1fr;
+          }
+
+          .gm-panel-copy {
+            width: auto;
+            left: 20px;
+            right: 20px;
+            bottom: 22px;
+          }
+
+          .gm-panel-copy h3 {
+            font-size: clamp(30px, 10vw, 44px);
+          }
+
+          .gm-panel-poster {
+            position: absolute;
+            top: 28px;
+            right: 20px;
+            width: min(42%, 170px);
+          }
+
+          .gm-panel-visual {
+            min-height: 620px;
+          }
+
+          .gm-catalog-head {
+            grid-template-columns: 1fr;
+            align-items: start;
+          }
+
+          .gm-catalog-head .gm-mini-label,
+          .gm-catalog-head h2 {
+            max-width: 9ch;
+          }
+
+          .gm-filters {
+            justify-self: start;
+            max-width: 100%;
+            overflow-x: auto;
+          }
+
+          .gm-catalog-preview {
+            min-height: 570px;
+            border-radius: 22px;
+          }
+
+          .gm-catalog-preview-shade {
+            background:
+              linear-gradient(180deg, rgba(8, 6, 15, 0.18), rgba(8, 6, 15, 0.34) 36%, rgba(8, 6, 15, 0.94)),
+              linear-gradient(90deg, rgba(8, 6, 15, 0.64), rgba(8, 6, 15, 0.12));
+          }
+
+          .gm-catalog-preview-copy {
+            left: 20px;
+            right: 20px;
+            bottom: 22px;
+            width: auto;
+          }
+
+          .gm-catalog-preview-copy h3 {
+            max-width: 10ch;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: clamp(30px, 9vw, 40px);
+            font-weight: 800;
+            line-height: 1.08;
+            background: transparent !important;
+            color: #fff !important;
+            -webkit-text-fill-color: #fff !important;
+          }
+
+          .gm-catalog-preview-copy p {
+            max-width: 28ch;
+            font-size: 13px;
+          }
+
+          .gm-catalog-preview-poster {
+            top: 22px;
+            right: 18px;
+            width: min(42%, 166px);
+            transform: rotate(4deg);
+          }
+
+          .gm-grid {
+            display: flex;
+            gap: 12px;
+            margin-left: calc(var(--gm-pad) * -1);
+            margin-right: calc(var(--gm-pad) * -1);
+            padding: 0 var(--gm-pad) 10px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+          }
+
+          .gm-grid::-webkit-scrollbar {
+            display: none;
+          }
+
+          .gm-card {
+            flex: 0 0 172px;
+            scroll-snap-align: start;
+          }
+
+          .gm-card-link {
+            min-height: 248px;
+          }
+
+          .gm-cta {
+            min-height: 620px;
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .gm-hero-eyebrow, .gm-hero-sub, .gm-hero-cta, .gm-hero-stats, .gm-hero-art { opacity: 1 !important; visibility: visible !important; transform: none !important; }
-          .gm-hero-title .gm-line span { transform: none !important; }
-          .gm-hero-art-img, .gm-spot-media-img { clip-path: none !important; }
-          .gm-catalog-title .sw { opacity: 1 !important; }
-          .gc { opacity: 1 !important; visibility: visible !important; }
-          .gm-marquee-track { animation: none !important; }
+          .gm-hero-copy > *,
+          .gm-stage-backdrop,
+          .gm-stage-poster,
+          .gm-stage-rail,
+          .gm-catalog-head,
+          .gm-card,
+          .gm-cta-copy > * {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: none !important;
+          }
+
+          .gm-pan-track {
+            transform: none !important;
+          }
+
+          .gm-showcase-head .gm-word {
+            opacity: 1 !important;
+            transform: none !important;
+          }
         }
       `}</style>
-    </div>
+    </main>
   );
 }
