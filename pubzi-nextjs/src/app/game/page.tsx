@@ -37,7 +37,7 @@ const GAMES: Game[] = [
     platform: 'PC',
     filters: ['PC'],
     poster: `${posterDir}/VLTK2.png`,
-    backdrop: `${backdropDir}/vltk.png`,
+    backdrop: `${backdropDir}/VLTK.png`,
     intro: 'Bang hội, chiến trường và những cuộc săn boss lớn được dựng như một thế giới sống.',
     details: ['Đấu phái', 'Bang hội', 'Giao thương'],
   },
@@ -48,7 +48,7 @@ const GAMES: Game[] = [
     genre: 'Nhập vai võ hiệp',
     platform: 'PC',
     filters: ['PC'],
-    poster: `${posterDir}/Kiếm Thế.png`,
+    poster: `${posterDir}/Kiếm Thế.png`,
     backdrop: `${backdropDir}/kiem-the.png`,
     intro: 'Nhịp chiến đấu nhanh, chất kiếm hiệp rõ và vòng lặp cộng đồng giữ chân người chơi lâu dài.',
     details: ['Tống Kim', 'Gia tộc', 'Sự kiện mùa'],
@@ -61,7 +61,7 @@ const GAMES: Game[] = [
     platform: 'PC & Mobile',
     filters: ['PC', 'Mobile'],
     poster: `${posterDir}/TLBB.png`,
-    backdrop: `${backdropDir}/Thiên Long Bát Bộ.png`,
+    backdrop: `${backdropDir}/thien-long-bat-bo.png`,
     intro: 'Một huyền thoại võ hiệp trở lại với khung hình lớn, kỹ năng rõ và nhịp vận hành hiện đại.',
     details: ['Môn phái', 'PvP lớn', 'Ra mắt 2026'],
   },
@@ -72,7 +72,7 @@ const GAMES: Game[] = [
     genre: 'Hành động nhập vai',
     platform: 'PC',
     filters: ['PC'],
-    poster: `${posterDir}/Tiếu Ngạo Giang Hồ.png`,
+    poster: `${posterDir}/Tiếu Ngạo Giang Hồ.png`,
     backdrop: `${backdropDir}/tieu-ngao-giang-ho.png`,
     intro: 'Không khí giang hồ đậm màu điện ảnh, tập trung vào tốc độ, thế võ và cuộc đấu phe phái.',
     details: ['Combo võ học', 'Thế lực', 'Chiến trường'],
@@ -84,8 +84,8 @@ const GAMES: Game[] = [
     genre: 'Tiên hiệp MMORPG',
     platform: 'Mobile',
     filters: ['Mobile'],
-    poster: `${posterDir}/Tru Tiên.png`,
-    backdrop: `${posterDir}/Tru Tiên.png`,
+    poster: `${posterDir}/Tru Tiên.png`,
+    backdrop: `${posterDir}/Tru Tiên.png`,
     backdropSource: 'portrait',
     intro: 'Tiên hiệp kỳ ảo với mood tím sâu, dựng trải nghiệm theo hướng lãng mạn và đại cảnh.',
     details: ['Tiên môn', 'Thú cưỡi', 'Boss thế giới'],
@@ -97,7 +97,7 @@ const GAMES: Game[] = [
     genre: 'MMORPG thương lộ',
     platform: 'PC',
     filters: ['PC'],
-    poster: `${posterDir}/Con Đường Tơ luaj.png`,
+    poster: `${posterDir}/Con Đường Tơ luaj.png`,
     backdrop: `${backdropDir}/con-duong-to-lua.png`,
     intro: 'Thương nhân, đạo tặc và bảo tiêu va chạm trong một bản đồ rộng có nhiều rủi ro thật.',
     details: ['Trading', 'Job war', 'Boss săn chung'],
@@ -1507,30 +1507,64 @@ export default function GamePage() {
           .gm-panel {
             flex: none;
             height: auto;
-            min-height: 620px;
-            grid-template-columns: 1fr;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            grid-template-columns: none;
+            overflow: hidden;
           }
 
           .gm-panel-copy {
+            position: relative;
+            z-index: 3;
             width: auto;
-            left: 20px;
-            right: 20px;
-            bottom: 22px;
+            left: auto;
+            right: auto;
+            bottom: auto;
+            padding: 22px 20px 24px;
+            background:
+              linear-gradient(180deg, rgba(14, 10, 26, 0.92), rgba(8, 6, 15, 0.98)),
+              radial-gradient(circle at 20% 0%, rgba(139, 122, 232, 0.18), transparent 18rem);
           }
 
           .gm-panel-copy h3 {
-            font-size: clamp(30px, 10vw, 44px);
+            font-size: clamp(28px, 9vw, 38px);
+          }
+
+          .gm-panel-copy p {
+            font-size: 14px;
+            line-height: 1.62;
           }
 
           .gm-panel-poster {
             position: absolute;
-            top: 28px;
-            right: 20px;
-            width: min(42%, 170px);
+            top: 14px;
+            right: 14px;
+            width: min(31%, 126px);
+            border-radius: 14px;
+            box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5);
           }
 
           .gm-panel-visual {
-            min-height: 620px;
+            position: relative;
+            inset: auto;
+            min-height: 0;
+            aspect-ratio: 1672 / 941;
+            flex: none;
+          }
+
+          .gm-panel-visual img,
+          .gm-panel-visual.is-portrait-source img {
+            object-fit: contain;
+            object-position: center;
+            filter: none;
+            transform: none;
+          }
+
+          .gm-panel-visual::after {
+            background:
+              linear-gradient(180deg, rgba(8, 6, 15, 0.06), rgba(8, 6, 15, 0.28)),
+              linear-gradient(90deg, rgba(8, 6, 15, 0.16), rgba(8, 6, 15, 0));
           }
 
           .gm-catalog-head {

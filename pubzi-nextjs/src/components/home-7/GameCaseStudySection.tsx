@@ -38,7 +38,7 @@ const GAMES: GameItem[] = [
     title: 'Võ Lâm Truyền Kỳ',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'PC',
-    image: '/assets/img/landing-page/game/vltk.png',
+    image: '/assets/img/landing-page/game/VLTK.png',
   },
   {
     num: '02',
@@ -538,15 +538,17 @@ export default function GameCaseStudySection() {
           }
 
           .game-panel {
-            height: 150px;
+            aspect-ratio: 1672 / 941;
+            height: auto;
             flex: none;
-            transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            background: #090611;
+            transition: box-shadow 0.35s ease, border-color 0.35s ease;
           }
 
           .game-panel:hover,
           .game-panel:focus-visible {
             flex: none;
-            height: 230px;
+            height: auto;
           }
 
           /* The key-art already has the game title baked in, so the overlay
@@ -558,7 +560,17 @@ export default function GameCaseStudySection() {
           }
 
           .game-panel-art {
+            background-size: contain;
+            background-repeat: no-repeat;
             background-position: center;
+            filter: brightness(1);
+            transform: none;
+          }
+
+          .game-panel:hover .game-panel-art,
+          .game-panel:focus-visible .game-panel-art {
+            filter: brightness(1);
+            transform: none;
           }
         }
 

@@ -8,34 +8,33 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const LAYER_HERO_IMAGE = 'https://picsum.photos/seed/blackhole-longterm-local-partner/1500/1000';
+const PROCESS_IMAGE = 'https://picsum.photos/seed/blackhole-live-ops-room/1200/1500';
+
 const OPERATING_LAYERS = [
   {
     title: 'đọc thị trường',
-    copy: 'Bắt đầu từ hành vi người chơi, kênh cộng đồng, nhịp nội dung và những rào cản bản địa trước khi nói về launch.',
-    image: '/assets/img/inner-page/service-details/details-1.jpg',
+    copy: 'Hành vi người chơi, cộng đồng và rào cản bản địa được soi trước khi quyết định thông điệp.',
+    image: 'https://picsum.photos/seed/blackhole-player-research/900/700',
     alt: 'Không gian nghiên cứu thị trường cho vận hành game',
-    ratio: 'wide',
   },
   {
     title: 'bản địa hóa trải nghiệm',
-    copy: 'Không chỉ dịch chữ. Thông điệp, onboarding, lịch sự kiện và cách người chơi gặp sản phẩm đều cần đúng ngữ cảnh.',
-    image: '/assets/img/home-2/about/aout-01.jpg',
+    copy: 'Ngôn ngữ, onboarding, lịch sự kiện và support được chỉnh theo ngữ cảnh Việt Nam.',
+    image: 'https://picsum.photos/seed/blackhole-localization-context/900/700',
     alt: 'Hình ảnh đại diện cho trải nghiệm bản địa hóa',
-    ratio: 'vertical',
   },
   {
     title: 'kích hoạt cộng đồng',
-    copy: 'Creator, bang hội, giải đấu và social content được nối thành một nhịp vận hành có điểm hẹn rõ ràng.',
-    image: '/assets/img/inner-page/gallery/gallery-1.jpg',
-    alt: 'Không khí cộng đồng game trong một chiến dịch',
-    ratio: 'vertical',
+    copy: 'Creator, bang hội, giải đấu và social content được nối thành một nhịp có điểm hẹn.',
+    image: 'https://picsum.photos/seed/blackhole-community-activation/900/700',
+    alt: 'Không khí cộng đồng game trong một hoạt động bản địa',
   },
   {
     title: 'vận hành sau launch',
-    copy: 'Phản hồi người chơi, dữ liệu giữ chân và lịch cập nhật được đưa ngược về đội vận hành để game có đời sống dài hơn.',
-    image: '/assets/img/inner-page/service-details/details-2.jpg',
+    copy: 'Phản hồi người chơi và dữ liệu giữ chân quay lại kế hoạch live ops để game có đời sống dài hơn.',
+    image: 'https://picsum.photos/seed/blackhole-postlaunch-operations/900/700',
     alt: 'Không gian vận hành live ops sau khi ra mắt',
-    ratio: 'wide',
   },
 ];
 
@@ -43,42 +42,42 @@ const WORK_STEPS = [
   {
     title: 'lắng nghe',
     kicker: 'từ người chơi',
-    copy: 'BlackHole gom tín hiệu từ cộng đồng, creator, social và dữ liệu sản phẩm để nhìn đúng vấn đề trước khi đẩy chiến dịch.',
-    image: '/assets/img/home-7/about/about-01.png',
+    copy: 'BlackHole gom tín hiệu từ cộng đồng, creator, social và dữ liệu sản phẩm để nhìn đúng vấn đề trước khi chốt kế hoạch.',
+    image: 'https://picsum.photos/seed/blackhole-player-signals/800/600',
     alt: 'Đội vận hành lắng nghe tín hiệu người chơi',
   },
   {
     title: 'định hình',
     kicker: 'thành kế hoạch',
-    copy: 'Mỗi thông điệp, kênh nội dung và lịch ra mắt được gom về một bản đồ vận hành mà marketing, cộng đồng và live ops cùng đọc được.',
-    image: '/assets/img/inner-page/service-details/details-3.jpg',
-    alt: 'Bản đồ kế hoạch vận hành cho chiến dịch',
+    copy: 'Thông điệp, kênh nội dung và lịch ra mắt được gom về một bản đồ vận hành mà marketing, cộng đồng và live ops cùng đọc được.',
+    image: 'https://picsum.photos/seed/blackhole-publishing-plan/800/600',
+    alt: 'Bản đồ kế hoạch vận hành cho sản phẩm game',
   },
   {
     title: 'vận hành',
     kicker: 'thành nhịp quay lại',
     copy: 'Sau launch, BlackHole giữ nhịp bằng sự kiện, phản hồi, ưu đãi, nội dung cộng đồng và những vòng cải thiện liên tục.',
-    image: '/assets/img/home-2/news/news-03.jpg',
+    image: 'https://picsum.photos/seed/blackhole-community-liveops/800/600',
     alt: 'Nhịp nội dung và vận hành cộng đồng sau launch',
   },
 ];
 
 const PRINCIPLES = [
   {
-    title: 'rõ việc',
-    copy: 'Mỗi đội biết mình đang tác động vào phần nào của hành trình người chơi.',
+    title: 'đi cùng từ sớm',
+    copy: 'Thị trường, pháp lý, thanh toán và cộng đồng được đặt lên bàn từ giai đoạn chuẩn bị, không đợi sát ngày ra mắt.',
   },
   {
-    title: 'phản hồi nhanh',
-    copy: 'Tín hiệu từ cộng đồng được chuyển thành hành động, không nằm im trong báo cáo.',
+    title: 'giữ nhịp sau launch',
+    copy: 'Launch chỉ là điểm mở. Lịch cập nhật, support và hoạt động cộng đồng mới quyết định sản phẩm có quay lại được không.',
   },
   {
-    title: 'tôn trọng cộng đồng',
-    copy: 'Người chơi không chỉ là traffic. Họ là lý do sản phẩm có đời sống dài hạn.',
+    title: 'nói đúng ngữ cảnh',
+    copy: 'Một sản phẩm quốc tế cần được gặp người chơi bằng ngôn ngữ, thời điểm và kênh phân phối phù hợp với Việt Nam.',
   },
   {
-    title: 'đo bằng dữ liệu',
-    copy: 'Cảm hứng cần có số liệu đi cùng để quyết định bớt mơ hồ.',
+    title: 'quyết định bằng tín hiệu',
+    copy: 'Dữ liệu giữ chân, phản hồi cộng đồng và hiệu quả kênh được dùng để điều chỉnh vận hành liên tục.',
   },
 ];
 
@@ -87,16 +86,19 @@ const PORTFOLIO_ACCENTS = [
     title: 'thị trường',
     image: '/assets/img/landing-page/game/tlbb.png',
     alt: 'Ảnh portfolio game ngang',
+    copy: 'Chọn cách tiếp cận theo hành vi và cộng đồng của từng nhóm người chơi.',
   },
   {
     title: 'cộng đồng',
     image: '/assets/img/landing-page/game/kiem-the.png',
     alt: 'Ảnh portfolio game cộng đồng',
+    copy: 'Xây lịch nội dung, creator và điểm hẹn để người chơi có lý do quay lại.',
   },
   {
     title: 'vận hành',
     image: '/assets/img/landing-page/list_game_doc/TLBB.png',
     alt: 'Ảnh portfolio game dọc',
+    copy: 'Giữ sản phẩm sống bằng phản hồi, support, update và live ops sau ngày mở cửa.',
   },
 ];
 
@@ -112,7 +114,7 @@ function PortalVideoSources() {
 // Manifesto rendered as discrete lines so each can reveal on scroll without
 // the inline-block whitespace-collapse bug that glued words together.
 // Each line is a clip window (.ab2-line) over an inner span (.ab2-line-inner)
-// that rises into view — a cinematic per-line mask wipe driven by GSAP.
+// that rises into view with a cinematic per-line mask wipe driven by GSAP.
 const MANIFESTO_LINES: ReactNode[] = [
   <>Chúng tôi đưa</>,
   <><span className="ab2-hl">game quốc tế</span> vào</>,
@@ -210,7 +212,7 @@ export default function AboutPage() {
         0
       );
       // Gentle settle: the copy block tightens tracking and lifts a touch as it
-      // locks in — a quiet weighty finish rather than a flat stop.
+      // locks in with a quiet weighty finish rather than a flat stop.
       lineTl.fromTo(
         '.ab2-manifesto-copy',
         { letterSpacing: '0.04em', y: 14 },
@@ -219,7 +221,7 @@ export default function AboutPage() {
       );
 
       // Framed video parallax: the portal drifts and breathes inside its frame
-      // as the section travels — depth without moving layout (transform only).
+      // as the section travels. Depth without moving layout (transform only).
       gsap.fromTo(
         '.ab2-letterbox-video',
         { yPercent: -6, scale: 1.08 },
@@ -313,9 +315,32 @@ export default function AboutPage() {
           },
         });
 
+        const proofMediaTweens = gsap.utils.toArray<HTMLElement>('.ab2-proof-media img').map((image, index) =>
+          gsap.fromTo(
+            image,
+            { scale: 1.04, yPercent: index === 1 ? 4 : -4 },
+            {
+              scale: 1.12,
+              yPercent: index === 1 ? -4 : 4,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: '.ab2-proof',
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1.05,
+                invalidateOnRefresh: true,
+              },
+            }
+          )
+        );
+
         return () => {
           bgTween.scrollTrigger?.kill();
           processMedia.scrollTrigger?.kill();
+          proofMediaTweens.forEach((tween) => {
+            tween.scrollTrigger?.kill();
+            tween.kill();
+          });
           bgTween.kill();
           processMedia.kill();
         };
@@ -359,7 +384,7 @@ export default function AboutPage() {
         <div className="ab2-content-backdrop" aria-hidden="true" />
 
         <section className="ab2-manifesto">
-          <div className="ab2-manifesto-mark ab2-reveal">— về BlackHole</div>
+          <div className="ab2-manifesto-mark ab2-reveal">về BlackHole</div>
 
           <div className="ab2-manifesto-stage">
             <div className="ab2-letterbox" aria-hidden="true">
@@ -390,30 +415,45 @@ export default function AboutPage() {
           <div className="ab2-section-head ab2-reveal">
             <h2>một local partner, không phải một chiến dịch ngắn ngày.</h2>
             <p>
-              Khi một sản phẩm bước vào thị trường mới, việc khó không chỉ là truyền thông. Việc khó là tạo được ngữ cảnh,
-              niềm tin và lý do quay lại sau ngày ra mắt.
+              BlackHole đi cùng sản phẩm từ ngày nghiên cứu thị trường đến khi cộng đồng đã có nhịp quay lại.
             </p>
           </div>
 
-          <div className="ab2-layer-grid">
-            {OPERATING_LAYERS.map((layer) => (
-              <article className={`ab2-layer-card ab2-layer-card-${layer.ratio}`} key={layer.title}>
-                <div className="ab2-layer-media">
-                  <Image src={layer.image} alt={layer.alt} fill sizes="(max-width: 991px) 100vw, 52vw" />
-                </div>
-                <div className="ab2-layer-copy">
-                  <h3>{layer.title}</h3>
-                  <p>{layer.copy}</p>
-                </div>
-              </article>
-            ))}
+          <div className="ab2-layer-showcase">
+            <figure className="ab2-layer-hero ab2-layer-card">
+              <div className="ab2-layer-hero-media">
+                <Image
+                  src={LAYER_HERO_IMAGE}
+                  alt="Không gian vận hành phát hành game tại thị trường Việt Nam"
+                  fill
+                  sizes="(max-width: 991px) 100vw, 54vw"
+                />
+              </div>
+              <figcaption>
+                Một bàn vận hành chung cho market, cộng đồng, creator và live ops.
+              </figcaption>
+            </figure>
+
+            <div className="ab2-layer-stack">
+              {OPERATING_LAYERS.map((layer) => (
+                <article className="ab2-layer-card" key={layer.title}>
+                  <div className="ab2-layer-media">
+                    <Image src={layer.image} alt={layer.alt} fill sizes="(max-width: 767px) 100vw, 18vw" />
+                  </div>
+                  <div className="ab2-layer-copy">
+                    <h3>{layer.title}</h3>
+                    <p>{layer.copy}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="ab2-process" aria-label="Cách BlackHole làm việc">
           <div className="ab2-process-visual ab2-reveal" aria-hidden="true">
             <div className="ab2-process-visual-inner">
-              <Image src="/assets/img/inner-page/service-details/details-1.jpg" alt="" fill sizes="(max-width: 991px) 100vw, 38vw" />
+              <Image src={PROCESS_IMAGE} alt="" fill sizes="(max-width: 991px) 100vw, 38vw" />
               <div className="ab2-process-panel">
                 <span>market</span>
                 <span>community</span>
@@ -424,10 +464,9 @@ export default function AboutPage() {
 
           <div className="ab2-process-copy">
             <div className="ab2-process-title ab2-reveal">
-              <h2>từ tín hiệu rời rạc thành một nhịp vận hành.</h2>
+              <h2>từ tín hiệu thị trường thành nhịp vận hành.</h2>
               <p>
-                Cách làm của BlackHole không bắt đầu bằng một poster đẹp. Nó bắt đầu bằng việc hiểu người chơi đang cần gì
-                và sản phẩm nên gặp họ ở đâu.
+                BlackHole bắt đầu bằng việc hiểu người chơi đang cần gì, rồi biến tín hiệu đó thành kế hoạch ra mắt và live ops.
               </p>
             </div>
 
@@ -450,10 +489,9 @@ export default function AboutPage() {
 
         <section className="ab2-principles" aria-label="Nguyên tắc vận hành BlackHole">
           <div className="ab2-principles-head ab2-reveal">
-            <h2>những nguyên tắc giữ trang About này thật.</h2>
+            <h2>nguyên tắc của một đối tác dài hạn.</h2>
             <p>
-              Khi chưa có fact từ marketing, điều đúng nhất là nói rõ cách BlackHole muốn vận hành, không dựng lên những con
-              số chưa được xác nhận.
+              Một thị trường mới không được mở bằng một banner đơn lẻ. Nó cần hệ điều hành đủ bền để sản phẩm sống cùng người chơi.
             </p>
           </div>
 
@@ -469,27 +507,31 @@ export default function AboutPage() {
 
         <section className="ab2-proof" aria-label="Điểm chạm portfolio của BlackHole">
           <div className="ab2-proof-copy ab2-reveal">
-            <h2>sản phẩm là bằng chứng, nhưng không chiếm hết câu chuyện.</h2>
+            <h2>portfolio là dấu vết của năng lực vận hành.</h2>
             <p>
-              Game vẫn xuất hiện như dấu vết portfolio. Trọng tâm của About là cách BlackHole đưa sản phẩm vào thị trường và
-              giữ nó sống cùng cộng đồng.
+              Game xuất hiện như bằng chứng thị trường. Điều quan trọng hơn là cách BlackHole đưa sản phẩm vào Việt Nam và giữ nhịp sau đó.
             </p>
           </div>
 
           <div className="ab2-proof-board">
             {PORTFOLIO_ACCENTS.map((item, index) => (
               <figure className={`ab2-proof-item ab2-proof-item-${index + 1} ab2-reveal`} key={item.title}>
-                <Image src={item.image} alt={item.alt} fill sizes="(max-width: 767px) 100vw, 34vw" />
-                <figcaption>{item.title}</figcaption>
+                <div className="ab2-proof-media">
+                  <Image src={item.image} alt={item.alt} fill sizes="(max-width: 767px) 100vw, 34vw" />
+                </div>
+                <figcaption>
+                  <strong>{item.title}</strong>
+                  <span>{item.copy}</span>
+                </figcaption>
               </figure>
             ))}
           </div>
         </section>
 
         <section className="ab2-cta ab2-reveal">
-          <div>
+          <div className="ab2-cta-copy">
             <h2>đưa game vào thị trường Việt Nam bằng một kế hoạch có lực.</h2>
-            <p>BlackHole sẵn sàng trao đổi về phát hành, cộng đồng và live operations.</p>
+            <p>BlackHole sẵn sàng trao đổi về phát hành, cộng đồng và live ops cho sản phẩm quốc tế.</p>
           </div>
           <div className="ab2-actions">
             <Link className="ab2-btn ab2-btn-primary" href="/contact">
@@ -522,6 +564,7 @@ export default function AboutPage() {
           background: var(--ab2-bg);
           overflow: clip;
           font-family: var(--font-body-regular, Arial, sans-serif);
+          text-transform: none;
         }
 
         .ab2-root::before {
@@ -755,7 +798,7 @@ export default function AboutPage() {
           font-family: var(--font-title-extra, Arial, sans-serif);
           font-weight: 900;
           letter-spacing: 0;
-          /* body sets text-transform:uppercase globally — force lowercase here */
+          /* body sets text-transform:uppercase globally. Force lowercase here */
           text-transform: none;
           text-wrap: balance;
           text-shadow: 0 2px 24px rgba(0, 0, 0, 0.74), 0 0 48px rgba(0, 0, 0, 0.4);
@@ -780,13 +823,16 @@ export default function AboutPage() {
           line-height: 1.8;
         }
 
-        .ab2-section-head,
         .ab2-principles-head,
         .ab2-proof-copy {
           display: grid;
           grid-template-columns: minmax(0, 0.92fr) minmax(280px, 0.62fr);
           gap: clamp(28px, 5vw, 78px);
           align-items: end;
+        }
+
+        .ab2-section-head {
+          max-width: 840px;
         }
 
         .ab2-section-head h2,
@@ -808,21 +854,26 @@ export default function AboutPage() {
           max-width: 56ch;
         }
 
+        .ab2-section-head p {
+          margin-top: 24px;
+          font-size: 1.08rem;
+        }
+
         .ab2-layers {
           padding-top: clamp(80px, 10vh, 130px);
           padding-bottom: clamp(92px, 12vh, 156px);
         }
 
-        .ab2-layer-grid {
+        .ab2-layer-showcase {
           margin-top: 56px;
           display: grid;
-          grid-template-columns: repeat(12, minmax(0, 1fr));
-          gap: 18px;
+          grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+          gap: 20px;
           align-items: stretch;
         }
 
-        .ab2-layer-card {
-          min-height: 520px;
+        .ab2-layer-hero {
+          min-height: 720px;
           display: grid;
           grid-template-rows: minmax(0, 1fr) auto;
           overflow: hidden;
@@ -834,36 +885,51 @@ export default function AboutPage() {
           box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
         }
 
-        .ab2-layer-card:nth-child(1) {
-          grid-column: span 7;
-        }
-
-        .ab2-layer-card:nth-child(2) {
-          grid-column: span 5;
-        }
-
-        .ab2-layer-card:nth-child(3) {
-          grid-column: span 5;
-        }
-
-        .ab2-layer-card:nth-child(4) {
-          grid-column: span 7;
-        }
-
-        .ab2-layer-media {
+        .ab2-layer-hero-media {
           position: relative;
+          min-height: 0;
           overflow: hidden;
           background: #05040a;
         }
 
-        .ab2-layer-card-wide .ab2-layer-media {
-          aspect-ratio: 16 / 9;
+        .ab2-layer-hero figcaption {
+          margin: 0;
+          padding: 26px 28px;
+          border-top: 1px solid rgba(176, 156, 255, 0.16);
+          color: rgba(255, 255, 255, 0.9);
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-size: clamp(1.4rem, 2.2vw, 2.15rem);
+          font-weight: 900;
+          line-height: 1.08;
         }
 
-        .ab2-layer-card-vertical .ab2-layer-media {
-          aspect-ratio: 4 / 5;
+        .ab2-layer-stack {
+          display: grid;
+          gap: 14px;
+          align-content: stretch;
         }
 
+        .ab2-layer-stack .ab2-layer-card {
+          min-height: 0;
+          display: grid;
+          grid-template-columns: minmax(132px, 0.4fr) minmax(0, 1fr);
+          overflow: hidden;
+          border-radius: var(--ab2-radius);
+          border: 1px solid var(--ab2-line);
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.016)),
+            rgba(13, 9, 28, 0.82);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+        }
+
+        .ab2-layer-media {
+          position: relative;
+          min-height: 180px;
+          overflow: hidden;
+          background: #05040a;
+        }
+
+        .ab2-layer-hero-media img,
         .ab2-layer-media img,
         .ab2-process-thumb img,
         .ab2-proof-item img,
@@ -873,20 +939,23 @@ export default function AboutPage() {
           height: 100%;
           object-fit: cover;
           filter: saturate(1.04) contrast(1.05) brightness(0.86);
+          will-change: transform;
         }
 
         .ab2-layer-copy {
-          padding: 28px;
+          padding: 24px;
+          align-self: center;
         }
 
         .ab2-layer-copy h3 {
           margin-bottom: 12px;
-          font-size: 2.15rem;
+          font-size: clamp(1.55rem, 2.1vw, 2.05rem);
           line-height: 1.04;
         }
 
         .ab2-layer-copy p {
-          max-width: 48ch;
+          max-width: 42ch;
+          font-size: 0.96rem;
         }
 
         .ab2-process {
@@ -907,6 +976,7 @@ export default function AboutPage() {
           border-radius: var(--ab2-radius);
           border: 1px solid var(--ab2-line);
           background: #090611;
+          box-shadow: 0 32px 110px rgba(0, 0, 0, 0.34);
         }
 
         .ab2-process-visual-inner {
@@ -931,23 +1001,25 @@ export default function AboutPage() {
           right: 24px;
           bottom: 24px;
           z-index: 2;
-          display: grid;
-          gap: 1px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
           overflow: hidden;
-          border-radius: var(--ab2-radius);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          background: rgba(255, 255, 255, 0.14);
         }
 
         .ab2-process-panel span {
-          min-height: 58px;
           display: flex;
           align-items: center;
-          padding: 0 18px;
-          background: rgba(9, 6, 20, 0.82);
+          min-height: 44px;
+          padding: 0 14px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: var(--ab2-radius);
+          background: rgba(9, 6, 20, 0.78);
           color: rgba(255, 255, 255, 0.9);
           font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 0.88rem;
           font-weight: 900;
+          backdrop-filter: blur(14px);
         }
 
         .ab2-process-copy {
@@ -970,16 +1042,17 @@ export default function AboutPage() {
 
         .ab2-process-card {
           display: grid;
-          grid-template-columns: minmax(180px, 0.56fr) minmax(0, 1fr);
+          grid-template-columns: minmax(166px, 0.44fr) minmax(0, 1fr);
           gap: 24px;
           align-items: center;
-          padding: 18px;
+          padding: 16px;
           border-radius: var(--ab2-radius);
           border: 1px solid var(--ab2-line);
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.018)),
+            linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012)),
             rgba(12, 8, 26, 0.86);
           backdrop-filter: blur(16px);
+          box-shadow: 0 18px 64px rgba(0, 0, 0, 0.2);
         }
 
         .ab2-process-thumb {
@@ -1005,6 +1078,10 @@ export default function AboutPage() {
           line-height: 1.04;
         }
 
+        .ab2-process-card p {
+          max-width: 52ch;
+        }
+
         .ab2-principles {
           padding-top: clamp(86px, 11vh, 140px);
           padding-bottom: clamp(86px, 11vh, 140px);
@@ -1013,37 +1090,49 @@ export default function AboutPage() {
         .ab2-principle-rail {
           margin-top: 58px;
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          border: 1px solid var(--ab2-line);
-          border-radius: var(--ab2-radius);
-          overflow: hidden;
-          background: rgba(176, 156, 255, 0.12);
+          grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+          gap: 16px;
         }
 
         .ab2-principle-item {
-          min-height: 310px;
+          min-height: 250px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           gap: 28px;
-          padding: 28px;
+          overflow: hidden;
+          padding: 30px;
+          border: 1px solid var(--ab2-line);
+          border-radius: var(--ab2-radius);
           background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
+            radial-gradient(circle at 0% 0%, rgba(159, 140, 255, 0.2), transparent 34%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012)),
             rgba(10, 7, 22, 0.94);
         }
 
-        .ab2-principle-item + .ab2-principle-item {
-          border-left: 1px solid rgba(176, 156, 255, 0.14);
+        .ab2-principle-item:nth-child(1) {
+          grid-row: span 2;
+          min-height: 520px;
+        }
+
+        .ab2-principle-item:nth-child(4) {
+          grid-column: 1 / -1;
+          min-height: 230px;
+          background:
+            linear-gradient(110deg, rgba(159, 140, 255, 0.18), transparent 42%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.014)),
+            rgba(10, 7, 22, 0.94);
         }
 
         .ab2-principle-item h3 {
-          max-width: 8ch;
-          font-size: 2.55rem;
+          max-width: 11ch;
+          font-size: clamp(2rem, 3vw, 3.1rem);
           line-height: 1.02;
         }
 
         .ab2-principle-item p {
-          font-size: 0.95rem;
+          max-width: 50ch;
+          font-size: 0.98rem;
         }
 
         .ab2-proof {
@@ -1064,13 +1153,34 @@ export default function AboutPage() {
         }
 
         .ab2-proof-board {
-          min-height: 620px;
-          position: relative;
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 18px;
         }
 
         .ab2-proof-item {
-          position: absolute;
           margin: 0;
+          display: grid;
+          gap: 14px;
+          border-radius: var(--ab2-radius);
+          color: var(--ab2-text);
+        }
+
+        .ab2-proof-item-1 {
+          grid-column: span 4;
+        }
+
+        .ab2-proof-item-2 {
+          grid-column: span 2;
+          padding-top: 54px;
+        }
+
+        .ab2-proof-item-3 {
+          grid-column: 3 / -1;
+        }
+
+        .ab2-proof-media {
+          position: relative;
           overflow: hidden;
           border-radius: var(--ab2-radius);
           border: 1px solid rgba(176, 156, 255, 0.22);
@@ -1078,38 +1188,36 @@ export default function AboutPage() {
           box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
         }
 
-        .ab2-proof-item-1 {
-          left: 0;
-          top: 48px;
-          width: 64%;
+        .ab2-proof-item-1 .ab2-proof-media {
           aspect-ratio: 16 / 9;
         }
 
-        .ab2-proof-item-2 {
-          right: 0;
-          top: 0;
-          width: 46%;
-          aspect-ratio: 4 / 3;
-        }
-
-        .ab2-proof-item-3 {
-          right: 10%;
-          bottom: 0;
-          width: 34%;
+        .ab2-proof-item-2 .ab2-proof-media {
           aspect-ratio: 4 / 5;
         }
 
+        .ab2-proof-item-3 .ab2-proof-media {
+          aspect-ratio: 16 / 8.4;
+        }
+
         .ab2-proof-item figcaption {
-          position: absolute;
-          left: 12px;
-          bottom: 12px;
-          padding: 8px 11px;
-          border-radius: var(--ab2-radius);
-          color: rgba(255, 255, 255, 0.92);
-          background: rgba(7, 5, 15, 0.78);
+          display: grid;
+          gap: 8px;
+          padding: 0 4px;
+        }
+
+        .ab2-proof-item figcaption strong {
+          color: rgba(255, 255, 255, 0.94);
           font-family: var(--font-subtitle-krafting, Arial, sans-serif);
-          font-size: 0.82rem;
+          font-size: 0.9rem;
           font-weight: 900;
+        }
+
+        .ab2-proof-item figcaption span {
+          max-width: 42ch;
+          color: rgba(255, 255, 255, 0.66);
+          font-size: 0.92rem;
+          line-height: 1.6;
         }
 
         .ab2-cta {
@@ -1119,10 +1227,11 @@ export default function AboutPage() {
           grid-template-columns: minmax(0, 1fr) auto;
           gap: 34px;
           align-items: end;
+          border-top: 1px solid rgba(176, 156, 255, 0.16);
         }
 
         .ab2-cta h2 {
-          max-width: 15ch;
+          max-width: 17ch;
         }
 
         .ab2-cta p {
@@ -1192,7 +1301,7 @@ export default function AboutPage() {
             font-size: 3.35rem;
           }
 
-          .ab2-layer-card,
+          .ab2-layer-hero,
           .ab2-process-visual {
             min-height: 480px;
           }
@@ -1201,12 +1310,8 @@ export default function AboutPage() {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
 
-          .ab2-principle-item:nth-child(3) {
-            border-left: 0;
-          }
-
-          .ab2-principle-item:nth-child(n + 3) {
-            border-top: 1px solid rgba(176, 156, 255, 0.14);
+          .ab2-principle-item:nth-child(1) {
+            min-height: 420px;
           }
         }
 
@@ -1216,7 +1321,6 @@ export default function AboutPage() {
           }
 
           .ab2-manifesto,
-          .ab2-section-head,
           .ab2-process,
           .ab2-principles-head,
           .ab2-proof,
@@ -1228,12 +1332,12 @@ export default function AboutPage() {
             min-height: auto;
           }
 
-          .ab2-layer-grid {
+          .ab2-layer-showcase {
             grid-template-columns: 1fr;
           }
 
-          .ab2-layer-card:nth-child(n) {
-            grid-column: auto;
+          .ab2-layer-hero {
+            min-height: 560px;
           }
 
           .ab2-process-visual {
@@ -1332,12 +1436,31 @@ export default function AboutPage() {
             font-size: 0.93rem;
           }
 
-          .ab2-layer-grid {
+          .ab2-layer-showcase {
             margin-top: 34px;
+            gap: 16px;
           }
 
-          .ab2-layer-card {
+          .ab2-layer-hero {
             min-height: auto;
+          }
+
+          .ab2-layer-hero-media {
+            aspect-ratio: 4 / 5;
+          }
+
+          .ab2-layer-hero figcaption {
+            padding: 22px;
+            font-size: 1.55rem;
+          }
+
+          .ab2-layer-stack .ab2-layer-card {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-layer-media {
+            min-height: auto;
+            aspect-ratio: 16 / 10;
           }
 
           .ab2-layer-copy,
@@ -1369,29 +1492,29 @@ export default function AboutPage() {
             grid-template-columns: 1fr;
           }
 
-          .ab2-principle-item + .ab2-principle-item {
-            border-left: 0;
-            border-top: 1px solid rgba(176, 156, 255, 0.14);
+          .ab2-principle-item:nth-child(1),
+          .ab2-principle-item:nth-child(4) {
+            grid-column: auto;
+            grid-row: auto;
+            min-height: auto;
           }
 
           .ab2-proof-board {
-            min-height: auto;
-            display: grid;
+            grid-template-columns: 1fr;
             gap: 16px;
           }
 
           .ab2-proof-item {
-            position: relative;
-            inset: auto;
-            width: 100%;
+            grid-column: auto;
+            padding-top: 0;
           }
 
-          .ab2-proof-item-1,
-          .ab2-proof-item-2 {
+          .ab2-proof-item-1 .ab2-proof-media,
+          .ab2-proof-item-2 .ab2-proof-media {
             aspect-ratio: 16 / 9;
           }
 
-          .ab2-proof-item-3 {
+          .ab2-proof-item-3 .ab2-proof-media {
             aspect-ratio: 4 / 5;
           }
 
@@ -1412,6 +1535,7 @@ export default function AboutPage() {
           .ab2-layer-card,
           .ab2-process-card,
           .ab2-process-visual-inner,
+          .ab2-proof-media img,
           .ab2-content-backdrop {
             opacity: 1 !important;
             visibility: visible !important;

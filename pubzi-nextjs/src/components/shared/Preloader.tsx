@@ -17,7 +17,7 @@ const HOME_PRELOAD_ASSETS = [
   '/assets/img/home-3/icon/13.svg',
   '/assets/img/home-3/icon/14.svg',
   '/assets/img/home-3/top-feature.png',
-  '/assets/img/landing-page/game/vltk.png',
+  '/assets/img/landing-page/game/VLTK.png',
   '/assets/img/landing-page/game/tieu-ngao-giang-ho.png',
   '/assets/img/landing-page/game/kiem-the.png',
   '/assets/img/landing-page/game/con-duong-to-lua.png',
