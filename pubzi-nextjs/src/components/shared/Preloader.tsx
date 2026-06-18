@@ -22,11 +22,11 @@ const HOME_PRELOAD_ASSETS = [
   '/assets/img/landing-page/game/kiem-the.png',
   '/assets/img/landing-page/game/con-duong-to-lua.png',
   '/assets/img/landing-page/game/thien-long-bat-bo.png',
-  '/assets/img/landing-page/kol/faker-t1.png',
-  '/assets/img/landing-page/kol/keria-t1.png',
-  '/assets/img/landing-page/kol/t1-esports.png',
-  '/assets/img/landing-page/kol/gen-esports.png',
-  '/assets/img/landing-page/kol/spg.png',
+  '/assets/img/landing-page/kol/gray_FPT.jpg',
+  '/assets/img/landing-page/kol/betroc_FPT.jpg',
+  '/assets/img/landing-page/kol/quanghai_FPT.jpg',
+  '/assets/img/landing-page/kol/huyhoang_FPT.jpg',
+  '/assets/img/landing-page/kol/yutan_FPT.jpg',
   '/assets/img/landing-page/iphone_2.png',
   '/assets/img/landing-page/shape-2.png',
   '/assets/img/landing-page/test_lan_thu_9.png',
@@ -35,11 +35,9 @@ const HOME_PRELOAD_ASSETS = [
   '/assets/img/logo/dot.svg',
 ];
 
-// Heavy assets streamed via fetch so the bar tracks real byte progress: the
-// Draco 3D model (~3.4MB) and the looping background videos. Fetching warms the
-// HTTP cache so GLTFLoader / <video> reuse the bytes instead of refetching.
+// Heavy assets streamed via fetch so the bar tracks real byte progress. Keep
+// below-the-fold 3D out of this list so the first load is not blocked by WebGL.
 const HOME_HEAVY_ASSETS = [
-  '/assets/img/home-7/3d/3d_9.glb',
   '/assets/video/background_1.webm',
   '/assets/video/background_1_pingpong.webm',
 ];
@@ -85,7 +83,6 @@ function streamAsset(src: string, onBytes: (received: number, total: number) => 
       const reader = response.body.getReader();
       let received = 0;
 
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -141,9 +138,9 @@ export default function Preloader() {
     };
 
     const loadHomepageAssets = async () => {
-      // Light bucket: small images + fonts, counted per-item. Heavy bucket: the
-      // 3D model + background videos, summed by real bytes. The bar combines
-      // both by weight so it reflects the actual download.
+      // Light bucket: small images + fonts, counted per-item. Heavy bucket:
+      // background videos, summed by real bytes. The bar combines both by
+      // weight so it reflects the actual download.
       const lightTotal = HOME_PRELOAD_ASSETS.length + 1;
       let lightDone = 0;
       let lightFraction = 0;

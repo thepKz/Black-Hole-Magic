@@ -22,29 +22,29 @@ function Words({ text }: { text: string }) {
 
 const PARTNERS = [
   {
-    name: 'Faker',
-    role: 'Mid Laner · T1',
-    image: '/assets/img/landing-page/kol/faker-t1.png',
+    name: 'Gray',
+    role: 'FPT Esports',
+    image: '/assets/img/landing-page/kol/gray_FPT.jpg',
   },
   {
-    name: 'Keria',
-    role: 'Support · T1',
-    image: '/assets/img/landing-page/kol/keria-t1.png',
+    name: 'Bé Trọc',
+    role: 'FPT Esports',
+    image: '/assets/img/landing-page/kol/betroc_FPT.jpg',
   },
   {
-    name: 'T1 Esports',
-    role: 'Đội tuyển · LCK',
-    image: '/assets/img/landing-page/kol/t1-esports.png',
+    name: 'Quang Hải',
+    role: 'Đội trưởng · FPT Esports',
+    image: '/assets/img/landing-page/kol/quanghai_FPT.jpg',
   },
   {
-    name: 'GEN Esports',
-    role: 'Đội tuyển · LCK',
-    image: '/assets/img/landing-page/kol/gen-esports.png',
+    name: 'Huy Hoàng',
+    role: 'FPT Esports',
+    image: '/assets/img/landing-page/kol/huyhoang_FPT.jpg',
   },
   {
-    name: 'SPG',
-    role: 'Đội tuyển · Đối tác',
-    image: '/assets/img/landing-page/kol/SPG.png',
+    name: 'Yutan',
+    role: 'FPT Esports',
+    image: '/assets/img/landing-page/kol/yutan_FPT.jpg',
   },
 ];
 

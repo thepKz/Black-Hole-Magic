@@ -361,18 +361,24 @@ export default function GameCaseStudySection() {
           mask-image: linear-gradient(90deg, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%);
         }
 
-        /* Panel #3 (Kiếm Thế) is featured by default so the strip never looks flat */
+        /* Panel #1 is featured by default so the list starts from 01 visibly. */
         @media (min-width: 992px) {
-          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child {
             flex: 4.5;
           }
 
-          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) .game-panel-meta {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-art {
+            background-position: center;
+            filter: brightness(1);
+            transform: scale(1);
+          }
+
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-meta {
             opacity: 1;
             transform: translateY(0);
           }
 
-          .games-strip:not(:hover):not(:focus-within) .game-panel:nth-child(3) .game-panel-edge {
+          .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-edge {
             transform: scaleX(1);
           }
         }
@@ -394,6 +400,7 @@ export default function GameCaseStudySection() {
         .game-panel {
           position: relative;
           flex: 0.7;
+          min-width: 116px;
           overflow: hidden;
           border-radius: 14px;
           cursor: pointer;
