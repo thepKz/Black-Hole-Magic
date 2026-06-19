@@ -652,8 +652,8 @@ export default function AboutPage() {
 
         .ab2-hero {
           position: relative;
-          height: 130dvh;
-          min-height: 900px;
+          height: 220dvh;
+          min-height: 1500px;
           z-index: 3;
           background-color: transparent !important;
         }

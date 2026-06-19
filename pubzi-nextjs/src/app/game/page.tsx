@@ -498,7 +498,6 @@ export default function GamePage() {
       </section>
 
       <section className="gm-showcase-head" id="showcase">
-        <p className="gm-mini-label">Catalog chính</p>
         <h2>
           <SplitWords text="Duyệt từng thế giới bằng nhịp cuộn" />
         </h2>
