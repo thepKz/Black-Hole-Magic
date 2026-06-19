@@ -46,7 +46,7 @@ const PROOF_ITEMS = [
   {
     title: 'Võ Lâm Truyền Kỳ 2',
     copy: 'Một sản phẩm kiếm hiệp cần được đọc bằng thói quen bang hội, chiến trường và cộng đồng lâu năm.',
-    image: '/assets/img/landing-page/game/vltk.png',
+    image: '/assets/img/landing-page/game/VLTK.png',
     alt: 'Key art Võ Lâm Truyền Kỳ 2',
     aspect: 'landscape',
   },
@@ -282,24 +282,6 @@ export default function AboutPage() {
         );
       });
 
-      gsap.fromTo(
-        '.ab2-final-ring, .ab2-final-core',
-        { autoAlpha: 0, scale: 0.72, rotate: -7 },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          rotate: 0,
-          duration: 1.1,
-          ease: 'power3.out',
-          stagger: 0.08,
-          scrollTrigger: {
-            trigger: '.ab2-final-contact',
-            start: 'top 82%',
-            once: true,
-          },
-        }
-      );
-
       mm.add('(min-width: 992px)', () => {
         const proofTweens = gsap.utils.toArray<HTMLElement>('.ab2-proof-card').map((card) =>
           gsap.fromTo(
@@ -479,10 +461,18 @@ export default function AboutPage() {
         </section>
 
         <section className="ab2-final-contact ab2-reveal">
-          <div className="ab2-final-portal" aria-hidden="true">
-            <span className="ab2-final-ring ab2-final-ring-a" />
-            <span className="ab2-final-ring ab2-final-ring-b" />
-            <span className="ab2-final-core" />
+          <div className="ab2-final-media" aria-hidden="true">
+            <video
+              className="ab2-final-video ab2-motion-video"
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="auto"
+            >
+              <PortalVideoSources />
+            </video>
+            <span className="ab2-final-scrim" />
           </div>
           <div className="ab2-final-copy">
             <h2>Sẵn sàng đưa game vào Việt Nam đúng cách.</h2>
@@ -1196,77 +1186,35 @@ export default function AboutPage() {
           overflow: hidden;
         }
 
-        .ab2-final-contact::before,
-        .ab2-final-contact::after {
-          content: '';
+        /* Real blackhole video as the closing scene — same footage as the hero, so
+           the page speaks one visual language end to end (no CSS fake ring). */
+        .ab2-final-media {
           position: absolute;
-          pointer-events: none;
-          z-index: -2;
-        }
-
-        .ab2-final-contact::before {
-          /* full-height now (was 6% from top) + a top-darkening band so the
-             section above no longer bleeds into the closing portal scene */
-          inset: 0 -10%;
-          background:
-            radial-gradient(ellipse 70% 52% at 50% 54%, rgba(159, 140, 255, 0.22), transparent 70%),
-            linear-gradient(180deg, rgba(8, 6, 15, 0.96) 0%, rgba(9, 6, 20, 0.5) 16%, transparent 36%, rgba(9, 6, 20, 0.62) 76%, rgba(8, 6, 15, 0.96) 100%);
-          filter: blur(10px);
-        }
-
-        .ab2-final-contact::after {
-          left: 50%;
-          top: 50%;
-          width: min(1040px, 106vw, calc(100dvh + 140px));
-          aspect-ratio: 1 / 1;
-          transform: translate(-50%, -50%);
-          background:
-            radial-gradient(circle at 50% 50%, rgba(8, 6, 15, 0.98) 0 22%, rgba(81, 48, 186, 0.24) 23% 34%, transparent 35%),
-            repeating-radial-gradient(circle at 50% 50%, transparent 0 88px, rgba(194, 180, 255, 0.11) 90px 91px, transparent 93px 158px);
-          opacity: 0.58;
-          -webkit-mask-image: radial-gradient(circle, black 0%, black 54%, transparent 74%);
-          mask-image: radial-gradient(circle, black 0%, black 54%, transparent 74%);
-        }
-
-        .ab2-final-portal {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          z-index: -1;
-          width: min(860px, 88vw, calc(100dvh - 80px));
-          aspect-ratio: 1 / 1;
-          transform: translate(-50%, -50%);
-          pointer-events: none;
-        }
-
-        .ab2-final-ring,
-        .ab2-final-core {
-          position: absolute;
-          border-radius: 50%;
           inset: 0;
-          opacity: 0;
-          will-change: transform, opacity;
+          z-index: -2;
+          overflow: hidden;
+          pointer-events: none;
         }
 
-        .ab2-final-ring-a {
+        .ab2-final-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
+          filter: contrast(1.16) brightness(0.9) saturate(1.2);
+        }
+
+        /* Dark wash so the headline + buttons stay readable over the video, with a
+           soft purple core glow and top/bottom fades that blend into the page bg. */
+        .ab2-final-scrim {
+          position: absolute;
+          inset: 0;
           background:
-            radial-gradient(circle at 50% 50%, transparent 35%, rgba(194, 180, 255, 0.24) 43%, rgba(159, 140, 255, 0.13) 50%, transparent 64%),
-            conic-gradient(from 210deg, transparent, rgba(194, 180, 255, 0.26), transparent 34%, rgba(116, 84, 255, 0.24), transparent 68%, rgba(194, 180, 255, 0.16), transparent);
-          filter: blur(1px);
-        }
-
-        .ab2-final-ring-b {
-          inset: 11%;
-          background:
-            radial-gradient(circle at 50% 50%, transparent 44%, rgba(194, 180, 255, 0.18) 49%, transparent 57%),
-            conic-gradient(from 24deg, transparent, rgba(159, 140, 255, 0.2), transparent 28%, rgba(194, 180, 255, 0.18), transparent 72%);
-          filter: blur(10px);
-        }
-
-        .ab2-final-core {
-          inset: 24%;
-          background: radial-gradient(circle at 50% 50%, rgba(8, 6, 15, 0.94) 0 32%, rgba(159, 140, 255, 0.24) 45%, transparent 72%);
-          filter: blur(4px);
+            radial-gradient(ellipse 60% 48% at 50% 50%, transparent 0%, rgba(8, 6, 15, 0.46) 64%, rgba(8, 6, 15, 0.74) 100%),
+            radial-gradient(ellipse 64% 46% at 50% 52%, rgba(159, 140, 255, 0.16), transparent 66%),
+            linear-gradient(180deg, #08060f 0%, rgba(8, 6, 15, 0.5) 18%, rgba(8, 6, 15, 0.32) 50%, rgba(8, 6, 15, 0.66) 82%, #08060f 100%);
         }
 
         .ab2-final-copy {
@@ -1597,14 +1545,6 @@ export default function AboutPage() {
             gap: 28px;
           }
 
-          .ab2-final-contact::after {
-            width: min(780px, 112vw, calc(100dvh + 80px));
-          }
-
-          .ab2-final-portal {
-            width: min(620px, 88vw, calc(100dvh - 96px));
-          }
-
           .ab2-actions {
             width: 100%;
             gap: 12px;
@@ -1638,13 +1578,6 @@ export default function AboutPage() {
 
           .ab2-portal-bloom {
             display: none !important;
-          }
-
-          .ab2-final-ring,
-          .ab2-final-core {
-            opacity: 1 !important;
-            visibility: visible !important;
-            transform: none !important;
           }
 
           .ab2-line-inner {
