@@ -157,16 +157,24 @@ export default function AboutPage() {
         scrollTrigger: {
           trigger: '.ab2-hero',
           start: 'top top',
-          end: 'bottom bottom+=220',
+          end: 'bottom bottom+=60',
           scrub: 0.15,
           invalidateOnRefresh: true,
         },
       });
 
+      // Portal ring: its container is sticky, so it stays put while you scroll and
+      // only scales outward. It must NOT scroll away — so it fades out IN PLACE
+      // (dissolves at center) before the sticky releases.
       portalTl.to(
         '.ab2-portal-frame',
-        { scale: 6.4, filter: 'brightness(1.08)', ease: 'none', duration: 1, force3D: false },
+        { scale: 6.4, filter: 'brightness(1.08)', ease: 'none', duration: 0.62, force3D: false },
         0
+      );
+      portalTl.to(
+        '.ab2-portal-frame',
+        { autoAlpha: 0, ease: 'power1.in', duration: 0.2 },
+        0.44
       );
       portalTl.to(
         '.ab2-fixed-video',
@@ -181,124 +189,54 @@ export default function AboutPage() {
         },
         0
       );
-      portalTl.to(
-        '.ab2-portal-frame',
-        { autoAlpha: 0, filter: 'brightness(1.05) blur(10px)', duration: 0.28, ease: 'power2.in' },
-        1
-      );
 
-      mm.add('(min-width: 768px)', () => {
-        const hero = root.querySelector<HTMLElement>('.ab2-hero');
-        const letterbox = root.querySelector<HTMLElement>('.ab2-letterbox');
+      mm.add('(min-width: 1024px) and (pointer: fine)', () => {
         const fixedVideoWrap = root.querySelector<HTMLElement>('.ab2-fixed-video-wrap');
+        const stage = root.querySelector<HTMLElement>('.ab2-stage');
+        const frame = root.querySelector<HTMLElement>('.ab2-frame-mask');
         const sectionBackdrop = root.querySelector<HTMLElement>('.ab2-section-backdrop');
-        if (!hero || !letterbox || !fixedVideoWrap || !sectionBackdrop) return;
+        if (!fixedVideoWrap || !stage || !frame || !sectionBackdrop) {
+          return;
+        }
 
-        const getHeroEndScroll = () => {
-          const heroTop = hero.getBoundingClientRect().top + window.scrollY;
-          return heroTop + hero.offsetHeight;
-        };
-        const getTargetRect = () => {
-          const rect = letterbox.getBoundingClientRect();
-          const targetScroll = getHeroEndScroll();
-          return {
-            left: rect.left,
-            top: rect.top + window.scrollY - targetScroll,
-            width: rect.width,
-            height: rect.height,
-          };
-        };
-
+        // Keep the portal full-bleed through the manifesto, then crossfade it with
+        // the section backdrop as the next section enters.
         gsap.set(fixedVideoWrap, {
           autoAlpha: 1,
-          x: 0,
           y: 0,
-          scaleX: 1,
-          scaleY: 1,
-          width: '100vw',
-          height: '100vh',
-          transformOrigin: '0 0',
+          clearProps: 'clipPath',
           '--ab2-fixed-vignette': 0.22,
-          clipPath: 'inset(0% round 0px)',
         });
-        gsap.set(sectionBackdrop, { autoAlpha: 0, yPercent: 2, scale: 1.02 });
-        gsap.set(letterbox, { autoAlpha: 0 });
+        gsap.set(stage, {
+          top: 0,
+          left: 0,
+          width: () => window.innerWidth,
+          height: () => window.innerHeight,
+          clearProps: 'transform',
+        });
+        gsap.set(frame, { '--f-left': '0px', '--f-top': '0px', '--f-right': '0px', '--f-bot': '0px', '--feather': '0px' });
+        gsap.set(sectionBackdrop, { autoAlpha: 0, yPercent: 0, scale: 1.01 });
 
-        const morphTl = gsap.timeline({
+        // Crossfade from the hero video into the manifesto's purple grid backdrop
+        // before the manifesto headline reveals.
+        const followTl = gsap.timeline({
           scrollTrigger: {
-            trigger: hero,
-            start: 'bottom bottom',
-            end: 'bottom top',
-            scrub: 0.9,
+            trigger: '.ab2-manifesto',
+            start: 'top 98%',
+            end: 'top 72%',
+            scrub: true,
             invalidateOnRefresh: true,
+            refreshPriority: 1,
           },
         });
 
-        morphTl
-          .to(
-            sectionBackdrop,
-            {
-              autoAlpha: 1,
-              yPercent: 0,
-              scale: 1,
-              duration: 0.38,
-              ease: 'power2.out',
-            },
-            0
-          )
-          .to(
-            fixedVideoWrap,
-            {
-              autoAlpha: 1,
-              '--ab2-fixed-vignette': 0.42,
-              filter: 'brightness(0.82) saturate(1.08) blur(0px)',
-              duration: 0.32,
-              ease: 'power2.out',
-            },
-            0
-          )
-          .to(
-            fixedVideoWrap,
-            {
-              clipPath: 'ellipse(100% 100% at 50% 50%)',
-              duration: 0.14,
-              ease: 'power1.out',
-            },
-            0
-          )
-          .to(
-            fixedVideoWrap,
-            {
-              clipPath: 'ellipse(73% 62% at 50% 50%)',
-              duration: 0.34,
-              ease: 'power1.inOut',
-            },
-            0.52
-          )
-          .fromTo(
-            fixedVideoWrap,
-            {
-              x: 0,
-              y: 0,
-              scaleX: 1,
-              scaleY: 1,
-            },
-            {
-              x: () => getTargetRect().left,
-              y: () => getTargetRect().top,
-              scaleX: () => getTargetRect().width / window.innerWidth,
-              scaleY: () => getTargetRect().height / window.innerHeight,
-              duration: 0.68,
-              ease: 'power2.inOut',
-            },
-            0.18
-          )
-          .to(letterbox, { autoAlpha: 1, duration: 0.06, ease: 'none' }, 0.94)
-          .to(fixedVideoWrap, { autoAlpha: 0, duration: 0.04, ease: 'none' }, 0.96);
+        followTl
+          .to(sectionBackdrop, { autoAlpha: 1, scale: 1, ease: 'none', duration: 1 }, 0)
+          .to(fixedVideoWrap, { autoAlpha: 0, ease: 'none', duration: 1 }, 0);
 
         return () => {
-          morphTl.scrollTrigger?.kill();
-          morphTl.kill();
+          followTl.scrollTrigger?.kill();
+          followTl.kill();
         };
       });
 
@@ -328,22 +266,6 @@ export default function AboutPage() {
         { letterSpacing: '0.035em', y: 14 },
         { letterSpacing: '0em', y: 0, ease: 'power2.out', duration: 0.6 },
         0.2
-      );
-
-      gsap.fromTo(
-        '.ab2-letterbox-video',
-        { yPercent: -5, scale: 1.08 },
-        {
-          yPercent: 5,
-          scale: 1.14,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: '.ab2-manifesto',
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.1,
-          },
-        }
       );
 
       gsap.utils.toArray<HTMLElement>('.ab2-reveal').forEach((item) => {
@@ -379,54 +301,6 @@ export default function AboutPage() {
       );
 
       mm.add('(min-width: 992px)', () => {
-        const visuals = gsap.utils.toArray<HTMLElement>('.ab2-story-visual');
-        const steps = gsap.utils.toArray<HTMLElement>('.ab2-story-step');
-        const copies = steps
-          .map((step) => step.querySelector<HTMLElement>('.ab2-step-copy'))
-          .filter((copy): copy is HTMLElement => Boolean(copy));
-
-        gsap.set(visuals, { autoAlpha: 0, yPercent: 10, scale: 0.975, filter: 'blur(5px)' });
-        gsap.set(copies, { autoAlpha: 0, y: 28, filter: 'blur(4px)' });
-
-        copies.forEach((copy) => {
-          gsap.set(gsap.utils.toArray<HTMLElement>('.ab2-step-index, h3, p', copy), { autoAlpha: 0, y: 12 });
-        });
-
-        const storyTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: '.ab2-story-layout',
-            start: 'top 112px',
-            end: () => `+=${steps.length * window.innerHeight * 0.78}`,
-            pin: true,
-            scrub: 0.85,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        steps.forEach((step, index) => {
-          const visual = visuals[index];
-          const copy = step.querySelector<HTMLElement>('.ab2-step-copy');
-          if (!visual || !copy) return;
-
-          const pieces = gsap.utils.toArray<HTMLElement>('.ab2-step-index, h3, p', copy);
-          const at = index * 0.92;
-
-          storyTimeline
-            .to(visual, { autoAlpha: 1, yPercent: 0, scale: 1, filter: 'blur(0px)', duration: 0.34, ease: 'power2.out' }, at)
-            .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.34, ease: 'power2.out' }, at + 0.04)
-            .to(pieces, { autoAlpha: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'power2.out' }, at + 0.08)
-            .to(visual, { autoAlpha: 1, yPercent: -2, scale: 1.012, filter: 'blur(0px)', duration: 0.32, ease: 'none' }, at + 0.36)
-            .to(copy, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.32, ease: 'none' }, at + 0.36);
-
-          if (index < steps.length - 1) {
-            storyTimeline
-              .to(visual, { autoAlpha: 0, yPercent: -10, scale: 1.018, filter: 'blur(5px)', duration: 0.28, ease: 'power2.in' }, at + 0.68)
-              .to(copy, { autoAlpha: 0, y: -22, filter: 'blur(4px)', duration: 0.28, ease: 'power2.in' }, at + 0.68)
-              .to(pieces, { autoAlpha: 0, y: -8, duration: 0.22, stagger: 0.03, ease: 'power2.in' }, at + 0.68);
-          }
-        });
-
         const proofTweens = gsap.utils.toArray<HTMLElement>('.ab2-proof-card').map((card) =>
           gsap.fromTo(
             card,
@@ -470,8 +344,6 @@ export default function AboutPage() {
         });
 
         return () => {
-          storyTimeline.scrollTrigger?.kill();
-          storyTimeline.kill();
           proofTweens.forEach((tween) => {
             tween.scrollTrigger?.kill();
             tween.kill();
@@ -497,27 +369,30 @@ export default function AboutPage() {
       <div className="ab2-section-backdrop" aria-hidden="true" />
 
       <div className="ab2-fixed-video-wrap" aria-hidden="true">
-        <video
-          className="ab2-fixed-video ab2-motion-video"
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="auto"
-        >
-          <PortalVideoSources />
-        </video>
+        <div className="ab2-stage">
+          <video
+            className="ab2-fixed-video ab2-motion-video"
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="auto"
+          >
+            <PortalVideoSources />
+          </video>
+        </div>
+        <span className="ab2-frame-mask" />
+      </div>
+
+      <div className="ab2-portal" aria-hidden="true">
+        <div className="ab2-portal-frame-shell">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="ab2-portal-frame" src="/assets/img/landing-page/trasparent_bg.png" alt="" />
+        </div>
       </div>
 
       <section className="ab2-hero">
-        <div className="ab2-hero-sticky">
-          <div className="ab2-portal" aria-hidden="true">
-            <div className="ab2-portal-frame-shell">
-              <img className="ab2-portal-frame" src="/assets/img/landing-page/trasparent_bg.png" alt="" />
-            </div>
-          </div>
-          <div className="ab2-hero-shade" aria-hidden="true" />
-        </div>
+        <div className="ab2-hero-sticky" />
       </section>
 
       <main className="ab2-content">
@@ -526,19 +401,7 @@ export default function AboutPage() {
 
         <section className="ab2-manifesto">
           <div className="ab2-manifesto-stage">
-            <div className="ab2-letterbox" aria-hidden="true">
-              <video
-                className="ab2-letterbox-video ab2-motion-video"
-                muted
-                loop
-                playsInline
-                autoPlay
-                preload="auto"
-              >
-                <PortalVideoSources />
-              </video>
-              <span className="ab2-letterbox-scrim" />
-            </div>
+            <div className="ab2-card-slot" aria-hidden="true" />
 
             <p className="ab2-manifesto-copy">
               <MissionLines />
@@ -557,16 +420,6 @@ export default function AboutPage() {
           </div>
 
           <div className="ab2-story-layout">
-            <div className="ab2-story-visual-col" aria-hidden="true">
-              <div className="ab2-story-visuals">
-                {OPERATING_STEPS.map((step) => (
-                  <figure className="ab2-story-visual" key={step.title}>
-                    <Image className="ab2-story-visual-poster" src={step.image} alt="" fill sizes="(max-width: 991px) 100vw, 32vw" />
-                  </figure>
-                ))}
-              </div>
-            </div>
-
             <div className="ab2-story-list">
               {OPERATING_STEPS.map((step, index) => (
                 <article className="ab2-story-step" key={step.title}>
@@ -695,9 +548,9 @@ export default function AboutPage() {
           opacity: 0;
           visibility: hidden;
           background:
-            radial-gradient(ellipse 86% 44% at 50% 12%, rgba(159, 140, 255, 0.22), rgba(73, 34, 170, 0.1) 46%, transparent 78%),
-            radial-gradient(ellipse 60% 42% at 76% 28%, rgba(159, 140, 255, 0.12), transparent 70%),
-            linear-gradient(180deg, rgba(19, 11, 48, 0.74) 0%, rgba(8, 6, 15, 0.96) 54%, #08060f 100%);
+            radial-gradient(ellipse 94% 56% at 52% 4%, rgba(159, 140, 255, 0.28), rgba(73, 34, 170, 0.16) 48%, transparent 82%),
+            radial-gradient(ellipse 76% 58% at 58% 46%, rgba(64, 38, 150, 0.24), transparent 76%),
+            linear-gradient(180deg, rgba(24, 14, 58, 0.82) 0%, rgba(13, 9, 30, 0.96) 58%, #08060f 100%);
           will-change: transform, opacity;
         }
 
@@ -711,24 +564,17 @@ export default function AboutPage() {
 
         .ab2-section-backdrop::before {
           background:
-            linear-gradient(90deg, rgba(194, 180, 255, 0.07) 1px, transparent 1px),
-            linear-gradient(180deg, rgba(194, 180, 255, 0.055) 1px, transparent 1px);
+            linear-gradient(90deg, rgba(194, 180, 255, 0.064) 1px, transparent 1px),
+            linear-gradient(180deg, rgba(194, 180, 255, 0.052) 1px, transparent 1px);
           background-size: 96px 96px;
-          opacity: 0.58;
-          -webkit-mask-image: radial-gradient(ellipse 82% 68% at 50% 38%, black 0%, rgba(0, 0, 0, 0.72) 62%, transparent 100%);
-          mask-image: radial-gradient(ellipse 82% 68% at 50% 38%, black 0%, rgba(0, 0, 0, 0.72) 62%, transparent 100%);
+          opacity: 0.52;
+          -webkit-mask-image: radial-gradient(ellipse 88% 72% at 50% 36%, black 0%, rgba(0, 0, 0, 0.64) 66%, transparent 100%);
+          mask-image: radial-gradient(ellipse 88% 72% at 50% 36%, black 0%, rgba(0, 0, 0, 0.64) 66%, transparent 100%);
         }
 
         .ab2-section-backdrop::after {
-          background:
-            radial-gradient(circle at 44% 58%, transparent 0 15%, rgba(194, 180, 255, 0.18) 16%, rgba(159, 140, 255, 0.06) 21%, transparent 28%),
-            radial-gradient(circle at 44% 58%, transparent 0 27%, rgba(87, 56, 186, 0.14) 28%, rgba(194, 180, 255, 0.06) 32%, transparent 40%),
-            conic-gradient(from 226deg at 44% 58%, transparent 0deg, rgba(159, 140, 255, 0.18) 54deg, transparent 112deg, rgba(61, 36, 142, 0.2) 206deg, transparent 292deg, rgba(194, 180, 255, 0.12) 332deg, transparent 360deg),
-            radial-gradient(ellipse 72% 44% at 44% 58%, rgba(159, 140, 255, 0.16), rgba(47, 24, 116, 0.1) 46%, transparent 72%),
-            radial-gradient(ellipse 42% 26% at 18% 34%, rgba(159, 140, 255, 0.1), transparent 72%),
-            linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.28) 72%, rgba(8, 6, 15, 0.86) 100%);
-          filter: blur(12px);
-          opacity: 0.9;
+          background: linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.22) 72%, rgba(8, 6, 15, 0.72) 100%);
+          opacity: 0.64;
         }
 
         .ab2-fixed-video-wrap {
@@ -743,31 +589,61 @@ export default function AboutPage() {
           transform: none;
           transform-origin: 0 0;
           visibility: visible;
-          background: #08060f;
-          will-change: transform, opacity, filter, clip-path;
+          background: transparent;
+          will-change: transform, opacity;
         }
 
-        .ab2-fixed-video-wrap::before,
-        .ab2-fixed-video-wrap::after {
+        /* The box that morphs. At rest it fills the viewport; GSAP animates its
+           top/left/width/height down to the card slot. It clips the video and
+           carries the grading/vignette so those track the box, not the screen. */
+        .ab2-stage {
+          --ab2-fixed-vignette: 0.22;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background: #08060f;
+          will-change: top, left, width, height;
+        }
+
+        /* No vignette/glow over the video — it shows raw and evenly lit. The only
+           overlay is a light bottom gradient so the mission text stays legible once
+           the video parks in the card slot. */
+        .ab2-stage::before {
           content: '';
           position: absolute;
-          pointer-events: none;
-        }
-
-        .ab2-fixed-video-wrap::before {
           inset: 0;
           z-index: 2;
-          background:
-            radial-gradient(ellipse 118% 96% at 50% 46%, transparent 0%, rgba(5, 3, 12, 0.1) 46%, rgba(5, 3, 12, 0.42) 80%, rgba(5, 3, 12, 0.72) 100%),
-            linear-gradient(180deg, rgba(5, 3, 12, 0.12) 0%, rgba(5, 3, 12, 0.16) 34%, rgba(5, 3, 12, 0.34) 55%, rgba(5, 3, 12, 0.68) 73%, rgba(5, 3, 12, 0.86) 100%);
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent 0%, transparent 52%, rgba(5, 3, 12, 0.22) 78%, rgba(5, 3, 12, 0.52) 100%);
         }
 
-        .ab2-fixed-video-wrap::after {
-          inset: 0;
-          z-index: 1;
+        /* Rectangular soft edge. Lives on the NON-transformed wrap and is sized in
+           screen px (GSAP animates the four --f-* insets to the card rect), so the
+           feather softness is pixel-true and never squashes. Four directional
+           gradients dissolve the page bg inward — squared corners, no oval. */
+        .ab2-frame-mask {
+          --f-left: 0px;
+          --f-top: 0px;
+          --f-right: 0px;
+          --f-bot: 0px;
+          --feather: 0px;
+          position: absolute;
+          inset: var(--f-top) var(--f-right) var(--f-bot) var(--f-left);
+          z-index: 3;
+          pointer-events: none;
+          /* Four directional ramps dissolve the page bg (#08060f) inward over a
+             wide, gradual band so the rectangular edge melts into space — no hard
+             border, no oval, no rounded corner. --feather grows during the morph
+             (driven by GSAP) so at card size the band is a large fraction of the
+             frame and the edges genuinely vanish. */
           background:
-            radial-gradient(ellipse 86% 78% at 50% 50%, transparent 0%, rgba(5, 3, 12, 0.04) 52%, rgba(5, 3, 12, var(--ab2-fixed-vignette)) 100%),
-            linear-gradient(180deg, rgba(5, 3, 12, calc(var(--ab2-fixed-vignette) * 0.34)) 0%, rgba(5, 3, 12, 0.05) 38%, rgba(5, 3, 12, calc(var(--ab2-fixed-vignette) * 0.24)) 74%, rgba(5, 3, 12, calc(var(--ab2-fixed-vignette) * 0.62)) 100%);
+            linear-gradient(to right, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
+            linear-gradient(to left, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
+            linear-gradient(to bottom, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
+            linear-gradient(to top, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather));
         }
 
         .ab2-fixed-video {
@@ -786,8 +662,8 @@ export default function AboutPage() {
 
         .ab2-hero {
           position: relative;
-          height: 240dvh;
-          min-height: 1600px;
+          height: 130dvh;
+          min-height: 900px;
           z-index: 3;
           background-color: transparent !important;
         }
@@ -805,10 +681,14 @@ export default function AboutPage() {
           background-color: transparent !important;
         }
 
+        /* Fixed to the viewport so the portal ring NEVER scrolls with the page —
+           it stays dead-center and only scales + fades out in place. z:3 sits ABOVE
+           the video wrap (z:2) so the ring is visible, but below .ab2-content (z:4)
+           so it can't cover the sections below once it has faded. */
         .ab2-portal {
-          position: absolute;
+          position: fixed;
           inset: 0;
-          z-index: 1;
+          z-index: 3;
           pointer-events: none;
           overflow: hidden;
         }
@@ -837,16 +717,6 @@ export default function AboutPage() {
           will-change: transform, opacity, filter;
         }
 
-        .ab2-hero-shade {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          pointer-events: none;
-          background:
-            radial-gradient(circle at 50% 50%, transparent 0%, transparent 30%, rgba(8, 6, 15, 0.02) 50%, rgba(8, 6, 15, 0.34) 88%),
-            linear-gradient(180deg, rgba(8, 6, 15, 0) 0%, rgba(8, 6, 15, 0.28) 100%);
-        }
-
         .ab2-content {
           position: relative;
           z-index: 4;
@@ -861,7 +731,7 @@ export default function AboutPage() {
 
         .ab2-content-backdrop {
           position: absolute;
-          inset: 0;
+          inset: -260px 0 0;
           z-index: 0;
           pointer-events: none;
           overflow: hidden;
@@ -871,8 +741,8 @@ export default function AboutPage() {
             linear-gradient(115deg, transparent 0%, rgba(159, 140, 255, 0.09) 42%, transparent 66%),
             radial-gradient(ellipse 56rem 28rem at 76% 22%, rgba(159, 140, 255, 0.16), transparent 68%);
           background-size: 96px 96px, 96px 96px, 100% 100%, 100% 100%;
-          -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 360px, rgba(0, 0, 0, 0.52) 620px, black 900px, black calc(100% - 420px), transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0, transparent 360px, rgba(0, 0, 0, 0.52) 620px, black 900px, black calc(100% - 420px), transparent 100%);
+          -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.28) 180px, rgba(0, 0, 0, 0.68) 420px, black 720px, black calc(100% - 420px), transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.28) 180px, rgba(0, 0, 0, 0.68) 420px, black 720px, black calc(100% - 420px), transparent 100%);
           opacity: 0.68;
         }
 
@@ -945,18 +815,22 @@ export default function AboutPage() {
         }
 
         .ab2-manifesto {
-          min-height: 100dvh;
-          padding-top: clamp(100px, 13vh, 168px);
-          padding-bottom: clamp(86px, 11vh, 140px);
+          min-height: 112dvh;
+          padding-top: clamp(80px, 10vh, 124px);
+          padding-bottom: clamp(76px, 10vh, 128px);
           display: flex;
           flex-direction: column;
           justify-content: center;
-          gap: clamp(24px, 4vw, 46px);
+          gap: clamp(18px, 3vw, 30px);
         }
 
         .ab2-manifesto-stage {
           position: relative;
-          width: min(100%, 1180px);
+          width: min(100%, 1280px);
+          min-height: min(760px, 76dvh);
+          margin: 0 auto;
+          display: grid;
+          align-items: center;
           isolation: isolate;
         }
 
@@ -969,101 +843,37 @@ export default function AboutPage() {
         }
 
         .ab2-manifesto-stage::before {
-          inset: -24% -9%;
+          inset: -18% -8%;
           background:
-            radial-gradient(ellipse 68% 50% at 48% 48%, rgba(174, 151, 255, 0.18), transparent 70%),
-            radial-gradient(ellipse 88% 74% at 50% 50%, rgba(8, 6, 15, 0.64), transparent 78%);
-          filter: blur(26px);
-          opacity: 0.95;
+            radial-gradient(ellipse 78% 56% at 54% 44%, rgba(174, 151, 255, 0.16), transparent 68%),
+            linear-gradient(180deg, transparent 0%, rgba(8, 6, 15, 0.08) 72%, transparent 100%);
+          filter: blur(24px);
+          opacity: 0.62;
         }
 
         .ab2-manifesto-stage::after {
-          inset: -2% -4%;
-          background: radial-gradient(ellipse 76% 56% at 48% 48%, transparent 46%, rgba(5, 3, 12, 0.78) 74%, transparent 90%);
-          filter: blur(24px);
+          inset: -8% -6%;
+          background: linear-gradient(180deg, rgba(8, 6, 15, 0.06), transparent 42%, transparent 100%);
+          opacity: 0.36;
         }
 
-        .ab2-letterbox {
-          --ab2-media-mask: radial-gradient(ellipse 58% 52% at 45% 53%, black 0%, black 42%, rgba(0, 0, 0, 0.54) 58%, rgba(0, 0, 0, 0.14) 72%, transparent 86%);
+        /* Invisible in-flow placeholder. It reserves the manifesto's height (so the
+           layout doesn't collapse when the video became a fixed overlay) and is the
+           getBoundingClientRect() target the morph aims at. Never display:none —
+           it must keep a measurable box. */
+        .ab2-card-slot {
           position: relative;
           width: 100%;
-          aspect-ratio: 2.39 / 1;
-          overflow: visible;
-          background: transparent;
-          box-shadow: none;
-          -webkit-mask-image: var(--ab2-media-mask);
-          mask-image: var(--ab2-media-mask);
-          -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-          -webkit-mask-size: 100% 100%;
-          mask-size: 100% 100%;
-        }
-
-        .ab2-letterbox::before,
-        .ab2-letterbox::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 2;
-          pointer-events: none;
-        }
-
-        .ab2-letterbox::before {
-          background:
-            radial-gradient(ellipse 58% 48% at 50% 46%, transparent 0%, transparent 50%, rgba(5, 3, 12, 0.54) 74%, rgba(5, 3, 12, 0.94) 100%),
-            linear-gradient(120deg, rgba(5, 3, 12, 0.22), transparent 28%, transparent 72%, rgba(5, 3, 12, 0.34));
-          -webkit-mask-image: var(--ab2-media-mask);
-          mask-image: var(--ab2-media-mask);
-        }
-
-        .ab2-letterbox::after {
-          inset: 0;
-          background:
-            linear-gradient(105deg, rgba(7, 5, 15, 0.38) 0%, transparent 34%, transparent 66%, rgba(7, 5, 15, 0.44) 100%),
-            radial-gradient(ellipse 96% 82% at 50% 50%, transparent 0%, transparent 56%, rgba(8, 6, 15, 0.64) 100%);
-          -webkit-mask-image: var(--ab2-media-mask);
-          mask-image: var(--ab2-media-mask);
-        }
-
-        .ab2-letterbox-video {
-          position: absolute;
-          inset: -14% -10%;
-          width: 120%;
-          height: 128%;
-          object-fit: cover;
-          object-position: center center;
-          filter: contrast(1.18) brightness(0.76) saturate(1.2);
-          will-change: transform;
-          -webkit-mask-image: var(--ab2-media-mask);
-          mask-image: var(--ab2-media-mask);
-          -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-          -webkit-mask-size: 100% 100%;
-          mask-size: 100% 100%;
-        }
-
-        .ab2-letterbox-scrim {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          pointer-events: none;
-          background:
-            linear-gradient(180deg, rgba(8, 6, 15, 0.82) 0%, rgba(8, 6, 15, 0.16) 18%, rgba(8, 6, 15, 0.08) 66%, rgba(8, 6, 15, 0.86) 100%),
-            linear-gradient(105deg, rgba(7, 5, 15, 0.9) 0%, rgba(7, 5, 15, 0.48) 48%, rgba(7, 5, 15, 0.2) 74%),
-            linear-gradient(0deg, rgba(7, 5, 15, 0.66), rgba(7, 5, 15, 0.08) 62%);
-          -webkit-mask-image: var(--ab2-media-mask);
-          mask-image: var(--ab2-media-mask);
-          -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-          -webkit-mask-size: 100% 100%;
-          mask-size: 100% 100%;
+          min-height: min(720px, 72dvh);
+          aspect-ratio: 16 / 9;
+          visibility: hidden;
         }
 
         .ab2-manifesto-copy {
           position: absolute;
-          left: clamp(20px, 4vw, 56px);
-          right: clamp(20px, 4vw, 56px);
-          bottom: clamp(22px, 5vh, 56px);
+          left: clamp(28px, 6vw, 96px);
+          right: clamp(28px, 34vw, 420px);
+          bottom: clamp(42px, 8vh, 92px);
           margin: 0;
           display: flex;
           flex-direction: column;
@@ -1075,8 +885,8 @@ export default function AboutPage() {
           overflow: hidden;
           padding: 0.12em 0.06em;
           margin: -0.12em -0.06em;
-          font-size: clamp(2.1rem, 5vw, 4.2rem);
-          line-height: 1.05;
+          font-size: clamp(2.15rem, 4.45vw, 4.95rem);
+          line-height: 1;
         }
 
         .ab2-line-inner {
@@ -1101,10 +911,14 @@ export default function AboutPage() {
 
         .ab2-manifesto-note {
           display: block;
-          max-width: 66ch;
-          color: rgba(255, 255, 255, 0.86);
-          font-size: 1.04rem;
-          line-height: 1.8;
+          width: min(100%, 1280px);
+          max-width: none;
+          margin: 0 auto;
+          padding-left: clamp(28px, 6vw, 96px);
+          padding-right: clamp(28px, 48vw, 540px);
+          color: rgba(255, 255, 255, 0.78);
+          font-size: clamp(0.92rem, 0.92vw, 1rem);
+          line-height: 1.78;
           text-shadow: 0 14px 38px rgba(0, 0, 0, 0.58);
         }
 
@@ -1140,37 +954,10 @@ export default function AboutPage() {
 
         .ab2-story-layout {
           margin-top: clamp(46px, 6vw, 78px);
-          display: grid;
-          grid-template-columns: minmax(360px, 0.82fr) minmax(0, 0.96fr);
-          gap: clamp(34px, 6vw, 88px);
-          align-items: center;
-          min-height: min(680px, 72vh);
+          display: block;
+          min-height: 0;
         }
 
-        .ab2-story-visual-col {
-          position: relative;
-          display: flex;
-          align-items: center;
-          min-height: min(680px, 72vh);
-        }
-
-        .ab2-story-visuals {
-          position: relative;
-          width: 100%;
-          height: min(680px, 72vh);
-          overflow: visible;
-          background: transparent;
-        }
-
-        .ab2-story-visual {
-          position: absolute;
-          inset: 0;
-          margin: 0;
-          overflow: visible;
-          background: transparent;
-        }
-
-        .ab2-story-visual-poster,
         .ab2-step-media-poster,
         .ab2-proof-media img {
           display: block;
@@ -1182,23 +969,43 @@ export default function AboutPage() {
         }
 
         .ab2-story-list {
+          display: grid;
           position: relative;
-          min-height: min(680px, 72vh);
-          align-self: stretch;
+          gap: clamp(34px, 6vw, 82px);
+          min-height: 0;
         }
 
         .ab2-story-step {
-          position: absolute;
-          inset: 0;
-          min-height: 0;
-          display: flex;
+          position: relative;
+          min-height: auto;
+          display: grid;
+          grid-template-columns: minmax(240px, 0.54fr) minmax(0, 0.9fr);
+          grid-template-areas: 'media copy';
+          gap: clamp(28px, 5vw, 76px);
           align-items: center;
+          padding: clamp(24px, 4vw, 54px) 0;
+          border-top: 0;
+        }
+
+        .ab2-story-step + .ab2-story-step {
+          border-top: 1px solid rgba(194, 180, 255, 0.1);
+        }
+
+        .ab2-story-step:nth-child(even) {
+          grid-template-columns: minmax(0, 0.9fr) minmax(240px, 0.54fr);
+          grid-template-areas: 'copy media';
+        }
+
+        .ab2-story-step:nth-child(even) .ab2-step-copy {
+          justify-self: end;
         }
 
         .ab2-step-copy {
+          grid-area: copy;
           position: relative;
           width: 100%;
-          padding: clamp(26px, 3vw, 38px) 0 clamp(28px, 3vw, 40px);
+          max-width: 620px;
+          padding: 0;
           border-top: 0;
         }
 
@@ -1207,10 +1014,10 @@ export default function AboutPage() {
           position: absolute;
           left: 0;
           top: 0;
-          width: min(68%, 520px);
+          width: min(62%, 420px);
           height: 1px;
-          background: linear-gradient(90deg, rgba(5, 3, 12, 0.92), rgba(159, 140, 255, 0.24) 56%, transparent 100%);
-          opacity: 0.86;
+          background: linear-gradient(90deg, rgba(194, 180, 255, 0.44), rgba(159, 140, 255, 0.18) 62%, transparent 100%);
+          opacity: 0.72;
         }
 
         .ab2-step-index {
@@ -1224,7 +1031,7 @@ export default function AboutPage() {
 
         .ab2-step-copy h3 {
           margin-bottom: 16px;
-          font-size: clamp(2.4rem, 5vw, 5rem);
+          font-size: clamp(2.35rem, 4.8vw, 4.8rem);
           line-height: 0.98;
         }
 
@@ -1234,11 +1041,13 @@ export default function AboutPage() {
         }
 
         .ab2-step-inline-media {
-          display: none;
+          grid-area: media;
+          display: block;
           position: relative;
-          width: 100%;
+          width: min(100%, 420px);
           aspect-ratio: 1122 / 1402;
-          margin: 0 0 22px;
+          margin: 0;
+          justify-self: center;
           overflow: visible;
           background: transparent;
         }
@@ -1373,10 +1182,10 @@ export default function AboutPage() {
 
         .ab2-final-contact {
           position: relative;
-          min-height: min(760px, 82dvh);
-          /* balanced padding so the centered closing scene doesn't sit high */
-          padding-top: clamp(96px, 13vh, 168px);
-          padding-bottom: clamp(96px, 13vh, 168px);
+          min-height: max(760px, 100dvh);
+          /* Keep the closing portal as a complete scene before the footer enters. */
+          padding-top: clamp(112px, 14vh, 176px);
+          padding-bottom: clamp(112px, 14vh, 176px);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -1408,9 +1217,9 @@ export default function AboutPage() {
         .ab2-final-contact::after {
           left: 50%;
           top: 50%;
-          width: min(1120px, 112vw);
+          width: min(1040px, 106vw, calc(100dvh + 140px));
           aspect-ratio: 1 / 1;
-          transform: translate(-50%, -47%);
+          transform: translate(-50%, -50%);
           background:
             radial-gradient(circle at 50% 50%, rgba(8, 6, 15, 0.98) 0 22%, rgba(81, 48, 186, 0.24) 23% 34%, transparent 35%),
             repeating-radial-gradient(circle at 50% 50%, transparent 0 88px, rgba(194, 180, 255, 0.11) 90px 91px, transparent 93px 158px);
@@ -1424,9 +1233,9 @@ export default function AboutPage() {
           left: 50%;
           top: 50%;
           z-index: -1;
-          width: min(860px, 90vw);
+          width: min(860px, 88vw, calc(100dvh - 80px));
           aspect-ratio: 1 / 1;
-          transform: translate(-50%, -52%);
+          transform: translate(-50%, -50%);
           pointer-events: none;
         }
 
@@ -1546,8 +1355,13 @@ export default function AboutPage() {
             font-size: clamp(2.45rem, 5.2vw, 4.4rem);
           }
 
-          .ab2-story-layout {
-            grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1fr);
+          .ab2-story-step {
+            grid-template-columns: minmax(220px, 0.5fr) minmax(0, 1fr);
+            gap: clamp(24px, 4vw, 54px);
+          }
+
+          .ab2-story-step:nth-child(even) {
+            grid-template-columns: minmax(0, 1fr) minmax(220px, 0.5fr);
           }
         }
 
@@ -1557,29 +1371,39 @@ export default function AboutPage() {
           }
 
           .ab2-story-layout {
-            grid-template-columns: 1fr;
-          }
-
-          .ab2-story-visual-col,
-          .ab2-story-visuals {
-            display: none;
+            margin-top: 38px;
           }
 
           .ab2-story-list {
             min-height: 0;
             display: grid;
-            gap: 20px;
+            gap: 42px;
           }
 
           .ab2-story-step {
-            position: static;
+            position: relative;
             inset: auto;
             min-height: auto;
-            display: block;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-areas:
+              'media'
+              'copy';
+            gap: 22px;
+            padding: 30px 0;
+          }
+
+          .ab2-story-step:nth-child(even) {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+              'media'
+              'copy';
           }
 
           .ab2-step-inline-media {
             display: block;
+            width: min(100%, 460px);
+            margin: 0 auto;
           }
 
           .ab2-proof-card--landscape,
@@ -1601,7 +1425,10 @@ export default function AboutPage() {
           }
         }
 
-        @media (max-width: 767px) {
+        /* Below the morph gate (1024px / fine pointer) the JS morph never runs, so
+           the video stays a static fullscreen background in the hero area and the
+           rectangular frame collapses to flush (invisible) edges. */
+        @media (max-width: 1023px), (pointer: coarse) {
           .ab2-fixed-video-wrap {
             position: absolute;
             height: 100dvh;
@@ -1610,8 +1437,34 @@ export default function AboutPage() {
             visibility: visible !important;
           }
 
+          .ab2-stage {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            transform: none !important;
+          }
+
+          .ab2-frame-mask {
+            inset: 0 !important;
+            --f-left: 0px !important;
+            --f-top: 0px !important;
+            --f-right: 0px !important;
+            --f-bot: 0px !important;
+          }
+
           .ab2-fixed-video {
             transform: none !important;
+          }
+
+          .ab2-fixed-portal-frame {
+            width: 100vw !important;
+            transform: translate(-50%, -39.5%) !important;
+          }
+
+          .ab2-portal-bloom {
+            display: none;
           }
 
           .ab2-portal-frame {
@@ -1655,19 +1508,28 @@ export default function AboutPage() {
             gap: 22px;
           }
 
-          .ab2-letterbox {
-            --ab2-media-mask: radial-gradient(ellipse 72% 66% at 50% 52%, black 0%, black 46%, rgba(0, 0, 0, 0.58) 60%, transparent 82%);
+          .ab2-manifesto-stage {
+            min-height: clamp(520px, 84dvh, 680px);
+          }
+
+          .ab2-card-slot {
+            min-height: clamp(520px, 84dvh, 680px);
             aspect-ratio: 1 / 1.16;
           }
 
           .ab2-manifesto-copy {
             left: 18px;
             right: 18px;
-            bottom: 20px;
+            bottom: 34px;
           }
 
           .ab2-line {
-            font-size: clamp(2rem, 12vw, 3.25rem);
+            font-size: clamp(2rem, 11.4vw, 3.15rem);
+          }
+
+          .ab2-manifesto-note {
+            padding-left: 0;
+            padding-right: 0;
           }
 
           .ab2-story-head h2,
@@ -1729,10 +1591,18 @@ export default function AboutPage() {
           }
 
           .ab2-final-contact {
-            min-height: min(640px, 78dvh);
-            padding-top: 70px;
-            padding-bottom: 112px;
+            min-height: max(620px, 92dvh);
+            padding-top: 84px;
+            padding-bottom: 120px;
             gap: 28px;
+          }
+
+          .ab2-final-contact::after {
+            width: min(780px, 112vw, calc(100dvh + 80px));
+          }
+
+          .ab2-final-portal {
+            width: min(620px, 88vw, calc(100dvh - 96px));
           }
 
           .ab2-actions {
@@ -1759,6 +1629,17 @@ export default function AboutPage() {
             transform: none !important;
           }
 
+          .ab2-fixed-portal-frame {
+            opacity: 1 !important;
+            visibility: visible !important;
+            filter: none !important;
+            transform: translate(calc(var(--ab2-ring-x) * -1), calc(var(--ab2-ring-y) * -1)) !important;
+          }
+
+          .ab2-portal-bloom {
+            display: none !important;
+          }
+
           .ab2-final-ring,
           .ab2-final-core {
             opacity: 1 !important;
@@ -1772,33 +1653,40 @@ export default function AboutPage() {
             transform: none !important;
           }
 
-          .ab2-story-visual-col,
-          .ab2-story-visuals {
-            display: none;
-          }
-
           .ab2-story-list {
             min-height: 0;
-            display: grid;
-            gap: 20px;
           }
 
           .ab2-story-step {
-            position: static;
+            position: relative;
             inset: auto;
             min-height: auto;
-            display: block;
           }
 
           .ab2-step-inline-media {
             display: block;
           }
 
-          .ab2-letterbox-video {
+          .ab2-fixed-video-wrap {
             transform: none !important;
-            inset: 0 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+
+          .ab2-stage {
+            top: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             height: 100% !important;
+            transform: none !important;
+          }
+
+          .ab2-frame-mask {
+            inset: 0 !important;
+            --f-left: 0px !important;
+            --f-top: 0px !important;
+            --f-right: 0px !important;
+            --f-bot: 0px !important;
           }
         }
       `}</style>

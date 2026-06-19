@@ -217,7 +217,7 @@ export default function AboutSection7() {
            otherwise the 3D model bleeds through later sections. */
         .about-story ~ section {
           position: relative;
-          z-index: 2;
+          z-index: 3;
         }
 
         .about-sticky {
@@ -402,7 +402,7 @@ export default function AboutSection7() {
                client wants it locked. The story now releases naturally and
                the next section follows in normal flow. Height trimmed so the
                final stage doesn't hold a long dead stretch before release. */
-            height: 560vh;
+            height: 360vh;
             margin-bottom: 0;
           }
 
@@ -410,8 +410,13 @@ export default function AboutSection7() {
             position: sticky;
             top: 0;
             height: 100vh;
-            overflow: visible;
-            background: linear-gradient(180deg, rgba(8, 5, 20, 0) 0, rgba(8, 5, 20, 0.4) 90px, rgba(8, 5, 20, 0.4) 100%);
+            height: 100dvh;
+            overflow: hidden;
+            background:
+              radial-gradient(circle at 28% 42%, rgba(108, 92, 231, 0.18), transparent 44%),
+              linear-gradient(180deg, rgba(8, 5, 20, 0) 0, rgba(8, 5, 20, 0.72) 130px, rgba(8, 5, 20, 0.94) 100%);
+            -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.35) 54px, #000 150px);
+            mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.35) 54px, #000 150px);
           }
 
           .about-model-track {
@@ -420,7 +425,7 @@ export default function AboutSection7() {
             top: 11vh;
             width: 38vw;
             height: 78vh;
-            z-index: 100;
+            z-index: 1;
             pointer-events: none;
             will-change: transform;
             overflow: visible;
@@ -947,7 +952,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
   return (
     <>
       <div ref={mountRef} className="about-model-mount" style={{ opacity: 0 }} />
-      {loadingProgress < 100 && (
+      {loadingProgress > 8 && loadingProgress < 100 && (
         <div className="loading-overlay">
           <svg className="loading-circle" viewBox="0 0 100 100">
             <circle className="loading-bg" cx="50" cy="50" r="40" />

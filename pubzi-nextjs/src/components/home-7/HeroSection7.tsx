@@ -141,109 +141,81 @@ export default function HeroSection7() {
           invalidateOnRefresh: true,
         },
       });
-      tl.totalDuration(150);
+      tl.totalDuration(110);
 
-      // Phase 1: zoom (0 → 35)
+      // Phase 1: zoom (0 -> 18)
       tl.addLabel('zoom', 0);
       tl.fromTo('.iphone-stage',
         { scale: 1, transformOrigin: '50% 50%' },
-        { scale: 1.22, duration: 35 },
+        { scale: 1.12, duration: 18 },
         0
       );
 
-      // Phase 2: videoDrift (0 → 150)
+      // Phase 2: videoDrift (0 -> 110)
       tl.addLabel('videoDrift', 0);
-      if (videoRef.current && frostRef.current) {
-        tl.fromTo([videoRef.current, frostRef.current],
+      if (videoRef.current) {
+        tl.fromTo(videoRef.current,
           { scale: 1, transformOrigin: '50% 50%' },
-          { scale: 1.05, duration: 150 },
+          { scale: 1.035, duration: 110 },
           0
         );
       }
 
-      // Phase 3: phoneExit (35 → 65)
-      tl.addLabel('phoneExit', 35);
+      // Phase 3: phoneExit (14 -> 30)
+      tl.addLabel('phoneExit', 14);
       tl.fromTo('.iphone-stage',
-        { yPercent: 0, scale: 1.22 },
-        { yPercent: -180, scale: 1.30, duration: 30, ease: 'power1.in' },
-        35
+        { yPercent: 0, scale: 1.12 },
+        { yPercent: -145, scale: 1.18, duration: 16, ease: 'power1.in' },
+        14
       );
 
-      // Phase 4: phoneFade (50 → 65)
-      tl.addLabel('phoneFade', 50);
+      // Phase 4: phoneFade (22 -> 32)
+      tl.addLabel('phoneFade', 22);
       tl.fromTo('.iphone-stage',
         { autoAlpha: 1 },
-        { autoAlpha: 0, duration: 15 },
-        50
+        { autoAlpha: 0, duration: 10 },
+        22
       );
 
-      // Phase 5: titleIn (40 → 65)
-      tl.addLabel('titleIn', 40);
+      // Phase 5: titleIn (20 -> 30)
+      tl.addLabel('titleIn', 20);
       tl.fromTo('.hero-title-block',
         { autoAlpha: 0, scale: 0.86, transformOrigin: '50% 50%' },
-        { autoAlpha: 1, scale: 1.0, duration: 25 },
-        40
+        { autoAlpha: 1, scale: 1.0, duration: 10 },
+        20
       );
 
-      // Phase 6: titleLetters (40 → 58, stagger)
-      tl.addLabel('titleLetters', 40);
+      // Phase 6: titleLetters (20 -> 32, stagger)
+      tl.addLabel('titleLetters', 20);
       tl.fromTo('.hero-title-block .ht-letter',
         { autoAlpha: 0, yPercent: 36 },
-        { autoAlpha: 1, yPercent: 0, duration: 8, stagger: 0.8 },
-        40
+        { autoAlpha: 1, yPercent: 0, duration: 4, stagger: 0.35 },
+        20
       );
 
-      // Phase 7: titleGrow (65 → 100)
-      tl.addLabel('titleGrow', 65);
+      // Phase 7: titleGrow (30 -> 36)
+      tl.addLabel('titleGrow', 30);
       tl.fromTo('.hero-title-block',
         { scale: 1.0 },
-        { scale: 1.30, duration: 35 },
-        65
+        { scale: 1.08, duration: 6 },
+        30
       );
 
-      // Phase 8: titleOut (78 → 100)
-      tl.addLabel('titleOut', 78);
+      // Phase 8: titleOut (36 -> 44)
+      tl.addLabel('titleOut', 36);
       tl.fromTo('.hero-title-block',
         { autoAlpha: 1 },
-        { autoAlpha: 0, duration: 22 },
-        78
+        { autoAlpha: 0, duration: 8 },
+        36
       );
 
-      // Phase 9: contrastOut (100 → 135)
-      tl.addLabel('contrastOut', 100);
+      // Phase 9: contrastOut (44 -> 66)
+      tl.addLabel('contrastOut', 44);
       tl.fromTo('.hero-contrast-layer',
         { autoAlpha: 1 },
-        { autoAlpha: 0, duration: 35 },
-        100
+        { autoAlpha: 0, duration: 22 },
+        44
       );
-
-      // Frost crossfade - separate scrubbed tween
-      const aboutEl = document.querySelector('.about-story');
-      if (aboutEl && frostRef.current) {
-        gsap.fromTo(frostRef.current,
-          { opacity: 0 },
-          {
-            opacity: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: aboutEl,
-              start: 'top bottom',
-              end: 'top top',
-              scrub: true,
-              invalidateOnRefresh: true,
-              onUpdate(self) {
-                const v = frostRef.current;
-                if (!v) return;
-                if (self.progress === 0) {
-                  if (!v.paused) v.pause();
-                } else if (v.paused && document.body.dataset.preloaderDone === 'true') {
-                  v.play().catch(() => {});
-                }
-              },
-            },
-          }
-        );
-      }
 
       tl.progress(0);
     });
@@ -468,15 +440,21 @@ export default function HeroSection7() {
         </div>
 
         <style jsx global>{`
+          .hero-pin-range {
+            position: relative;
+            isolation: isolate;
+            background: #06060a;
+          }
+
           .hero-scroll-spacer {
-            height: 150vh;
-            height: 150dvh;
+            height: 120vh;
+            height: 120dvh;
           }
 
           @media (max-width: 991px) {
             .hero-scroll-spacer {
-              height: 120vh;
-              height: 120dvh;
+              height: 90vh;
+              height: 90dvh;
             }
           }
 
@@ -487,6 +465,7 @@ export default function HeroSection7() {
 
           /* Frost twin: permanently blurred; ONLY opacity is animated */
           .hero-video-frost {
+            display: none;
             filter: blur(16px) saturate(1.25) contrast(1.08) brightness(0.7);
           }
 
