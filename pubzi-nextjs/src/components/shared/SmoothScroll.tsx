@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,7 +22,10 @@ declare global {
  * Driven from gsap.ticker so Lenis and ScrollTrigger share one clock.
  */
 export default function SmoothScroll() {
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (pathname?.startsWith('/game')) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     // touch devices already have momentum scrolling; doubling it feels wrong
     if (window.matchMedia('(pointer: coarse)').matches) return;
@@ -66,7 +70,7 @@ export default function SmoothScroll() {
       lenis.destroy();
       if (window.__lenis === lenis) delete window.__lenis;
     };
-  }, []);
+  }, [pathname]);
 
   return null;
 }

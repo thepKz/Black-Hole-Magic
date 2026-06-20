@@ -57,7 +57,7 @@ export default function Header7() {
           <div className="mega-menu-wrapper">
             <div className="header-main">
               <div className="logo">
-                <Link href="/" className="header-logo" aria-label="BlackHole Game">
+                <Link href="/" prefetch={false} className="header-logo" aria-label="BlackHole Game">
                   <img src="/assets/img/logo/white-logo-2.png" alt="logo-img" />
                   <span className="header-wordmark">BlackHole</span>
                 </Link>
@@ -68,7 +68,7 @@ export default function Header7() {
                     <ul>
                       {NAV.map((item) => (
                         <li key={item.href} className={isActive(item.href) ? 'active' : ''}>
-                          <Link href={item.href}>{item.label}</Link>
+                          <Link href={item.href} prefetch={false}>{item.label}</Link>
                         </li>
                       ))}
                     </ul>
@@ -81,7 +81,7 @@ export default function Header7() {
                     <i className="fa-regular fa-magnifying-glass"></i>
                   </a>
                   <div className="header-button">
-                    <Link href="/contact" className="header-electric-btn">
+                    <Link href="/contact" prefetch={false} className="header-electric-btn">
                       Liên hệ
                     </Link>
                   </div>

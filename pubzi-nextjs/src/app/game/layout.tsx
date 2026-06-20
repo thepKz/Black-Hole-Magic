@@ -1,6 +1,7 @@
 import Header7 from '@/components/home-7/Header7';
 import Footer7 from '@/components/home-7/Footer7';
 import Offcanvas from '@/components/common/Offcanvas';
+import './game-critical.css';
 
 export default function GameLayout({
   children,

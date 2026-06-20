@@ -26,6 +26,11 @@ export default function RootLayout({
     <html lang="vi">
       <head>
         <link rel="shortcut icon" href="/assets/img/favicon.svg" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{history.scrollRestoration='manual'}catch(e){}",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Chakra+Petch:wght@400;500;600;700&family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />

@@ -40,7 +40,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
             <div className="offcanvas__content">
               <div className="offcanvas__top mb-5 d-flex justify-content-between align-items-center">
                 <div className="offcanvas__logo">
-                  <Link href="/" onClick={closeOffcanvas} className="offcanvas__brand">
+                  <Link href="/" prefetch={false} onClick={closeOffcanvas} className="offcanvas__brand">
                     <img src="/assets/img/logo/white-logo-2.png" alt="BlackHole" />
                     <span>BlackHole</span>
                   </Link>
@@ -55,7 +55,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                 <ul>
                   {NAV_LINKS.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} onClick={closeOffcanvas}>
+                      <Link href={item.href} prefetch={false} onClick={closeOffcanvas}>
                         {item.label}
                         <i className="fas fa-arrow-right"></i>
                       </Link>
@@ -64,7 +64,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                 </ul>
               </nav>
 
-              <Link href="/contact" className="offcanvas__cta" onClick={closeOffcanvas}>
+              <Link href="/contact" prefetch={false} className="offcanvas__cta" onClick={closeOffcanvas}>
                 Liên hệ ngay
               </Link>
 

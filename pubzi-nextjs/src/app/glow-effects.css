@@ -286,8 +286,17 @@ select:focus {
    SMOOTH SCROLLING
    ============================================ */
 
-* {
-  scroll-behavior: smooth;
+/* NOTE: do NOT set `scroll-behavior: smooth` on * / html / body.
+   Smooth in-page scrolling on desktop is handled by Lenis; mobile has native
+   momentum. A global CSS smooth-scroll makes programmatic resets (ScrollReset's
+   window.scrollTo(0) on route change) ANIMATE instead of jumping — and on mobile
+   that animation gets interrupted by late layout shifts, so the new page lands
+   mid-scroll instead of at the top. (Next.js also warns about this.)
+   Explicitly force the document scroller to `auto`, overriding Bootstrap's
+   default `html { scroll-behavior: smooth }`. */
+html,
+body {
+  scroll-behavior: auto !important;
 }
 
 /* ============================================

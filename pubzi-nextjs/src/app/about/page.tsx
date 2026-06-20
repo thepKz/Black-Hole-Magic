@@ -146,6 +146,71 @@ export default function AboutPage() {
     }
   }, []);
 
+  // Section 1 has two stacked layers: the full-bleed video (z:2) and the portal
+  // ring PNG (z:3). The video autoplays instantly while the PNG arrives later,
+  // so on first paint the bare video shows and the ring "pops" in — a visible
+  // jolt. Fix: keep BOTH layers hidden (CSS opacity:0) until the video can play
+  // AND the ring image has loaded, then add `ab2-ready` to fade them in together.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const reveal = () => root.classList.add('ab2-ready');
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      reveal();
+      return;
+    }
+
+    const video = root.querySelector<HTMLVideoElement>('.ab2-fixed-video');
+    const ring = root.querySelector<HTMLImageElement>('.ab2-portal-frame');
+
+    let videoOk = false;
+    let ringOk = false;
+    const maybeReveal = () => {
+      if (videoOk && ringOk) reveal();
+    };
+
+    const onVideoReady = () => {
+      videoOk = true;
+      maybeReveal();
+    };
+    const onRingReady = () => {
+      ringOk = true;
+      maybeReveal();
+    };
+
+    // Video: readyState >= 2 (HAVE_CURRENT_DATA) means a frame is paintable.
+    if (!video || video.readyState >= 2) {
+      videoOk = true;
+    } else {
+      video.addEventListener('loadeddata', onVideoReady, { once: true });
+      video.addEventListener('canplay', onVideoReady, { once: true });
+    }
+
+    // Ring image: complete + naturalWidth guards against a broken/0-byte load.
+    if (!ring || (ring.complete && ring.naturalWidth > 0)) {
+      ringOk = true;
+    } else {
+      ring.addEventListener('load', onRingReady, { once: true });
+      ring.addEventListener('error', onRingReady, { once: true });
+    }
+
+    maybeReveal();
+
+    // Fallback: if an event never fires (cache quirks, decode stalls), reveal
+    // anyway so the section can never stay invisible.
+    const fallback = window.setTimeout(reveal, 2500);
+
+    return () => {
+      window.clearTimeout(fallback);
+      video?.removeEventListener('loadeddata', onVideoReady);
+      video?.removeEventListener('canplay', onVideoReady);
+      ring?.removeEventListener('load', onRingReady);
+      ring?.removeEventListener('error', onRingReady);
+    };
+  }, []);
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -201,8 +266,11 @@ export default function AboutPage() {
 
         // Keep the portal full-bleed through the manifesto, then crossfade it with
         // the section backdrop as the next section enters.
+        // NOTE: opacity/visibility intentionally NOT set here — the first-paint
+        // reveal (CSS .ab2-ready, added by JS once video+ring are both ready) owns
+        // the initial fade-in. Setting autoAlpha:1 here would write inline opacity
+        // and defeat that gate, letting the bare video flash before the ring.
         gsap.set(fixedVideoWrap, {
-          autoAlpha: 1,
           y: 0,
           clearProps: 'clipPath',
           '--ab2-fixed-vignette': 0.22,
@@ -214,7 +282,7 @@ export default function AboutPage() {
           height: () => window.innerHeight,
           clearProps: 'transform',
         });
-        gsap.set(frame, { '--f-left': '0px', '--f-top': '0px', '--f-right': '0px', '--f-bot': '0px', '--feather': '0px' });
+        gsap.set(frame, { '--f-left': '0px', '--f-top': '0px', '--f-right': '0px', '--f-bot': '0px' });
         gsap.set(sectionBackdrop, { autoAlpha: 0, yPercent: 0, scale: 1.01 });
 
         // Crossfade from the hero video into the manifesto's purple grid backdrop
@@ -422,9 +490,7 @@ export default function AboutPage() {
         <section className="ab2-proof-gallery" aria-label="Danh mục game làm bằng chứng năng lực">
           <div className="ab2-proof-head ab2-reveal">
             <h2>Bằng chứng nằm trong cách game được giữ đúng nhịp.</h2>
-            <p>
-              Ảnh game được đặt đúng tỉ lệ để nhìn rõ sản phẩm. Điều quan trọng hơn là mỗi sản phẩm có một cách vào thị trường riêng.
-            </p>
+
           </div>
 
           <div className="ab2-proof-grid">
@@ -583,6 +649,19 @@ export default function AboutPage() {
           will-change: transform, opacity;
         }
 
+        /* Both section-1 layers start hidden and fade in together once the video
+           AND the portal ring are both ready (JS adds .ab2-ready on the root).
+           This kills the first-paint jolt where the video showed before the ring. */
+        .ab2-fixed-video-wrap,
+        .ab2-portal {
+          opacity: 0;
+          transition: opacity 0.5s ease-out;
+        }
+        .ab2-root.ab2-ready .ab2-fixed-video-wrap,
+        .ab2-root.ab2-ready .ab2-portal {
+          opacity: 1;
+        }
+
         /* The box that morphs. At rest it fills the viewport; GSAP animates its
            top/left/width/height down to the card slot. It clips the video and
            carries the grading/vignette so those track the box, not the screen. */
@@ -610,30 +689,30 @@ export default function AboutPage() {
           background: linear-gradient(180deg, transparent 0%, transparent 52%, rgba(5, 3, 12, 0.22) 78%, rgba(5, 3, 12, 0.52) 100%);
         }
 
-        /* Rectangular soft edge. Lives on the NON-transformed wrap and is sized in
-           screen px (GSAP animates the four --f-* insets to the card rect), so the
-           feather softness is pixel-true and never squashes. Four directional
-           gradients dissolve the page bg inward — squared corners, no oval. */
+        /* Rectangular soft edge. Lives on the NON-transformed wrap so the feather
+           softness is sized in true screen px and never squashes. Four directional
+           gradients dissolve the page bg (#08060f) inward — squared corners, no oval.
+           Feather is split X vs Y: wider on the sides, gentler top/bottom so the band
+           never darkens the hero headline. The --f-* insets stay 0 at rest (the mask
+           fills the wrap); they exist so a future morph could animate them to a card
+           rect. NOTE: the feather is a static dissolve — it is intentionally NOT
+           animated by any timeline, so it cannot interfere with the scroll-zoom. */
         .ab2-frame-mask {
           --f-left: 0px;
           --f-top: 0px;
           --f-right: 0px;
           --f-bot: 0px;
-          --feather: 0px;
+          --feather-x: clamp(90px, 13vw, 240px);
+          --feather-y: clamp(56px, 8vh, 150px);
           position: absolute;
           inset: var(--f-top) var(--f-right) var(--f-bot) var(--f-left);
           z-index: 3;
           pointer-events: none;
-          /* Four directional ramps dissolve the page bg (#08060f) inward over a
-             wide, gradual band so the rectangular edge melts into space — no hard
-             border, no oval, no rounded corner. --feather grows during the morph
-             (driven by GSAP) so at card size the band is a large fraction of the
-             frame and the edges genuinely vanish. */
           background:
-            linear-gradient(to right, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
-            linear-gradient(to left, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
-            linear-gradient(to bottom, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather)),
-            linear-gradient(to top, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather) * 0.55), transparent var(--feather));
+            linear-gradient(to right, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather-x) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather-x) * 0.55), transparent var(--feather-x)),
+            linear-gradient(to left, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather-x) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather-x) * 0.55), transparent var(--feather-x)),
+            linear-gradient(to bottom, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather-y) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather-y) * 0.55), transparent var(--feather-y)),
+            linear-gradient(to top, #08060f 0, rgba(8, 6, 15, 0.86) calc(var(--feather-y) * 0.22), rgba(8, 6, 15, 0.4) calc(var(--feather-y) * 0.55), transparent var(--feather-y));
         }
 
         .ab2-fixed-video {
@@ -1183,17 +1262,45 @@ export default function AboutPage() {
           gap: clamp(28px, 4vw, 44px);
           text-align: center;
           isolation: isolate;
-          overflow: hidden;
+          /* No overflow clip here: any clip on this 1360px box would cut the
+             full-bleed video media back into a 1360px rectangle (the very seam we're
+             removing). The media spans exactly 100vw centered, so it never exceeds the
+             viewport and can't create a horizontal scrollbar; vertically it's pinned
+             to this section (top/bottom:0) so it won't bleed into neighbours. */
+          overflow: visible;
         }
 
         /* Real blackhole video as the closing scene — same footage as the hero, so
            the page speaks one visual language end to end (no CSS fake ring). */
         .ab2-final-media {
           position: absolute;
-          inset: 0;
+          /* Full-bleed break-out: the parent .ab2-final-contact is capped at 1360px
+             and centered, so an inset:0 media only filled that box — its edges met
+             the wider page bg in two straight vertical seams. Spanning the full
+             viewport width (100vw, centered via left:50% + -50vw) removes the box
+             edge entirely; the mask is now the only thing shaping the video, so it
+             dissolves into the page bg with no rectangular seam at any screen width. */
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          width: 100vw;
+          margin-left: -50vw;
           z-index: -2;
           overflow: hidden;
           pointer-events: none;
+          /* Two masks multiplied (mask-composite): an ellipse that melts the L/R
+             sides, AND a vertical linear fade that melts the TOP/BOTTOM edges sooner
+             than the ellipse alone did (the top edge was still showing a faint
+             horizontal seam where the video met the grid bg). Intersecting them means
+             a pixel is only opaque where BOTH say so, so all four edges dissolve. */
+          -webkit-mask-image:
+            radial-gradient(ellipse 64% 78% at 50% 50%, black 0%, black 34%, rgba(0, 0, 0, 0.5) 60%, transparent 84%),
+            linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 12%, black 30%, black 70%, rgba(0, 0, 0, 0.5) 88%, transparent 100%);
+          -webkit-mask-composite: source-in;
+          mask-image:
+            radial-gradient(ellipse 64% 78% at 50% 50%, black 0%, black 34%, rgba(0, 0, 0, 0.5) 60%, transparent 84%),
+            linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 12%, black 30%, black 70%, rgba(0, 0, 0, 0.5) 88%, transparent 100%);
+          mask-composite: intersect;
         }
 
         .ab2-final-video {
@@ -1207,14 +1314,28 @@ export default function AboutPage() {
         }
 
         /* Dark wash so the headline + buttons stay readable over the video, with a
-           soft purple core glow and top/bottom fades that blend into the page bg. */
+           soft purple core glow. Shares the media's elliptical mask so its edges
+           dissolve with the video instead of forming a straight rectangular band —
+           the old inset:-1px + opaque top/bottom linear stops were drawing that band.
+           The vertical readability wash is now a soft center-weighted radial, not a
+           full-width linear, so it never paints a hard edge at the box top/bottom. */
         .ab2-final-scrim {
           position: absolute;
           inset: 0;
+          /* Same intersect approach as the media so the dark wash dissolves on all
+             four edges (especially top/bottom) and never paints a horizontal seam. */
+          -webkit-mask-image:
+            radial-gradient(ellipse 72% 74% at 50% 50%, black 0%, black 38%, rgba(0, 0, 0, 0.55) 62%, transparent 84%),
+            linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 12%, black 30%, black 70%, rgba(0, 0, 0, 0.5) 88%, transparent 100%);
+          -webkit-mask-composite: source-in;
+          mask-image:
+            radial-gradient(ellipse 72% 74% at 50% 50%, black 0%, black 38%, rgba(0, 0, 0, 0.55) 62%, transparent 84%),
+            linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 12%, black 30%, black 70%, rgba(0, 0, 0, 0.5) 88%, transparent 100%);
+          mask-composite: intersect;
           background:
-            radial-gradient(ellipse 60% 48% at 50% 50%, transparent 0%, rgba(8, 6, 15, 0.46) 64%, rgba(8, 6, 15, 0.74) 100%),
-            radial-gradient(ellipse 64% 46% at 50% 52%, rgba(159, 140, 255, 0.16), transparent 66%),
-            linear-gradient(180deg, #08060f 0%, rgba(8, 6, 15, 0.5) 18%, rgba(8, 6, 15, 0.32) 50%, rgba(8, 6, 15, 0.66) 82%, #08060f 100%);
+            radial-gradient(ellipse 68% 54% at 50% 50%, transparent 0%, rgba(8, 6, 15, 0.3) 58%, rgba(8, 6, 15, 0.6) 100%),
+            radial-gradient(ellipse 82% 56% at 50% 52%, rgba(159, 140, 255, 0.2), rgba(70, 42, 154, 0.11) 48%, transparent 74%),
+            radial-gradient(ellipse 60% 78% at 50% 50%, rgba(8, 6, 15, 0.72) 0%, rgba(20, 12, 48, 0.34) 42%, transparent 78%);
         }
 
         .ab2-final-copy {
@@ -1400,6 +1521,9 @@ export default function AboutPage() {
             --f-top: 0px !important;
             --f-right: 0px !important;
             --f-bot: 0px !important;
+            /* Mobile keeps flush edges (no feather) — video is a plain fullscreen bg. */
+            --feather-x: 0px !important;
+            --feather-y: 0px !important;
           }
 
           .ab2-fixed-video {
@@ -1620,6 +1744,9 @@ export default function AboutPage() {
             --f-top: 0px !important;
             --f-right: 0px !important;
             --f-bot: 0px !important;
+            /* Mobile keeps flush edges (no feather) — video is a plain fullscreen bg. */
+            --feather-x: 0px !important;
+            --feather-y: 0px !important;
           }
         }
       `}</style>
