@@ -3,7 +3,7 @@
 import GameCompanion3D from '@/components/game/GameCompanion3D';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useLayoutEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import {
   ArrowUpRight,
   Gamepad2,
@@ -12,10 +12,6 @@ import {
   ShieldCheck,
   Smartphone,
 } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 type Game = {
   code: string;
@@ -26,7 +22,7 @@ type Game = {
   poster: string;
   backdrop: string;
   backdropSource?: 'portrait';
-  // hook: one emotional line — the player's reason to care (not a feature list).
+  // hook: one emotional line - the player's reason to care (not a feature list).
   hook: string;
   // forWho: helps the player self-identify ("this game is for someone like me").
   forWho: string;
@@ -51,7 +47,7 @@ const GAMES: Game[] = [
     platform: 'PC',
     poster: `${posterDir}/VLTK2.png`,
     backdrop: `${backdropDir}/VLTK.png`,
-    hook: 'Giang hồ vẫn đông như ngày đó — bang hội, công thành, săn boss mỗi tối.',
+    hook: 'Giang hồ vẫn đông như ngày đó. Bang hội, công thành, săn boss mỗi tối.',
     forWho: 'Dành cho ai mê chiến trường đông và muốn có anh em chinh chiến cùng.',
     status: 'Đang vận hành',
     details: ['Bang hội', 'Công thành', 'Boss thế giới'],
@@ -83,7 +79,7 @@ const GAMES: Game[] = [
     platform: 'PC & Mobile',
     poster: `${posterDir}/TLBB.png`,
     backdrop: `${backdropDir}/thien-long-bat-bo.png`,
-    hook: 'Thiên Long trở lại — vẫn môn phái đó, giờ chơi được cả trên điện thoại.',
+    hook: 'Thiên Long trở lại. Vẫn môn phái đó, giờ chơi được cả trên điện thoại.',
     forWho: 'Dành cho ai muốn chơi lại huyền thoại mà không phải ngồi mãi bên máy.',
     status: 'Ra mắt 2026',
     details: ['Môn phái', 'PvP lớn', 'PC & Mobile'],
@@ -99,7 +95,7 @@ const GAMES: Game[] = [
     platform: 'PC',
     poster: `${posterDir}/tieu-ngao-giang-ho.png`,
     backdrop: `${backdropDir}/tieu-ngao-giang-ho.png`,
-    hook: 'Combo tay nhanh, phe phái rõ ràng — giang hồ đúng chất phim kiếm hiệp.',
+    hook: 'Combo tay nhanh, phe phái rõ ràng. Giang hồ đúng chất phim kiếm hiệp.',
     forWho: 'Dành cho game thủ thích đánh đấm có kỹ năng, không chỉ bấm auto.',
     status: 'Sắp mở',
     details: ['Combo võ học', 'Thế lực', 'Chiến trường'],
@@ -150,201 +146,185 @@ function PlatformIcon({ platform }: { platform: Game['platform'] }) {
   return <Monitor size={17} strokeWidth={1.8} aria-hidden="true" />;
 }
 
-function SplitWords({ text }: { text: string }) {
-  return (
-    <>
-      {text.split(' ').map((word, index) => (
-        <span className="gm-word" key={`${word}-${index}`}>
-          {word}
-        </span>
-      ))}
-    </>
-  );
-}
-
 function accentStyle(game: Game): CSSProperties {
   return { '--game-accent': game.accent } as CSSProperties;
 }
 
 export default function GamePage() {
   const rootRef = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
+  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // No intro animation: drop the pre-hydration hidden state so everything
-      // is simply visible.
       root.classList.remove('gm-pending');
-      ScrollTrigger.refresh();
       return;
     }
 
     let disposed = false;
     let refreshFrame = 0;
     let refreshTimer = 0;
+    let refreshScrollTrigger: (() => void) | null = null;
+    let ctx: { revert: () => void } | null = null;
 
     const requestStableRefresh = () => {
-      if (disposed) return;
+      if (disposed || !refreshScrollTrigger) return;
       window.cancelAnimationFrame(refreshFrame);
       window.clearTimeout(refreshTimer);
       refreshFrame = window.requestAnimationFrame(() => {
         refreshTimer = window.setTimeout(() => {
-          if (!disposed) ScrollTrigger.refresh();
+          if (!disposed) refreshScrollTrigger?.();
         }, 60);
       });
     };
 
-    ScrollTrigger.clearScrollMemory();
+    void Promise.all([import('gsap'), import('gsap/ScrollTrigger')])
+      .then(([gsapModule, scrollTriggerModule]) => {
+        if (disposed) return;
 
-    const ctx = gsap.context(() => {
-      gsap.set('.gm-showcase-head .gm-word', { opacity: 0.16, y: 12 });
-      gsap.set('.gm-panel', { autoAlpha: 0, y: 34, scale: 0.985 });
-      gsap.set('.gm-ledger-row, .gm-ops-step', { autoAlpha: 0, y: 24 });
-      gsap.set('.gm-cta-visual', { autoAlpha: 0, scale: 1.04 });
-      gsap.set('.gm-cta-copy > *', { autoAlpha: 0, y: 30 });
+        const gsap = gsapModule.gsap;
+        const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+        gsap.registerPlugin(ScrollTrigger);
+        refreshScrollTrigger = () => ScrollTrigger.refresh();
+        ScrollTrigger.clearScrollMemory();
 
-      gsap.fromTo(
-        '.gm-hero-copy > *',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.84, stagger: 0.08, ease: 'power3.out', force3D: true }
-      );
+        ctx = gsap.context(() => {
+          gsap.set('.gm-showcase-head .gm-word', { opacity: 0.16, y: 12 });
+          gsap.set('.gm-panel', { autoAlpha: 0, y: 34, scale: 0.985 });
+          gsap.set('.gm-ledger-row, .gm-ops-step', { autoAlpha: 0, y: 24 });
+          gsap.set('.gm-cta-visual', { autoAlpha: 0, scale: 1.04 });
+          gsap.set('.gm-cta-copy > *', { autoAlpha: 0, y: 30 });
 
-      gsap.fromTo(
-        '.gm-portal-shell',
-        { autoAlpha: 0, y: 34, scale: 0.96 },
-        { autoAlpha: 1, y: 0, scale: 1, duration: 1.05, ease: 'power3.out', delay: 0.18, force3D: true }
-      );
+          // Drifting starfield in the hero background: keep the first viewport
+          // already visible, then add motion once GSAP has loaded.
+          gsap.utils.toArray<HTMLElement>('.gm-star').forEach((star) => {
+            gsap.set(star, {
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              scale: 0.5 + Math.random() * 1.1,
+            });
+            gsap.to(star, {
+              x: () => (Math.random() - 0.5) * 80,
+              y: () => (Math.random() - 0.5) * 80,
+              duration: 6 + Math.random() * 8,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true,
+            });
+            gsap.to(star, {
+              opacity: 0.15 + Math.random() * 0.5,
+              duration: 1.4 + Math.random() * 2.6,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true,
+              delay: Math.random() * 2,
+            });
+          });
 
-      // Drifting starfield in the hero background — slow float + twinkle, each
-      // star on its own loop so they never pulse in unison (cosmic feel).
-      gsap.utils.toArray<HTMLElement>('.gm-star').forEach((star) => {
-        gsap.set(star, {
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          scale: 0.5 + Math.random() * 1.1,
-        });
-        gsap.to(star, {
-          x: () => (Math.random() - 0.5) * 80,
-          y: () => (Math.random() - 0.5) * 80,
-          duration: 6 + Math.random() * 8,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-        });
-        gsap.to(star, {
-          opacity: 0.15 + Math.random() * 0.5,
-          duration: 1.4 + Math.random() * 2.6,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: Math.random() * 2,
-        });
+          gsap.to('.gm-hero-backdrop img', {
+            scale: 1.1,
+            yPercent: -4,
+            ease: 'none',
+            force3D: true,
+            scrollTrigger: {
+              trigger: '.gm-hero',
+              start: 'top top',
+              end: 'bottom top',
+              scrub: true,
+            },
+          });
+
+          gsap.to(
+            '.gm-showcase-head .gm-word',
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.54,
+              stagger: 0.024,
+              ease: 'power2.out',
+              force3D: true,
+              scrollTrigger: { trigger: '.gm-showcase-head', start: 'top 76%', once: true },
+            }
+          );
+
+          gsap.to('.gm-panel', {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.72,
+            stagger: 0.08,
+            ease: 'power3.out',
+            force3D: true,
+            scrollTrigger: { trigger: '.gm-showcase', start: 'top 76%', once: true },
+          });
+
+          gsap.to('.gm-ledger-row', {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.58,
+            stagger: 0.055,
+            ease: 'power3.out',
+            force3D: true,
+            scrollTrigger: { trigger: '.gm-ledger', start: 'top 74%', once: true },
+          });
+
+          gsap.to('.gm-ops-step', {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.62,
+            stagger: 0.07,
+            ease: 'power3.out',
+            force3D: true,
+            scrollTrigger: { trigger: '.gm-ops', start: 'top 74%', once: true },
+          });
+
+          gsap.to(
+            '.gm-cta-visual',
+            {
+              autoAlpha: 1,
+              scale: 1,
+              duration: 0.9,
+              ease: 'power3.out',
+              force3D: true,
+              scrollTrigger: { trigger: '.gm-cta', start: 'top 72%', once: true },
+            }
+          );
+
+          gsap.to(
+            '.gm-cta-copy > *',
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.75,
+              stagger: 0.08,
+              ease: 'power3.out',
+              force3D: true,
+              scrollTrigger: { trigger: '.gm-cta', start: 'top 72%', once: true },
+            }
+          );
+        }, root);
+
+        root.classList.remove('gm-pending');
+
+        window.addEventListener('load', requestStableRefresh, { once: true });
+        void document.fonts?.ready.then(requestStableRefresh);
+        requestStableRefresh();
+      })
+      .catch(() => {
+        if (!disposed) root.classList.remove('gm-pending');
       });
-
-      gsap.to('.gm-hero-backdrop img', {
-        scale: 1.1,
-        yPercent: -4,
-        ease: 'none',
-        force3D: true,
-        scrollTrigger: {
-          trigger: '.gm-hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-
-      gsap.to(
-        '.gm-showcase-head .gm-word',
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.54,
-          stagger: 0.024,
-          ease: 'power2.out',
-          force3D: true,
-          scrollTrigger: { trigger: '.gm-showcase-head', start: 'top 76%', once: true },
-        }
-      );
-
-      gsap.to('.gm-panel', {
-        autoAlpha: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.72,
-        stagger: 0.08,
-        ease: 'power3.out',
-        force3D: true,
-        scrollTrigger: { trigger: '.gm-showcase', start: 'top 76%', once: true },
-      });
-
-      gsap.to('.gm-ledger-row', {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.58,
-        stagger: 0.055,
-        ease: 'power3.out',
-        force3D: true,
-        scrollTrigger: { trigger: '.gm-ledger', start: 'top 74%', once: true },
-      });
-
-      gsap.to('.gm-ops-step', {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.62,
-        stagger: 0.07,
-        ease: 'power3.out',
-        force3D: true,
-        scrollTrigger: { trigger: '.gm-ops', start: 'top 74%', once: true },
-      });
-
-      gsap.to(
-        '.gm-cta-visual',
-        {
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.9,
-          ease: 'power3.out',
-          force3D: true,
-          scrollTrigger: { trigger: '.gm-cta', start: 'top 72%', once: true },
-        }
-      );
-
-      gsap.to(
-        '.gm-cta-copy > *',
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.75,
-          stagger: 0.08,
-          ease: 'power3.out',
-          force3D: true,
-          scrollTrigger: { trigger: '.gm-cta', start: 'top 72%', once: true },
-        }
-      );
-    }, root);
-
-    // gsap.set() above has now written inline hidden styles on every gated
-    // element, so dropping the CSS-driven hidden state causes no second flash:
-    // GSAP's inline opacity/visibility take over seamlessly.
-    root.classList.remove('gm-pending');
-
-    window.addEventListener('load', requestStableRefresh, { once: true });
-    void document.fonts?.ready.then(requestStableRefresh);
-    requestStableRefresh();
 
     return () => {
       disposed = true;
       window.removeEventListener('load', requestStableRefresh);
       window.cancelAnimationFrame(refreshFrame);
       window.clearTimeout(refreshTimer);
-      ctx.revert();
+      ctx?.revert();
     };
   }, []);
 
   return (
     <main className="gm-root gm-pending" ref={rootRef}>
-      {/* Page-coordinate floating warrior — lives only on /game, drag it
+      {/* Page-coordinate floating warrior - lives only on /game, drag it
           anywhere down the page and it stays where dropped. */}
       <GameCompanion3D />
 
@@ -392,7 +372,7 @@ export default function GamePage() {
           </div>
 
           {/* Right column of the hero. The 3D warrior (GameCompanion3D) floats
-              here at start — its home is measured from this shell — then can be
+              here at start - its home is measured from this shell - then can be
               dragged/thrown anywhere down the page. No ring/frame. */}
           <div className="gm-portal-shell" aria-hidden="true" />
         </div>
@@ -492,13 +472,13 @@ export default function GamePage() {
           --gm-max: 1360px;
           --gm-pad: clamp(20px, 5vw, 78px);
           position: relative;
-          overflow: hidden;
+          overflow: visible;
           min-height: 100dvh;
           background:
             radial-gradient(circle at 72% 8%, rgba(183, 156, 255, 0.18), transparent 28rem),
             /* Resolve to the section colour (#05040a) well before the hero ends
                so the hero region and every section below sit on one continuous
-               deep-black plate — no lighter band at the showcase seam. */
+               deep-black plate - no lighter band at the showcase seam. */
             linear-gradient(180deg, #0c0819 0%, var(--gm-bg) 18%, var(--gm-bg-deep) 30%);
           color: var(--gm-text);
         }
@@ -582,6 +562,7 @@ export default function GamePage() {
           align-items: center;
           padding: clamp(92px, 10vh, 112px) var(--gm-pad) clamp(52px, 8vh, 86px);
           isolation: isolate;
+          background: var(--gm-bg-deep) !important;
         }
 
         .gm-hero::after {
@@ -594,7 +575,7 @@ export default function GamePage() {
           height: clamp(300px, 46vh, 560px);
           /* Tall, opaque-by-the-bottom wash in the EXACT section colour (#05040a,
              measured with a colour picker) so the hero image fully dissolves into
-             the section below — no bright band left at the seam. */
+             the section below - no bright band left at the seam. */
           background: linear-gradient(180deg, rgba(5, 4, 10, 0), rgba(5, 4, 10, 0.65) 50%, rgba(5, 4, 10, 0.95) 82%, #05040a 96%);
           pointer-events: none;
         }
@@ -607,7 +588,7 @@ export default function GamePage() {
           filter: saturate(1.08) brightness(0.82) contrast(1.04);
           pointer-events: none;
           /* Dissolve the image itself toward the bottom (not just dim it) so the
-             lower edge melts fully away into the section colour — same on
+             lower edge melts fully away into the section colour - same on
              mobile + web. The image must be FULLY gone (alpha 0) by ~74%: any
              residual tail overlaps the opaque #05040a wash below and reads as a
              darker/denser band at the showcase seam. Smooth single ramp, no
@@ -644,7 +625,7 @@ export default function GamePage() {
           pointer-events: none;
         }
 
-        /* Drifting starfield — positions/opacity/motion driven by GSAP. */
+        /* Drifting starfield - positions/opacity/motion driven by GSAP. */
         .gm-hero-stars {
           position: absolute;
           inset: 0;
@@ -805,14 +786,14 @@ export default function GamePage() {
         }
 
         /* ====================================================================
-           SHOWCASE — image-first game library. Key art stays clean; metadata
+           SHOWCASE - image-first game library. Key art stays clean; metadata
            lives in a separate footer so artwork text is not duplicated.
            ==================================================================== */
         .gm-showcase-head {
           position: relative;
           isolation: isolate;
           padding: clamp(56px, 8vw, 104px) var(--gm-pad) clamp(34px, 5vw, 62px);
-          /* Opaque #05040a — matches the hero's bottom fade target exactly so
+          /* Opaque #05040a - matches the hero's bottom fade target exactly so
              the dissolved hero image lands on the same colour with no seam. */
           background: #05040a;
         }
@@ -838,7 +819,7 @@ export default function GamePage() {
           width: 100vw;
           transform: translateX(-50%);
           /* Exact section colour so the dissolved hero image and the page
-             gradient both land on #05040a — single seamless plate. */
+             gradient both land on #05040a - single seamless plate. */
           background: #05040a;
           pointer-events: none;
         }
@@ -868,9 +849,7 @@ export default function GamePage() {
           min-height: auto;
           overflow: visible;
           padding: 0 var(--gm-pad) clamp(86px, 9vw, 142px);
-          background:
-            linear-gradient(90deg, rgba(216, 255, 78, 0.035), transparent 22%, transparent 78%, rgba(183, 156, 255, 0.035)),
-            linear-gradient(180deg, #05040a, #05040a 54%, #05040a);
+          background: var(--gm-bg-deep) !important;
         }
 
         .gm-showcase-track {

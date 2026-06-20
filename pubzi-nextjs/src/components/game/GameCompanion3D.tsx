@@ -8,34 +8,34 @@ import type { Material, Mesh } from 'three';
 // /game floating 3D companion.
 //
 // A large warrior that lives ONLY on the /game page. It is positioned in PAGE
-// coordinates (position:absolute inside .gm-root) — NOT fixed to the viewport.
+// coordinates (position:absolute inside .gm-root) - NOT fixed to the viewport.
 // User's model: "the page is a road; drop it and it stays there." Throw it to a
 // lower section and it stays at that page position; scroll past and it scrolls
 // out of view; scroll back and it's exactly where you left it.
 //
 // Why absolute (not fixed): /game uses NATIVE scroll (Lenis is disabled on
-// /game), so an absolutely-positioned element scrolls with the page for free —
+// /game), so an absolutely-positioned element scrolls with the page for free -
 // no per-frame scrollY math, no Lenis integration. Dragging adds the viewport
 // pointer delta to the page-coord position (the page doesn't move during a
 // pointer-captured drag, so viewport delta == page delta).
 //
 // The box is a small render target moved by left/top; the 3D model fills it and
-// tumbles gently on 3 axes ("floating in space"). Physics live in refs — never
-// React state — so dragging causes zero re-renders. On release it stays put
+// tumbles gently on 3 axes ("floating in space"). Physics live in refs - never
+// React state - so dragging causes zero re-renders. On release it stays put
 // (no inertia, by design).
 // ---------------------------------------------------------------------------
 
 const EDGE_PAD = 12; // px gap kept from the viewport edge
 
 // Zero-gravity fling physics (px / per-RAF-frame at 60fps; normalised by `f`).
-const LINEAR_DAMPING = 0.985; // velocity decay — high = floats long (~2-4s) like vacuum
+const LINEAR_DAMPING = 0.985; // velocity decay - high = floats long (~2-4s) like vacuum
 const STOP_SPEED = 0.02; // px/frame; below this (and spin small) the drift settles
 const MAX_FLING_SPEED = 60; // px/frame clamp so a violent flick can't rocket off-screen
 const VELOCITY_WINDOW = 90; // ms of recent pointer samples used for fling velocity
 const EDGE_SOFT = 0.018; // soft-boundary spring stiffness (accel = -k * overshoot)
 const EDGE_DAMP_OUT = 0.86; // extra velocity damping while past the soft edge
 
-// Angular momentum — the character tumbles like an object in space.
+// Angular momentum - the character tumbles like an object in space.
 const SPIN_DAMPING = 0.97; // spin decay (slow → keeps tumbling a while)
 const SPIN_FROM_FLING = 0.00022; // rad/frame of spin added per (px/frame) of fling speed
 const SPIN_MAX = 0.16; // rad/frame clamp
@@ -112,19 +112,75 @@ export default function GameCompanion3D() {
     };
     applyBoxSize();
 
-    // Page bounds for clamping (page coords relative to the container).
+    const pageRelativeRect = (element: HTMLElement) => {
+      const cRect = container.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      return {
+        top: rect.top - cRect.top,
+        bottom: rect.bottom - cRect.top,
+      };
+    };
+
+    const footerBottomY = () => {
+      const footer = document.querySelector<HTMLElement>('.bhf-footer');
+      return footer ? pageRelativeRect(footer).bottom : container.scrollHeight;
+    };
+
+    let secretArmed = false;
+    let secretRevealed = false;
+    const revealSecretIfNeeded = () => {
+      if (secretRevealed) return;
+      const secret = document.querySelector<HTMLElement>('.gm-secret-section');
+      const footer = document.querySelector<HTMLElement>('.bhf-footer');
+      if (!secret || !footer) return;
+
+      const footerBottom = pageRelativeRect(footer).bottom;
+      const bottomY = pos.current.y + boxSize.current;
+
+      if (!secretArmed && bottomY >= footerBottom - Math.min(boxSize.current * 0.22, 150)) {
+        secretArmed = true;
+        secret.classList.add('is-armed');
+        window.dispatchEvent(new CustomEvent('game-secret:arm'));
+      }
+
+      if (!secretArmed) return;
+      if (bottomY < footerBottom + window.innerHeight - EDGE_PAD) return;
+
+      secretRevealed = true;
+      secret.classList.add('is-armed', 'is-revealed');
+      secret.setAttribute('aria-hidden', 'false');
+      window.dispatchEvent(new CustomEvent('game-secret:reveal'));
+    };
+
+    // Page bounds for clamping (page coords relative to the container). The Y
+    // floor is a gameplay limit, not the full secret section height: the model
+    // may dive to about 100vh under the footer to unlock the story, then stops.
     const maxX = () => Math.max(EDGE_PAD, container.clientWidth - boxSize.current - EDGE_PAD);
-    const maxY = () =>
-      Math.max(EDGE_PAD, container.scrollHeight - boxSize.current - EDGE_PAD);
+    const maxY = () => {
+      const armDepth = Math.min(boxSize.current * 0.22, 150);
+      const diveDepth = secretArmed ? window.innerHeight : armDepth;
+      return Math.max(EDGE_PAD, footerBottomY() + diveDepth - boxSize.current - EDGE_PAD);
+    };
 
     const clampHard = () => {
       pos.current.x = Math.min(Math.max(EDGE_PAD, pos.current.x), maxX());
       pos.current.y = Math.min(Math.max(EDGE_PAD, pos.current.y), maxY());
     };
 
+    const clampBottomHard = () => {
+      if (pos.current.y > maxY()) revealSecretIfNeeded();
+      const bottom = maxY();
+      if (pos.current.y <= bottom) return;
+      pos.current.y = bottom;
+      if (vel.current.y > 0) vel.current.y = 0;
+      idleAnchor.current.y = Math.min(idleAnchor.current.y, bottom);
+    };
+
     const applyTransform = () => {
+      clampBottomHard();
       root.style.left = `${pos.current.x}px`;
       root.style.top = `${pos.current.y}px`;
+      revealSecretIfNeeded();
     };
 
     // Home = centre of the portal ring, in PAGE coords relative to the container.
@@ -159,8 +215,8 @@ export default function GameCompanion3D() {
     // -- reveal: fade in once placed / model ready ----------------------
     const reveal = () => root.classList.add('is-ready');
 
-    // The hero only has its real layout once .gm-pending is removed and a frame
-    // has passed; re-measure home then so the companion lands on the portal.
+    // Re-measure after the first frames so late font/image layout shifts don't
+    // leave the companion off-centre in the portal.
     let settleFrame = 0;
     const settle = () => {
       if (!homeLocked) recenterHome();
@@ -269,11 +325,12 @@ export default function GameCompanion3D() {
         };
 
         // Soft elastic boundary, measured against the CURRENT VIEWPORT (not the
-        // page) — measured in PAGE coords, the same space as `pos`. (Earlier this
+        // page) - measured in PAGE coords, the same space as `pos`. (Earlier this
         // used the viewport; that mixed coord spaces, so scrolling while the model
         // drifted near an edge dragged it along with the scroll. Page bounds keep
-        // "dropped where you left it in the page" consistent.) Pushes velocity
-        // back instead of hard-stopping.
+        // "dropped where you left it in the page" consistent.) Sides stay soft,
+        // but the lower edge is a hard floor so the model cannot fall past the
+        // hidden secret tunnel.
         const applySoftEdges = (f: number) => {
           const left = EDGE_PAD;
           const right = maxX();
@@ -291,8 +348,7 @@ export default function GameCompanion3D() {
             vel.current.y += (top - pos.current.y) * EDGE_SOFT * f;
             outside = true;
           } else if (pos.current.y > bottom) {
-            vel.current.y -= (pos.current.y - bottom) * EDGE_SOFT * f;
-            outside = true;
+            clampBottomHard();
           }
           if (outside) {
             vel.current.x *= Math.pow(EDGE_DAMP_OUT, f);
@@ -332,7 +388,7 @@ export default function GameCompanion3D() {
 
           // --- Angular momentum (tumble) ---
           // While right-drag orbiting, the user hand-rotates the model directly
-          // (in pointermove) — don't auto-spin on top of that.
+          // (in pointermove) - don't auto-spin on top of that.
           if (mode.current !== 'orbiting') {
             if (mode.current === 'idle') {
               // ease spin toward a tiny baseline drift so it's never dead-still,
@@ -375,8 +431,8 @@ export default function GameCompanion3D() {
           return { x: x / n, y: y / n };
         };
 
-        // (Re)bind the gesture reference point to the current driving point — the
-        // single finger for MOVE, the two-finger centroid for ORBIT — without
+        // (Re)bind the gesture reference point to the current driving point - the
+        // single finger for MOVE, the two-finger centroid for ORBIT - without
         // emitting motion (used when a finger is added/removed mid-gesture).
         const rebindRef = () => {
           const c = drag.current.gesture === 'orbit' ? centroid() : (() => {
@@ -443,12 +499,12 @@ export default function GameCompanion3D() {
 
           if (drag.current.gesture === 'orbit') {
             // Orbit-inspect: rotate the model directly (yaw from horizontal, pitch
-            // from vertical) — like spinning a figurine to look at it.
+            // from vertical) - like spinning a figurine to look at it.
             modelGroup.rotation.y += dx * ORBIT_SPEED;
             modelGroup.rotation.x += dy * ORBIT_SPEED;
           } else {
             // Move: /game is native scroll and the page doesn't move during a
-            // captured drag, so viewport delta == page-coord delta. No hard clamp —
+            // captured drag, so viewport delta == page-coord delta. No hard clamp -
             // soft edges handle bounds; dragging can briefly cross them.
             pos.current.x += dx;
             pos.current.y += dy;
@@ -554,8 +610,8 @@ export default function GameCompanion3D() {
         };
         window.addEventListener('resize', onResize);
 
-        // The page height changes when the catalog filter changes the grid →
-        // re-clamp Y so a dropped companion never ends up stuck off-page.
+        // The page/footer height can change when content settles → re-clamp Y
+        // so a dropped companion never ends up stuck off-page.
         rootResize = new ResizeObserver(() => {
           if (!homeLocked) recenterHome();
           else {
@@ -565,6 +621,10 @@ export default function GameCompanion3D() {
           }
         });
         rootResize.observe(container);
+        const footer = document.querySelector<HTMLElement>('.bhf-footer');
+        if (footer) rootResize.observe(footer);
+        const secret = document.querySelector<HTMLElement>('.gm-secret-section');
+        if (secret) rootResize.observe(secret);
 
         // pause RAF when the tab is hidden
         const onVisibility = () => {
@@ -699,7 +759,7 @@ export default function GameCompanion3D() {
              the viewport and swaps the mobile size. These are the defaults. */
           width: 820px;
           height: 820px;
-          z-index: 6;
+          z-index: 12;
           pointer-events: none;
           touch-action: none;
           user-select: none;

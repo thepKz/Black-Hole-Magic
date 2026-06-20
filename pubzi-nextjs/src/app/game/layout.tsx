@@ -14,6 +14,16 @@ export default function GameLayout({
       <Header7 />
       {children}
       <Footer7 />
+      <section className="gm-secret-section" aria-hidden="true" aria-label="Tầng bí mật Black Hole">
+        <div className="gm-secret-inner">
+          <div className="gm-secret-story">
+            <p className="gm-secret-line gm-secret-line-main">Bạn đã đi qua đáy trang.</p>
+            <p className="gm-secret-line">Ở đây, Black Hole giữ lại những tín hiệu chưa công bố.</p>
+            <p className="gm-secret-line">Một cổng mới đang khóa thử nghiệm.</p>
+            <p className="gm-secret-line gm-secret-line-code">Tên mã: Black Gate.</p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

@@ -4,9 +4,9 @@
    Two jobs this file must do BEFORE the client bundle (three/gsap/styled-jsx)
    loads, so the SSR HTML never flashes a pile of stacked <Image fill> images:
      1. give every image-fill PARENT a position + height, and
-     2. pre-apply the same hidden state GSAP's gsap.set() will set, gated on the
-        `.gm-pending` class that ships in the SSR markup. GSAP removes the class
-        on first layout; a CSS/JS-failed fallback reveals via the load timeout. */
+     2. pre-apply the below-fold hidden state GSAP's gsap.set() will set, gated
+        on the `.gm-pending` class that ships in the SSR markup. The hero stays
+        visible from SSR so the first viewport never waits for hydration. */
 .gm-root {
   --gm-bg: #08060f;
   --gm-bg-deep: #05040a;
@@ -19,7 +19,7 @@
   --gm-pad: clamp(20px, 5vw, 78px);
   position: relative;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow: visible;
   /* Resolve to the section colour (#05040a) before the hero ends so the hero
      region and every section below sit on one continuous deep-black plate.
      Must mirror the styled-jsx rule in page.tsx (critical CSS wins pre-hydration). */
@@ -45,6 +45,9 @@
   align-items: center;
   padding: clamp(92px, 10vh, 112px) var(--gm-pad) clamp(52px, 8vh, 86px);
   isolation: isolate;
+  /* Override the global `section { background-color: ... !important }` rule so
+     the hero dissolves into the game grid on the same deep-black plate. */
+  background: var(--gm-bg-deep) !important;
 }
 
 .gm-hero-backdrop,
@@ -99,7 +102,7 @@
   left: 50%;
   width: 100vw;
   transform: translateX(-50%);
-  /* Exact section colour — mirror page.tsx. Old double-layer (#06050c + an
+  /* Exact section colour - mirror page.tsx. Old double-layer (#06050c + an
      #08060f-ish wash) made this band read darker than the hero fade above it. */
   background: #05040a;
   pointer-events: none;
@@ -114,6 +117,7 @@
   min-height: auto;
   overflow: visible;
   padding: 0 var(--gm-pad) clamp(86px, 9vw, 142px);
+  background: var(--gm-bg-deep) !important;
 }
 
 .gm-showcase-track {
@@ -230,6 +234,184 @@
   padding: 0 var(--gm-pad);
 }
 
+.gm-secret-section {
+  --secret-bg: #080614;
+  --secret-line: rgba(255, 255, 255, 0.18);
+  --secret-line-soft: rgba(255, 255, 255, 0.07);
+  --secret-text: rgba(255, 255, 255, 0.92);
+  --secret-muted: rgba(255, 255, 255, 0.5);
+  --secret-dim: rgba(255, 255, 255, 0.32);
+  position: relative;
+  z-index: 0;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--secret-bg) !important;
+  color: rgba(255, 255, 255, 0.94);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.gm-secret-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-top: 1px solid var(--secret-line);
+  background: var(--secret-bg);
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.gm-secret-section::after {
+  content: "";
+  position: absolute;
+  left: var(--gm-pad);
+  right: var(--gm-pad);
+  top: 100vh;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.46), transparent);
+  opacity: 0;
+  transform: scaleX(0.42);
+  transform-origin: center;
+  transition:
+    opacity 900ms ease,
+    transform 1200ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.gm-secret-inner {
+  position: relative;
+  min-height: 220vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 112vh var(--gm-pad) 52vh;
+}
+
+.gm-secret-story {
+  position: sticky;
+  top: 62dvh;
+  width: min(760px, 100%);
+  margin: 0 auto;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gm-secret-story::before {
+  content: "";
+  display: block;
+  width: min(180px, 38vw);
+  height: 1px;
+  margin: 0 auto clamp(24px, 4vh, 38px);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+  opacity: 0;
+  transform: scaleX(0.2);
+  transition:
+    opacity 700ms ease,
+    transform 1000ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.gm-secret-line {
+  max-width: 34em;
+  margin: 0 auto;
+  color: var(--secret-muted);
+  font-family: "Inter", "Montserrat", sans-serif;
+  font-size: clamp(15px, 1.35vw, 20px);
+  font-weight: 400;
+  line-height: 1.78;
+  letter-spacing: 0;
+  opacity: 0;
+  filter: blur(9px);
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 840ms ease,
+    filter 900ms ease,
+    transform 980ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.gm-secret-line + .gm-secret-line {
+  margin-top: clamp(12px, 2vh, 20px);
+}
+
+.gm-secret-line-main {
+  max-width: 12em;
+  color: var(--secret-text);
+  font-family: "Montserrat", "Inter", sans-serif;
+  font-size: clamp(30px, 4.2vw, 62px);
+  font-weight: 520;
+  line-height: 1.08;
+}
+
+.gm-secret-line-code {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: "Chakra Petch", "Inter", sans-serif;
+  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: 600;
+}
+
+.gm-secret-section.is-armed {
+  height: 220vh;
+  min-height: 220vh;
+  visibility: visible;
+}
+
+.gm-secret-section.is-armed::before {
+  opacity: 1;
+}
+
+.gm-secret-section.is-armed::after {
+  opacity: 0.42;
+  transform: scaleX(1);
+}
+
+.gm-secret-section.is-revealed {
+  height: 220vh;
+  min-height: 220vh;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.gm-secret-section.is-revealed::after {
+  opacity: 0.2;
+}
+
+.gm-secret-section.is-revealed .gm-secret-story::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.gm-secret-section.is-revealed .gm-secret-line {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.gm-secret-section.is-revealed .gm-secret-line:nth-child(1) {
+  transition-delay: 120ms;
+}
+
+.gm-secret-section.is-revealed .gm-secret-line:nth-child(2) {
+  transition-delay: 520ms;
+}
+
+.gm-secret-section.is-revealed .gm-secret-line:nth-child(3) {
+  transition-delay: 900ms;
+}
+
+.gm-secret-section.is-revealed .gm-secret-line:nth-child(4) {
+  transition-delay: 1280ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-secret-section::before,
+  .gm-secret-section::after,
+  .gm-secret-story::before,
+  .gm-secret-line {
+    transition: none;
+  }
+}
+
 @media (max-width: 991px) {
   .gm-hero-inner {
     grid-template-columns: 1fr;
@@ -330,28 +512,58 @@
   .gm-cta {
     min-height: 620px;
   }
+
+  .gm-secret-section.is-armed,
+  .gm-secret-section.is-revealed {
+    height: 210vh;
+    min-height: 210vh;
+  }
+
+  .gm-secret-section::after {
+    left: var(--gm-pad);
+    right: var(--gm-pad);
+  }
+
+  .gm-secret-inner {
+    min-height: 210vh;
+    padding: 108vh var(--gm-pad) 46vh;
+  }
+
+  .gm-secret-story {
+    top: 56dvh;
+    width: min(100%, 520px);
+  }
+
+  .gm-secret-line {
+    font-size: 14.5px;
+    line-height: 1.7;
+  }
+
+  .gm-secret-line-main {
+    font-size: clamp(30px, 10vw, 44px);
+    line-height: 1.12;
+  }
 }
 
 /* ---------------------------------------------------------------------------
    Pre-hydration hidden state.
 
-   The page's useLayoutEffect runs gsap.set() to hide these blocks before the
-   scroll/intro tweens reveal them. But styled-jsx + the gsap bundle load LATE
+   The page effect runs gsap.set() to hide below-fold blocks before the
+   scroll tweens reveal them. But styled-jsx + the gsap bundle can load late
    in dev, so without this the SSR HTML paints every block fully visible, then
-   GSAP snaps them hidden — the "flash then settle" jank.
+   GSAP snaps them hidden - the "flash then settle" jank.
 
    `.gm-pending` ships in the SSR markup and mirrors those gsap.set() start
-   values exactly (autoAlpha:0 = opacity:0 + visibility:hidden). GSAP removes
-   the class on first layout (after registering its own inline styles, so there
-   is no second flash). A reduced-motion / JS-disabled / load-failed fallback
-   reveals everything via the rules below.
+   values for below-fold content (autoAlpha:0 = opacity:0 + visibility:hidden).
+   The hero copy and 3D portal are intentionally NOT gated: they must be visible
+   from SSR, even while the animation bundle is still loading. GSAP removes the
+   class after registering its own inline styles. A reduced-motion / JS-disabled
+   / load-failed fallback reveals everything via the rules below.
 
    .gm-panel is gated here because the client runs a single card reveal after
    layout. This prevents the game art grid from flashing fully visible before
    GSAP takes over.
    --------------------------------------------------------------------------- */
-.gm-root.gm-pending .gm-hero-copy > *,
-.gm-root.gm-pending .gm-portal-shell,
 .gm-root.gm-pending .gm-panel,
 .gm-root.gm-pending .gm-ledger-row,
 .gm-root.gm-pending .gm-ops-step,
@@ -366,11 +578,9 @@
 }
 
 /* Safety net: if the gsap bundle stalls or fails to run (so .gm-pending is
-   never removed), don't leave the page blank forever. After 4s reveal it via a
-   pure-CSS animation. In the normal path GSAP removes .gm-pending in <100ms,
-   long before this fires. */
-.gm-root.gm-pending .gm-hero-copy > *,
-.gm-root.gm-pending .gm-portal-shell,
+   never removed), don't leave below-fold content hidden forever. After 4s reveal
+   it via a pure-CSS animation. In the normal path GSAP removes .gm-pending after
+   the animation bundle is ready. */
 .gm-root.gm-pending .gm-panel,
 .gm-root.gm-pending .gm-ledger-row,
 .gm-root.gm-pending .gm-ops-step,
@@ -388,10 +598,8 @@
 }
 
 /* If JS never runs (no GSAP) or the user prefers reduced motion, never leave
-   content stuck hidden — reveal it and drop any pin transform. */
+   content stuck hidden - reveal it and drop any pin transform. */
 @media (prefers-reduced-motion: reduce) {
-  .gm-root.gm-pending .gm-hero-copy > *,
-  .gm-root.gm-pending .gm-portal-shell,
   .gm-root.gm-pending .gm-panel,
   .gm-root.gm-pending .gm-ledger-row,
   .gm-root.gm-pending .gm-ops-step,

@@ -3,12 +3,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useEffect } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger)
-}
 
 // Helper: wrap words in spans
 function Words(text: string) {
@@ -43,6 +37,7 @@ export default function Footer7() {
     const footer = footerRef.current
     const canvas = canvasRef.current
     if (!footer || !canvas) return
+    let disposed = false
 
     const isMobile = window.matchMedia('(max-width: 767px)').matches
     const isTouch = window.matchMedia('(hover: none)').matches
@@ -63,32 +58,48 @@ export default function Footer7() {
 
     const state = stateRef.current
     let ctx: CanvasRenderingContext2D | null = null
-    let gsapCtx: gsap.Context | null = null
+    let gsapApi: typeof import('gsap').gsap | null = null
+    let gsapCtx: { revert: () => void } | null = null
     let obsA: IntersectionObserver | null = null
     let obsB: IntersectionObserver | null = null
     let resizeObs: ResizeObserver | null = null
-    let tickerFn: gsap.TickerCallback | null = null
+    let tickerFn: ((time: number) => void) | null = null
     let tickerActive = false
+    let initStarted = false
     let lastT = 0
     const frameAvg: number[] = []
     let frame60Hz = true
 
     const addTicker = () => {
-      if (!tickerFn || tickerActive) return
-      gsap.ticker.add(tickerFn)
+      if (!gsapApi || !tickerFn || tickerActive) return
+      gsapApi.ticker.add(tickerFn)
       tickerActive = true
     }
 
     const removeTicker = () => {
-      if (!tickerFn || !tickerActive) return
-      gsap.ticker.remove(tickerFn)
+      if (!gsapApi || !tickerFn || !tickerActive) return
+      gsapApi.ticker.remove(tickerFn)
       tickerActive = false
     }
 
     const DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.75)
 
-    function init() {
+    async function init() {
+      if (initStarted) return
+      initStarted = true
+
       try {
+        const [gsapModule, scrollTriggerModule] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger')
+        ])
+        if (disposed) return
+
+        const gsap = gsapModule.gsap
+        const ScrollTrigger = scrollTriggerModule.ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger)
+        gsapApi = gsap
+
         if (!canvas) return
         ctx = canvas.getContext('2d', { alpha: false })
         if (!ctx) throw new Error('no 2d context')
@@ -523,9 +534,9 @@ export default function Footer7() {
         if (entries[0].isIntersecting) {
           obsA?.disconnect()
           if (typeof window.requestIdleCallback !== 'undefined') {
-            requestIdleCallback(() => init())
+            requestIdleCallback(() => void init())
           } else {
-            setTimeout(init, 1)
+            setTimeout(() => void init(), 1)
           }
         }
       },
@@ -559,6 +570,7 @@ export default function Footer7() {
 
     // Cleanup
     return () => {
+      disposed = true
       gsapCtx?.revert()
       removeTicker()
       obsA?.disconnect()
