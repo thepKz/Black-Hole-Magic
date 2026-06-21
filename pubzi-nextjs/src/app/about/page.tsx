@@ -218,49 +218,50 @@ export default function AboutPage() {
 
     const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
-      const portalTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.ab2-hero',
-          start: 'top top',
-          end: 'bottom bottom+=60',
-          scrub: 0.15,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Portal ring: its container is sticky, so it stays put while you scroll and
-      // only scales outward. It must NOT scroll away — so it fades out IN PLACE
-      // (dissolves at center) before the sticky releases.
-      portalTl.to(
-        '.ab2-portal-frame',
-        { scale: 6.4, filter: 'brightness(1.08)', ease: 'none', duration: 0.62, force3D: false },
-        0
-      );
-      portalTl.to(
-        '.ab2-portal-frame',
-        { autoAlpha: 0, ease: 'power1.in', duration: 0.2 },
-        0.44
-      );
-      portalTl.to(
-        '.ab2-fixed-video',
-        {
-          scale: 1.08,
-          xPercent: -1.4,
-          yPercent: 1.2,
-          filter: 'contrast(1.2) brightness(1) saturate(1.28)',
-          ease: 'none',
-          duration: 1.28,
-          force3D: true,
-        },
-        0
-      );
-
       mm.add('(min-width: 1024px) and (pointer: fine)', () => {
+        const portalTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.ab2-hero',
+            start: 'top top',
+            end: 'bottom bottom+=60',
+            scrub: 0.15,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Portal ring: its container is sticky, so it stays put while you scroll and
+        // only scales outward. It fades out in place before the sticky releases.
+        portalTl.to(
+          '.ab2-portal-frame',
+          { scale: 6.4, filter: 'brightness(1.08)', ease: 'none', duration: 0.62, force3D: false },
+          0
+        );
+        portalTl.to(
+          '.ab2-portal-frame',
+          { autoAlpha: 0, ease: 'power1.in', duration: 0.2 },
+          0.44
+        );
+        portalTl.to(
+          '.ab2-fixed-video',
+          {
+            scale: 1.08,
+            xPercent: -1.4,
+            yPercent: 1.2,
+            filter: 'contrast(1.2) brightness(1) saturate(1.28)',
+            ease: 'none',
+            duration: 1.28,
+            force3D: true,
+          },
+          0
+        );
+
         const fixedVideoWrap = root.querySelector<HTMLElement>('.ab2-fixed-video-wrap');
         const stage = root.querySelector<HTMLElement>('.ab2-stage');
         const frame = root.querySelector<HTMLElement>('.ab2-frame-mask');
         const sectionBackdrop = root.querySelector<HTMLElement>('.ab2-section-backdrop');
         if (!fixedVideoWrap || !stage || !frame || !sectionBackdrop) {
+          portalTl.scrollTrigger?.kill();
+          portalTl.kill();
           return;
         }
 
@@ -303,6 +304,8 @@ export default function AboutPage() {
           .to(fixedVideoWrap, { autoAlpha: 0, ease: 'none', duration: 1 }, 0);
 
         return () => {
+          portalTl.scrollTrigger?.kill();
+          portalTl.kill();
           followTl.scrollTrigger?.kill();
           followTl.kill();
         };
@@ -579,6 +582,7 @@ export default function AboutPage() {
 
         html:has(.ab2-root),
         body:has(.ab2-root) {
+          background: #08060f;
           overflow-x: hidden;
         }
 
@@ -1494,74 +1498,111 @@ export default function AboutPage() {
           }
         }
 
-        /* Below the morph gate (1024px / fine pointer) the JS morph never runs, so
-           the video stays a static fullscreen background in the hero area and the
-           rectangular frame collapses to flush (invisible) edges. */
+        /* Mobile / coarse pointer: replace the desktop scroll runway with a
+           compact in-flow intro so the page does not stack multiple 100vh scenes. */
         @media (max-width: 1023px), (pointer: coarse) {
-          .ab2-fixed-video-wrap {
+          .ab2-root {
+            --ab2-mobile-visual-h: clamp(330px, 58dvh, 560px);
+            overflow-x: hidden;
+            background: #08060f;
+          }
+
+          .ab2-root::before {
             position: absolute;
-            height: 100dvh;
+            min-height: 100%;
+          }
+
+          .ab2-section-backdrop {
+            display: none;
+          }
+
+          .ab2-fixed-video-wrap {
+            position: relative;
+            inset: auto;
+            width: 100%;
+            height: var(--ab2-mobile-visual-h);
+            z-index: 1;
+            overflow: hidden;
+            background: #08060f;
             transform: none !important;
             opacity: 1 !important;
             visibility: visible !important;
           }
 
+          .ab2-fixed-video-wrap::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 4;
+            height: 48%;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(8, 6, 15, 0) 0%, rgba(8, 6, 15, 0.68) 68%, #08060f 100%);
+          }
+
           .ab2-stage {
             position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
+            inset: 0 !important;
             width: 100% !important;
             height: 100% !important;
             transform: none !important;
           }
 
           .ab2-frame-mask {
-            inset: 0 !important;
-            --f-left: 0px !important;
-            --f-top: 0px !important;
-            --f-right: 0px !important;
-            --f-bot: 0px !important;
-            /* Mobile keeps flush edges (no feather) — video is a plain fullscreen bg. */
-            --feather-x: 0px !important;
-            --feather-y: 0px !important;
+            display: none;
           }
 
           .ab2-fixed-video {
             transform: none !important;
+            object-position: center center;
+            filter: contrast(1.16) brightness(0.88) saturate(1.14);
           }
 
-          .ab2-fixed-portal-frame {
-            width: 100vw !important;
-            transform: translate(-50%, -39.5%) !important;
-          }
-
-          .ab2-portal-bloom {
-            display: none;
-          }
-
-          .ab2-portal-frame {
-            transform: none !important;
+          .ab2-portal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--ab2-mobile-visual-h);
+            z-index: 2;
+            overflow: hidden;
+            opacity: 1 !important;
+            visibility: visible !important;
           }
 
           .ab2-portal-frame-shell {
-            width: 100vw !important;
-            transform: translate(-50%, -39.5%) !important;
+            left: 50%;
+            top: 50%;
+            width: max(122vw, 560px);
+            transform: translate(-49%, -39%) scale(1.03) !important;
+            transform-origin: var(--ab2-ring-x) var(--ab2-ring-y);
+          }
+
+          .ab2-portal-frame {
+            opacity: 0.96 !important;
+            transform: none !important;
+            filter: brightness(0.86) saturate(1.05);
           }
 
           .ab2-hero,
           .ab2-hero-sticky {
+            display: none;
+            height: 0;
+            min-height: 0;
+            padding: 0;
             overflow: hidden;
           }
 
-          .ab2-hero {
-            height: 100dvh;
-            min-height: unset;
+          .ab2-content {
+            z-index: 3;
+            margin-top: 0;
+            background: #08060f;
           }
 
-          .ab2-content {
-            background:
-              linear-gradient(180deg, rgba(52, 25, 129, 0.34) 0%, rgba(8, 6, 15, 0.88) 150px, #08060f 360px),
-              #08060f;
+          .ab2-portal-bridge,
+          .ab2-content-backdrop {
+            display: none;
           }
 
           .ab2-manifesto,
@@ -1569,47 +1610,70 @@ export default function AboutPage() {
           .ab2-proof-gallery,
           .ab2-capability-map,
           .ab2-final-contact {
-            padding-left: 20px;
-            padding-right: 20px;
+            width: 100%;
+            padding-left: clamp(18px, 5vw, 32px);
+            padding-right: clamp(18px, 5vw, 32px);
           }
 
           .ab2-manifesto {
             min-height: auto;
-            padding-top: 74px;
-            padding-bottom: 66px;
-            gap: 22px;
+            padding-top: clamp(42px, 10vw, 76px);
+            padding-bottom: 64px;
+            gap: clamp(18px, 5vw, 26px);
           }
 
           .ab2-manifesto-stage {
-            min-height: clamp(520px, 84dvh, 680px);
+            display: block;
+            width: 100%;
+            min-height: 0;
+            margin: 0;
           }
 
+          .ab2-manifesto-stage::before {
+            inset: -22px -18px -10px;
+            background: radial-gradient(ellipse 76% 52% at 28% 30%, rgba(159, 140, 255, 0.14), transparent 70%);
+            filter: blur(18px);
+            opacity: 0.5;
+          }
+
+          .ab2-manifesto-stage::after,
           .ab2-card-slot {
-            min-height: clamp(520px, 84dvh, 680px);
-            aspect-ratio: 1 / 1.16;
+            display: none;
           }
 
           .ab2-manifesto-copy {
-            left: 18px;
-            right: 18px;
-            bottom: 34px;
+            position: relative;
+            left: auto;
+            right: auto;
+            bottom: auto;
+            max-width: min(100%, 620px);
+            gap: 0.02em;
           }
 
           .ab2-line {
-            font-size: clamp(2rem, 11.4vw, 3.15rem);
+            padding: 0.06em 0;
+            margin: -0.06em 0;
+            font-size: clamp(2.05rem, 11vw, 3.45rem);
+            line-height: 0.98;
           }
 
           .ab2-manifesto-note {
+            width: 100%;
+            max-width: 58ch;
+            margin: 4px 0 0;
             padding-left: 0;
             padding-right: 0;
+            color: rgba(255, 255, 255, 0.74);
+            line-height: 1.7;
           }
 
           .ab2-story-head h2,
           .ab2-proof-head h2,
           .ab2-capability-head h2,
           .ab2-final-contact h2 {
-            max-width: 12ch;
-            font-size: clamp(2.2rem, 12vw, 3rem);
+            max-width: min(100%, 13ch);
+            font-size: clamp(2.15rem, 11vw, 3rem);
+            line-height: 1.02;
           }
 
           .ab2-content p,
@@ -1622,6 +1686,40 @@ export default function AboutPage() {
           .ab2-capability-map {
             padding-top: 68px;
             padding-bottom: 72px;
+          }
+
+          .ab2-story-head,
+          .ab2-proof-head,
+          .ab2-capability-head {
+            max-width: none;
+          }
+
+          .ab2-story-layout {
+            margin-top: 34px;
+          }
+
+          .ab2-story-list {
+            min-height: 0;
+            display: grid;
+            gap: 30px;
+          }
+
+          .ab2-story-step,
+          .ab2-story-step:nth-child(even) {
+            position: relative;
+            min-height: auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-areas:
+              'media'
+              'copy';
+            gap: 20px;
+            padding: 28px 0;
+            border-top: 1px solid rgba(194, 180, 255, 0.12);
+          }
+
+          .ab2-story-step:nth-child(even) .ab2-step-copy {
+            justify-self: stretch;
           }
 
           .ab2-step-copy {
@@ -1645,9 +1743,14 @@ export default function AboutPage() {
             padding-top: 0;
           }
 
+          .ab2-proof-card figcaption {
+            gap: 6px;
+          }
+
           .ab2-capability-rail {
             grid-template-columns: 1fr;
             border-top: 0;
+            margin-top: 34px;
           }
 
           .ab2-capability-rail::before {
@@ -1663,10 +1766,11 @@ export default function AboutPage() {
           }
 
           .ab2-final-contact {
-            min-height: max(620px, 92dvh);
-            padding-top: 84px;
-            padding-bottom: 120px;
+            min-height: auto;
+            padding-top: 82px;
+            padding-bottom: 104px;
             gap: 28px;
+            overflow: hidden;
           }
 
           .ab2-actions {
@@ -1677,6 +1781,28 @@ export default function AboutPage() {
           .ab2-btn {
             width: 100%;
             white-space: nowrap;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .ab2-root {
+            --ab2-mobile-visual-h: clamp(300px, 52dvh, 440px);
+          }
+
+          .ab2-portal-frame-shell {
+            width: max(136vw, 520px);
+            transform: translate(-50%, -38%) scale(1) !important;
+          }
+
+          .ab2-line {
+            font-size: clamp(1.9rem, 12.2vw, 2.8rem);
+          }
+
+          .ab2-story-head h2,
+          .ab2-proof-head h2,
+          .ab2-capability-head h2,
+          .ab2-final-contact h2 {
+            max-width: 12ch;
           }
         }
 

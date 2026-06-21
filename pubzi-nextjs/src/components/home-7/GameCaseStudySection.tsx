@@ -38,7 +38,7 @@ const GAMES: GameItem[] = [
     title: 'Võ Lâm Truyền Kỳ',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'PC',
-    image: '/assets/img/landing-page/game/VLTK.png',
+    image: '/assets/img/landing-page/game/vltk.webp',
   },
   {
     num: '02',
@@ -47,7 +47,7 @@ const GAMES: GameItem[] = [
     title: 'Tiếu Ngạo Giang Hồ',
     genre: 'MMORPG Kiếm Hiệp',
     platform: 'PC & Mobile',
-    image: '/assets/img/landing-page/game/tieu-ngao-giang-ho.png',
+    image: '/assets/img/landing-page/game/tieu-ngao-giang-ho.webp',
   },
   {
     num: '03',
@@ -56,7 +56,7 @@ const GAMES: GameItem[] = [
     title: 'Kiếm Thế',
     genre: 'MMORPG',
     platform: 'Mobile',
-    image: '/assets/img/landing-page/game/kiem-the.png',
+    image: '/assets/img/landing-page/game/kiem-the.webp',
   },
   {
     num: '04',
@@ -65,7 +65,7 @@ const GAMES: GameItem[] = [
     title: 'Con Đường Tơ Lụa',
     genre: 'MMORPG',
     platform: 'PC',
-    image: '/assets/img/landing-page/game/con-duong-to-lua.png',
+    image: '/assets/img/landing-page/game/con-duong-to-lua.webp',
   },
   {
     num: '05',
@@ -74,7 +74,7 @@ const GAMES: GameItem[] = [
     title: 'Thiên Long Bát Bộ',
     genre: 'MMORPG',
     platform: 'PC & Mobile',
-    image: '/assets/img/landing-page/game/thien-long-bat-bo.png',
+    image: '/assets/img/landing-page/game/thien-long-bat-bo.webp',
   },
 ];
 
@@ -135,16 +135,20 @@ export default function GameCaseStudySection() {
         }
       );
 
+      // Transform-only reveal (opacity + translateY). The old version animated
+      // clip-path on panels that each carry a ~2.5MB background image, which
+      // forced a repaint every frame and dropped frames (visible "giật").
       gsap.fromTo(
         '.game-panel',
-        { clipPath: 'inset(100% 0 0 0)', y: 30 },
+        { autoAlpha: 0, y: 30 },
         {
-          clipPath: 'inset(0% 0 0 0)',
+          autoAlpha: 1,
           y: 0,
-          duration: 0.85,
+          duration: 0.8,
           ease: 'power3.out',
           stagger: 0.09,
-          scrollTrigger: { trigger: '.games-strip', start: 'top 78%', toggleActions: 'play none none reverse' },
+          force3D: true,
+          scrollTrigger: { trigger: '.games-strip', start: 'top 85%', toggleActions: 'play none none reverse' },
         }
       );
     }, section);
@@ -185,16 +189,23 @@ export default function GameCaseStudySection() {
         </div>
 
         <div className="games-strip">
-          {GAMES.map((g) => (
+          {GAMES.map((g, i) => (
             <article
               key={g.num}
               className="game-panel"
               tabIndex={0}
               style={{ ['--gp-accent' as string]: g.accent }}
             >
-              <div
+              {/* Panel 01 is the featured/expanded one — load it eagerly so it
+                  never pops in. The rest are narrow and can lazy-load. */}
+              <img
                 className="game-panel-art"
-                style={{ backgroundImage: `url('${g.image}')` }}
+                src={g.image}
+                alt={g.title}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={i === 0 ? 'high' : 'auto'}
+                decoding="async"
+                draggable={false}
               />
               <div className="game-panel-tint" />
               <span className="game-panel-sheen" aria-hidden="true" />
@@ -288,7 +299,6 @@ export default function GameCaseStudySection() {
           text-shadow:
             0 0 16px rgba(255, 255, 255, 0.2),
             0 0 38px rgba(139, 122, 232, 0.32);
-          will-change: clip-path, transform;
         }
 
         .games-title .sw {
@@ -368,7 +378,7 @@ export default function GameCaseStudySection() {
           }
 
           .games-strip:not(:hover):not(:focus-within) .game-panel:first-child .game-panel-art {
-            background-position: center;
+            object-position: center;
             filter: brightness(1);
             transform: scale(1);
           }
@@ -406,7 +416,6 @@ export default function GameCaseStudySection() {
           cursor: pointer;
           outline: none;
           transition: flex 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-          will-change: flex, clip-path;
         }
 
         .game-panel:hover,
@@ -417,23 +426,25 @@ export default function GameCaseStudySection() {
         .game-panel-art {
           position: absolute;
           inset: 0;
-          background-size: cover;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
           /* Collapsed panels are tall+narrow: anchor the art to the LEFT so the
              subject (always on the left of the key-art) stays visible. */
-          background-position: left center;
+          object-position: left center;
           /* Near-neutral — let the original key-art colors carry. Only a whisper
              of dim on collapsed panels so the title text stays legible. */
           filter: brightness(0.97);
           transform: scale(1.04);
           transition: filter 0.6s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-            background-position 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+            object-position 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .game-panel:hover .game-panel-art,
         .game-panel:focus-visible .game-panel-art {
           /* Active panel is wide (~16:9, matching the source) — recenter and show
              the art at full, untouched color. */
-          background-position: center;
+          object-position: center;
           filter: brightness(1);
           transform: scale(1);
         }
@@ -560,9 +571,8 @@ export default function GameCaseStudySection() {
           }
 
           .game-panel-art {
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            object-fit: contain;
+            object-position: center;
             filter: brightness(1);
             transform: none;
           }

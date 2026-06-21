@@ -451,10 +451,25 @@ export default function HeroSection7() {
             height: 120dvh;
           }
 
+          .home-scroll-content {
+            position: relative;
+            z-index: 1;
+            /* Start About while the BLACK HOLE GAME title is fading out, so
+               the 3D story enters on the same blackhole frame instead of after
+               the hero overlay has already disappeared. */
+            margin-top: -180vh;
+            margin-top: -180dvh;
+          }
+
           @media (max-width: 991px) {
             .hero-scroll-spacer {
               height: 90vh;
               height: 90dvh;
+            }
+
+            .home-scroll-content {
+              margin-top: -90vh;
+              margin-top: -90dvh;
             }
           }
 
@@ -639,37 +654,27 @@ export default function HeroSection7() {
             position: relative;
           }
 
+          /* Bloom (loá kiểu loá): a soft warm light bleeding off the bright
+             screen, not a colored glow blob. Centered on the banner, warm-white
+             core fading to the page's dark, screen-blended so it adds light
+             instead of laying a tinted film over the art. */
           .iphone-float::before {
             content: '';
             position: absolute;
-            inset: 18% 4% -18% -6%;
+            inset: -6% -10%;
             z-index: -1;
             background:
-              radial-gradient(circle at 45% 46%, rgba(134, 69, 255, 0.38) 0%, rgba(70, 24, 204, 0.26) 34%, transparent 68%);
-            filter: blur(24px) contrast(1.18);
-          }
-
-          .iphone-float::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(142, 92, 255, 0.34), rgba(74, 22, 213, 0.18) 44%, rgba(16, 4, 64, 0.08));
-            mix-blend-mode: soft-light;
-            -webkit-mask-image: url('/assets/img/landing-page/iphone_2.png');
-            mask-image: url('/assets/img/landing-page/iphone_2.png');
-            -webkit-mask-size: 100% 100%;
-            mask-size: 100% 100%;
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-            pointer-events: none;
+              radial-gradient(ellipse 56% 62% at 50% 46%, rgba(255, 244, 224, 0.5) 0%, rgba(255, 214, 150, 0.22) 30%, rgba(120, 92, 220, 0.12) 56%, transparent 74%);
+            filter: blur(34px);
+            mix-blend-mode: screen;
           }
 
           .iphone-stage {
             position: relative;
+            /* Grounding shadow only — no purple glow rings around the phone. */
             filter:
-              drop-shadow(0 28px 54px rgba(20, 5, 74, 0.82))
-              drop-shadow(0 0 12px rgba(119, 58, 255, 0.36))
-              drop-shadow(0 0 30px rgba(56, 13, 170, 0.32));
+              drop-shadow(0 28px 54px rgba(20, 5, 74, 0.78))
+              drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
           }
 
           .iphone-art {
@@ -677,7 +682,9 @@ export default function HeroSection7() {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: contrast(1.22) saturate(0.92) hue-rotate(14deg);
+            /* True key-art colors — no hue shift, just a touch of pop so the
+               bright screen reads as the light source for the bloom. */
+            filter: contrast(1.06) saturate(1.04) brightness(1.03);
           }
 
           .hero-cta {

@@ -26,8 +26,13 @@ export default function AboutSection7() {
       );
       if (inners.some((el) => !el)) return;
 
-      gsap.set(inners[0], { opacity: 1, y: 0, filter: 'blur(0px)' });
-      gsap.set(inners.slice(1), { opacity: 0, y: 60, filter: 'blur(12px)' });
+      const scrim = wrapper.querySelector<HTMLElement>('.about-story-scrim');
+
+      // The story should begin only when the about panel is pinned. Before
+      // that, keep text/model hidden so no separate section appears from below.
+      gsap.set(inners, { autoAlpha: 0, x: 96, y: 0, filter: 'blur(12px)' });
+      gsap.set(track, { autoAlpha: 0, x: () => window.innerWidth * 0.26, y: 0, scale: 1 });
+      if (scrim) gsap.set(scrim, { autoAlpha: 0 });
 
       const rotProxy = { v: 0 };
       const tl = gsap.timeline({
@@ -35,21 +40,25 @@ export default function AboutSection7() {
           trigger: wrapper,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2,
+          scrub: 0.55,
           invalidateOnRefresh: true,
         },
       });
 
       const fadeOut = (i: number, at: number) => {
-        tl.to(inners[i], { opacity: 0, y: -60, filter: 'blur(12px)', duration: 0.32, ease: 'power2.in' }, at);
+        tl.to(inners[i], { autoAlpha: 0, x: -72, filter: 'blur(12px)', duration: 0.32, ease: 'power2.in' }, at);
       };
       const fadeIn = (i: number, at: number) => {
-        tl.to(inners[i], { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.36, ease: 'power2.out' }, at);
+        tl.to(inners[i], { autoAlpha: 1, x: 0, filter: 'blur(0px)', duration: 0.42, ease: 'power3.out' }, at);
       };
 
       // Choreography (5 units total): the model drifts gently on the left while
       // the right-side text plays, sweeps across the EMPTY stage as its own beat
       // (so it never covers text), then the remaining copy plays on the left.
+      if (scrim) {
+        tl.to(scrim, { autoAlpha: 0.78, duration: 0.25, ease: 'power2.out' }, 0);
+      }
+      tl.to(track, { autoAlpha: 1, duration: 0.16, ease: 'power2.out' }, 0);
       tl.to(rotProxy, {
         v: Math.PI * 2,
         duration: 4.6,
@@ -69,7 +78,8 @@ export default function AboutSection7() {
         ease: 'power1.inOut',
       }, 1.9);
 
-      fadeOut(0, 0.7);
+      fadeIn(0, 0);
+      fadeOut(0, 0.72);
       fadeIn(1, 0.96);
       fadeOut(1, 1.75); // text clears the floor before the sweep
       fadeIn(2, 2.55); // model has landed on the right
@@ -96,6 +106,9 @@ export default function AboutSection7() {
         duration: 0.44,
         ease: 'power2.in',
       }, 4.74);
+      if (scrim) {
+        tl.to(scrim, { autoAlpha: 0, duration: 0.32, ease: 'power1.out' }, 4.72);
+      }
       tl.to({}, { duration: 0.18 }, 5.12);
     };
 
@@ -151,15 +164,10 @@ export default function AboutSection7() {
         <span className="atf-dot atf-dot-5" />
       </div>
       <div className="about-sticky">
+        <div className="about-story-scrim" aria-hidden="true" />
         <div ref={trackRef} className="about-model-track">
           <div className="about-ellipse">
             <img src="/assets/img/home-7/about/ellipse.png" alt="" />
-          </div>
-          {/* Hào quang nhân vật — lớp glow tím pulse nhẹ đứng sau model,
-              tạo cảm giác nhân vật phát sáng từ bên trong. */}
-          <div className="about-hero-aura" aria-hidden="true">
-            <span className="aura-core" />
-            <span className="aura-ring" />
           </div>
           <div className="about-3d-stage" aria-label="Black Hole 3D model">
             <AboutGlbModel rotationRef={rotationRef} />
@@ -179,29 +187,27 @@ export default function AboutSection7() {
 
         <div className="about-stage about-stage--right stage-1">
           <div className="stage-inner">
-            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
-            <p className="glow-text-subtle stage-statement">
-              Chúng tôi không chỉ phát hành game. Chúng tôi tháo gỡ từng rào cản bản địa, tối ưu hóa ROI và nâng cao giá trị vòng đời người dùng (LTV) của từng sản phẩm.
+            <h2 className="glow-text stage-title">Không chỉ phát hành game</h2>
+            <p className="glow-text-subtle stage-body stage-body--lead">
+              Chúng tôi tháo gỡ rào cản bản địa, tối ưu ROI và tăng LTV bằng dữ liệu vận hành thực tế.
             </p>
           </div>
         </div>
 
         <div className="about-stage about-stage--left stage-2">
           <div className="stage-inner">
-            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <h2 className="glow-text stage-title">Tầm nhìn 2030</h2>
             <p className="glow-text-subtle stage-body">
-              Đến năm 2030, Blackhole Game định vị là Hệ sinh thái Đồng phát hành (Co-Publishing) tiêu chuẩn và là Local Partner được lựa chọn đầu tiên (Top-of-mind) bởi các nhà phát triển game quốc tế tại thị trường Đông Nam Á.
+              Trở thành hệ sinh thái đồng phát hành tiêu chuẩn tại Đông Nam Á, là lựa chọn đầu tiên của studio quốc tế khi vào thị trường Việt Nam.
             </p>
           </div>
         </div>
 
         <div className="about-stage about-stage--left stage-3">
           <div className="stage-inner">
-            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
             <h2 className="glow-text stage-title">Sứ mệnh</h2>
             <p className="glow-text-subtle stage-body">
-              Trở thành cổng kết nối hàng đầu giữa game quốc tế và 100 triệu người chơi Đông Nam Á, đặt Việt Nam lên bản đồ gaming toàn cầu.
+              Kết nối game quốc tế với 100 triệu người chơi Đông Nam Á, đưa năng lực vận hành Việt Nam ra thị trường toàn cầu.
             </p>
           </div>
         </div>
@@ -211,6 +217,7 @@ export default function AboutSection7() {
         .about-story {
           position: relative;
           z-index: 1;
+          text-transform: none;
         }
 
         /* Everything after the story must paint ABOVE its pinned panel,
@@ -224,6 +231,10 @@ export default function AboutSection7() {
           position: relative;
         }
 
+        .about-story-scrim {
+          display: none;
+        }
+
         /* Tech backdrop hidden by default; only shown in stacked/mobile mode. */
         .about-tech-fx {
           display: none;
@@ -233,42 +244,48 @@ export default function AboutSection7() {
           font-family: var(--font-subtitle-krafting);
           font-size: 13px;
           font-weight: 700;
-          letter-spacing: 3px;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
-          margin-bottom: 20px;
+          margin-bottom: 22px;
         }
 
         .stage-title {
           font-family: var(--font-title-extra);
-          font-size: 32px;
+          font-size: clamp(34px, 4.1vw, 58px);
           font-weight: 900;
-          line-height: 1.3;
-          margin-bottom: 16px;
+          line-height: 1.06;
+          letter-spacing: 0;
+          text-transform: none;
+          margin-bottom: 18px;
           color: #fff;
+          text-wrap: balance;
         }
 
         .stage-body {
-          font-family: var(--font-body-regular);
-          font-size: 16px;
-          font-weight: 400;
-          line-height: 1.7;
-          color: rgba(255, 255, 255, 0.85);
+          font-family: 'Chakra Petch', var(--font-body-regular), sans-serif;
+          font-size: clamp(17px, 1.42vw, 22px);
+          font-weight: 500;
+          line-height: 1.62;
+          letter-spacing: 0;
+          text-transform: none;
+          color: rgba(255, 255, 255, 0.86);
         }
 
-        .stage-statement {
-          font-family: var(--font-body-regular);
-          font-size: 23px;
-          font-weight: 400;
-          line-height: 1.6;
-          color: rgba(255, 255, 255, 0.92);
+        .stage-body--lead {
+          font-size: clamp(18px, 1.7vw, 25px);
+          line-height: 1.5;
+          color: rgba(255, 255, 255, 0.9);
         }
 
         .stage-finale {
           font-family: var(--font-title-extra);
-          font-size: 44px;
+          font-size: clamp(38px, 4.4vw, 68px);
           font-weight: 900;
-          line-height: 1.25;
+          line-height: 1.08;
+          letter-spacing: 0;
+          text-transform: none;
           color: #fff;
+          text-wrap: balance;
         }
 
         .text-purple {
@@ -276,18 +293,19 @@ export default function AboutSection7() {
         }
 
         .glow-text {
+          /* Toned down: a soft purple halo + a dark scrim for legibility, no
+             bright white bloom. Keeps the text readable on the busy 3D backdrop
+             without the heavy "loá" glow. */
           text-shadow:
-            0 0 20px rgba(255, 255, 255, 0.55),
-            0 0 58px rgba(139, 122, 232, 0.9),
-            0 2px 0 rgba(7, 4, 20, 0.92),
+            0 0 14px rgba(139, 122, 232, 0.24),
+            0 2px 0 rgba(7, 4, 20, 0.9),
             0 10px 30px rgba(0, 0, 0, 0.86);
-          filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.58)) drop-shadow(0 0 34px rgba(139, 122, 232, 0.76));
         }
 
         .glow-text-subtle {
           text-shadow:
-            0 0 12px rgba(139, 122, 232, 0.4),
-            0 0 24px rgba(139, 122, 232, 0.2);
+            0 0 8px rgba(139, 122, 232, 0.14),
+            0 7px 18px rgba(0, 0, 0, 0.72);
         }
 
         .about-ellipse {
@@ -302,71 +320,19 @@ export default function AboutSection7() {
 
         .about-ellipse img {
           width: 100%;
-          filter: brightness(0.9) saturate(0.9) drop-shadow(0 0 24px rgba(108, 92, 231, 0.35));
-          opacity: 0.58;
-        }
-
-        /* ===== Hào quang nhân vật ===== */
-        .about-hero-aura {
-          position: absolute;
-          left: 50%;
-          top: 46%;
-          transform: translate(-50%, -50%);
-          width: 70%;
-          aspect-ratio: 1 / 1.25;
-          z-index: 1;
-          pointer-events: none;
-          mix-blend-mode: screen;
-        }
-
-        /* Lõi sáng dọc theo thân nhân vật — pulse chậm. */
-        .aura-core {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          background: radial-gradient(
-            ellipse 52% 64% at 50% 48%,
-            rgba(178, 142, 255, 0.55) 0%,
-            rgba(124, 78, 245, 0.34) 32%,
-            rgba(74, 24, 204, 0.16) 56%,
-            transparent 74%
-          );
-          filter: blur(14px);
-          animation: aura-breathe 5.5s ease-in-out infinite;
-        }
-
-        /* Vầng hào quang ngoài rộng hơn, sáng yếu, lệch nhịp với lõi. */
-        .aura-ring {
-          position: absolute;
-          inset: -16%;
-          border-radius: 50%;
-          background: radial-gradient(
-            circle at 50% 42%,
-            transparent 38%,
-            rgba(155, 124, 255, 0.22) 52%,
-            rgba(108, 92, 231, 0.1) 64%,
-            transparent 78%
-          );
-          filter: blur(22px);
-          animation: aura-breathe 7s ease-in-out infinite reverse;
-        }
-
-        @keyframes aura-breathe {
-          0%, 100% { opacity: 0.7; transform: scale(0.97); }
-          50% { opacity: 1; transform: scale(1.05); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .aura-core, .aura-ring { animation: none; }
+          /* Dimmed to a faint floor shadow — no purple glow halo. The model
+             carries its own light now. */
+          filter: brightness(0.55) saturate(0.7);
+          opacity: 0.22;
         }
 
         .about-3d-stage {
           position: absolute;
           inset: -30%;
           z-index: 2;
-          filter: contrast(1.12) brightness(1.04)
-            drop-shadow(0 0 22px rgba(108, 92, 231, 0.5))
-            drop-shadow(0 0 62px rgba(139, 122, 232, 0.42));
+          /* No external glow effects — the model lights itself from the scene's
+             emissive material + point lights. Just a touch of contrast. */
+          filter: contrast(1.04);
         }
 
         .about-3d-stage canvas {
@@ -392,6 +358,25 @@ export default function AboutSection7() {
 
         .stage-inner {
           width: 100%;
+          max-width: 660px;
+          position: relative;
+          isolation: isolate;
+        }
+
+        .stage-inner::before {
+          content: "";
+          position: absolute;
+          inset: -28% -18%;
+          z-index: -1;
+          pointer-events: none;
+          background: radial-gradient(
+            ellipse at 50% 52%,
+            rgba(7, 4, 18, 0.66),
+            rgba(7, 4, 18, 0.36) 34%,
+            transparent 72%
+          );
+          filter: blur(18px);
+          opacity: 0.92;
         }
 
         /* ===== Story mode: sticky + scroll-driven ===== */
@@ -412,11 +397,27 @@ export default function AboutSection7() {
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
+            isolation: isolate;
+            background: transparent !important;
+          }
+
+          .about-story-scrim {
+            display: block;
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
             background:
-              radial-gradient(circle at 28% 42%, rgba(108, 92, 231, 0.18), transparent 44%),
-              linear-gradient(180deg, rgba(8, 5, 20, 0) 0, rgba(8, 5, 20, 0.72) 130px, rgba(8, 5, 20, 0.94) 100%);
-            -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.35) 54px, #000 150px);
-            mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.35) 54px, #000 150px);
+              radial-gradient(ellipse at center, transparent 0%, rgba(3, 2, 10, 0.14) 54%, rgba(3, 2, 10, 0.66) 100%),
+              radial-gradient(circle at 43% 42%, rgba(95, 42, 255, 0.32), rgba(40, 12, 118, 0.18) 22%, transparent 40%),
+              radial-gradient(circle at 82% 20%, rgba(76, 21, 190, 0.2), transparent 30%),
+              linear-gradient(90deg, rgba(3, 2, 10, 0.78) 0%, rgba(15, 5, 43, 0.34) 44%, rgba(4, 2, 12, 0.68) 100%),
+              linear-gradient(180deg, rgba(3, 2, 10, 0.38), rgba(3, 2, 10, 0.68));
+            box-shadow:
+              inset 0 0 15vw rgba(2, 1, 8, 0.72),
+              inset 0 -18vh 18vh rgba(2, 1, 8, 0.42);
+            -webkit-backdrop-filter: blur(1.5px) saturate(94%) brightness(0.86);
+            backdrop-filter: blur(1.5px) saturate(94%) brightness(0.86);
           }
 
           .about-model-track {
@@ -447,11 +448,23 @@ export default function AboutSection7() {
           .about-stage--right {
             left: 50vw;
             right: 6vw;
+            justify-content: flex-end;
+            text-align: right;
           }
 
           .about-stage--left {
             left: 6vw;
             right: 54vw;
+            justify-content: flex-start;
+            text-align: left;
+          }
+
+          .about-stage--right .stage-inner {
+            margin-left: auto;
+          }
+
+          .about-stage--left .stage-inner {
+            margin-right: auto;
           }
         }
 
@@ -472,8 +485,13 @@ export default function AboutSection7() {
             font-size: 34px;
           }
 
-          .stage-statement {
-            font-size: 20px;
+          .stage-title {
+            font-size: 34px;
+          }
+
+          .stage-body,
+          .stage-body--lead {
+            font-size: 18px;
           }
         }
 
@@ -604,6 +622,17 @@ export default function AboutSection7() {
             margin: 0 auto;
           }
 
+          .stage-inner::before {
+            inset: -18% -8%;
+            background: radial-gradient(
+              ellipse at 50% 52%,
+              rgba(7, 4, 18, 0.5),
+              rgba(7, 4, 18, 0.25) 38%,
+              transparent 74%
+            );
+            filter: blur(14px);
+          }
+
           .stage-kicker {
             margin-bottom: 10px;
             font-size: 10px;
@@ -621,14 +650,12 @@ export default function AboutSection7() {
 
           /* Body copy on mobile: normal case, justified with conservative
              spacing so the monospace rhythm still feels intentional. */
-          .stage-statement,
           .stage-body {
             text-transform: none;
-            text-align: justify;
+            text-align: left;
             text-align-last: left;
-            text-justify: inter-word;
             hyphens: auto;
-            word-spacing: 0.02em;
+            word-spacing: 0;
             letter-spacing: 0;
           }
 
@@ -663,11 +690,6 @@ export default function AboutSection7() {
             margin-bottom: 16px;
           }
 
-          .stage-statement {
-            font-size: clamp(15px, 4.35vw, 17px);
-            line-height: 1.72;
-          }
-
           .stage-title {
             font-size: clamp(24px, 7.1vw, 30px);
             line-height: 1.18;
@@ -678,6 +700,10 @@ export default function AboutSection7() {
           .stage-body {
             font-size: clamp(15px, 4.35vw, 17px);
             line-height: 1.72;
+          }
+
+          .stage-body--lead {
+            font-size: clamp(15px, 4.35vw, 17px);
           }
         }
 
@@ -798,6 +824,10 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       const THREE = await import('three');
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       const { DRACOLoader } = await import('three/examples/jsm/loaders/DRACOLoader.js');
+      const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js');
+      const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js');
+      const { UnrealBloomPass } = await import('three/examples/jsm/postprocessing/UnrealBloomPass.js');
+      const { OutputPass } = await import('three/examples/jsm/postprocessing/OutputPass.js');
       if (disposed || !mountRef.current) return;
 
       const scene = new THREE.Scene();
@@ -811,35 +841,70 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
+      // Tone mapping is set below and applied by the composer's OutputPass —
+      // after bloom has read the HDR buffer, so bright emissive isn't clamped.
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.28;
+      renderer.toneMappingExposure = 0.3;
       mount.appendChild(renderer.domElement);
 
       camera.position.set(0, 0.16, 9.5);
       scene.add(modelGroup);
-      scene.add(new THREE.AmbientLight(0xffffff, 1.75));
+      scene.add(new THREE.AmbientLight(0xffffff, 1.55));
 
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.35);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
       keyLight.position.set(2.8, 4.6, 4.2);
       scene.add(keyLight);
 
-      const haloLight = new THREE.PointLight(0x8b7ae8, 4.2, 7.5);
+      // Purple accent lights — pushed up for a "game character" look: bright
+      // enough that the lit areas spill past the bloom threshold and glow.
+      const haloLight = new THREE.PointLight(0x8b7ae8, 3.4, 7.5);
       haloLight.position.set(0, 1.25, 2.3);
       scene.add(haloLight);
 
-      const purpleRim = new THREE.PointLight(0x9b7cff, 4.4, 8);
+      const purpleRim = new THREE.PointLight(0x9b7cff, 3.6, 8);
       purpleRim.position.set(-2.4, 1.8, 2.8);
       scene.add(purpleRim);
 
-      const softFill = new THREE.PointLight(0x6c5ce7, 2.2, 7);
+      const softFill = new THREE.PointLight(0x6c5ce7, 1.8, 7);
       softFill.position.set(2.2, -1.2, 2.4);
       scene.add(softFill);
+
+      // Back rim lights placed BEHIND the model on both sides — these graze the
+      // silhouette edges (hair, shoulders, sword) and create the bright outline
+      // that reads as a glowing game character. High intensity so the rim pixels
+      // blow out and bloom into a halo.
+      const rimLeft = new THREE.PointLight(0xb09cff, 12, 9);
+      rimLeft.position.set(-3.2, 2.2, -2.6);
+      scene.add(rimLeft);
+
+      const rimRight = new THREE.PointLight(0x9d7cff, 0, 9);
+      rimRight.position.set(3.0, 1.4, -2.4);
+      scene.add(rimRight);
+
+      // ── Post-processing: UnrealBloom (game-character glow) ─────────────────
+      // Values dialled in via the live tuning panel and locked here.
+      const composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(1, 1), // sized properly in resize()
+        0.31, // strength
+        0.43, // radius
+        0.23  // threshold
+      );
+      composer.addPass(bloomPass);
+      // OutputPass applies tone mapping + sRGB after bloom, so colors match the
+      // previous look without clamping the HDR values bloom needs.
+      const outputPass = new OutputPass();
+      composer.addPass(outputPass);
 
       const resize = () => {
         const stage = mount.parentElement ?? mount;
         const width = Math.max(stage.clientWidth, 1);
         const height = Math.max(stage.clientHeight, 1);
+        const dpr = Math.min(window.devicePixelRatio, 2);
         renderer.setSize(width, height, false);
+        composer.setSize(width * dpr, height * dpr);
+        bloomPass.setSize(width * dpr, height * dpr);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         needsRender = true;
@@ -850,7 +915,8 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
         const rotation = baseRotationY + rotationRef.current;
         if (needsRender || rotation !== lastRotation) {
           modelGroup.rotation.y = rotation;
-          renderer.render(scene, camera);
+          // composer.render() runs the bloom pipeline instead of a plain render.
+          composer.render();
           lastRotation = rotation;
           needsRender = false;
         }
@@ -881,10 +947,33 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
           if (disposed) return;
 
           const model = gltf.scene;
+          // Self-illumination feeding the bloom pass: drive emission from the
+          // base texture so the model's own bright areas (highlights on hair,
+          // skin, sword) push past the bloom threshold and bloom selectively —
+          // dark areas stay dark and don't glow. toneMapped=false keeps those
+          // values HDR so bloom reads them before the OutputPass tone-maps.
+          const tintColor = new THREE.Color(0x7a5cff);
           model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
               child.castShadow = true;
               child.receiveShadow = true;
+              const mats = Array.isArray(child.material) ? child.material : [child.material];
+              mats.forEach((mat) => {
+                if (!mat) return;
+                const m = mat as InstanceType<typeof THREE.MeshStandardMaterial>;
+                if ('emissive' in m && m.emissive) {
+                  // Locked at the tuned value (HDR) so bright areas bloom.
+                  if (m.map) {
+                    m.emissiveMap = m.map;
+                    m.emissive.copy(tintColor);
+                  } else {
+                    m.emissive.copy(m.color).lerp(tintColor, 0.4);
+                  }
+                  m.emissiveIntensity = 4;
+                  m.toneMapped = false;
+                  m.needsUpdate = true;
+                }
+              });
             }
           });
 
@@ -926,6 +1015,8 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
 
       disposeScene = () => {
         dracoLoader.dispose();
+        composer.dispose();
+        bloomPass.dispose();
         renderer.dispose();
         scene.traverse((child) => {
           if (child instanceof THREE.Mesh) {

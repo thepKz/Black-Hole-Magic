@@ -19,7 +19,7 @@ export default function Home7Page() {
         <HeroSection7 />
         <div className="hero-scroll-spacer" aria-hidden="true" />
       </div>
-      <div style={{ position: 'relative', zIndex: 1, marginTop: '-100dvh' }}>
+      <div className="home-scroll-content">
         <AboutSection7 />
         {/* <PortalTransitionSection /> */}
         <ServiceSection7 />

@@ -63,28 +63,36 @@ export default function ContactPage() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const ctx = gsap.context(() => {
-      gsap.set('.ct-hero-eyebrow, .ct-hero-sub, .ct-hero-channels', { autoAlpha: 0 });
-      gsap.timeline({ delay: 0.12 })
-        .to('.ct-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' })
+      // Hero: a quick, gentle entrance only — title lines rise, the rest just fades.
+      // Keep it short so nothing important is hidden for long.
+      gsap.set('.ct-hero-eyebrow, .ct-hero-sub, .ct-hero-channels', { autoAlpha: 0, y: 12 });
+      gsap.timeline({ delay: 0.05 })
+        .to('.ct-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
         .fromTo('.ct-hero-title .ct-line span', { yPercent: 115 },
-          { yPercent: 0, duration: 1, stagger: 0.12, ease: 'power4.out' }, '-=0.3')
-        .to('.ct-hero-sub', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
-        .to('.ct-hero-channels', { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5');
+          { yPercent: 0, duration: 0.85, stagger: 0.1, ease: 'power4.out' }, '-=0.25')
+        .to('.ct-hero-sub', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.4')
+        .to('.ct-hero-channels', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35');
 
-      gsap.fromTo('.ct-form-wrap',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: '.ct-main', start: 'top 75%', once: true } });
+      // The form is the whole point of this page — it must be readable the moment
+      // the page loads, even if it sits just below the fold. So NO scroll-reveal on
+      // it (a hidden start-state would make it vanish until scrolled into view).
+      // We only fade it up if it's already in the viewport on load.
+      const formWrap = root.querySelector('.ct-form-wrap');
+      if (formWrap && formWrap.getBoundingClientRect().top < window.innerHeight) {
+        gsap.from('.ct-form-wrap', { autoAlpha: 0, y: 16, duration: 0.6, ease: 'power2.out' });
+      }
 
-      gsap.fromTo('.ct-reason',
-        { autoAlpha: 0, x: 26 },
-        { autoAlpha: 1, x: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out',
-          scrollTrigger: { trigger: '.ct-reasons', start: 'top 78%', once: true } });
+      // Lower-down content can reveal on scroll, but with a safe start so it never
+      // gets stuck hidden: animate from y only, and clear any leftover hidden state.
+      gsap.from('.ct-reason', {
+        y: 14, duration: 0.5, stagger: 0.08, ease: 'power2.out',
+        scrollTrigger: { trigger: '.ct-reasons', start: 'top 95%', once: true },
+      });
 
-      gsap.fromTo('.ct-map',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: '.ct-map', start: 'top 82%', once: true } });
+      gsap.from('.ct-map', {
+        autoAlpha: 0, y: 18, duration: 0.6, ease: 'power2.out',
+        scrollTrigger: { trigger: '.ct-map', start: 'top 95%', once: true },
+      });
 
       ScrollTrigger.refresh();
     }, root);
@@ -137,6 +145,10 @@ export default function ContactPage() {
           <div className="ct-form-wrap">
             <span className="ct-section-kicker">Gửi tin nhắn</span>
             <h2 className="ct-form-title">Chúng tôi rất muốn nghe từ bạn</h2>
+            <p className="ct-form-lead">
+              Điền vào mẫu dưới đây, chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.
+              Các ô có dấu <span className="ct-req-mark">*</span> là bắt buộc.
+            </p>
 
             {submitStatus === 'success' && (
               <div className="ct-alert ct-alert-ok">
@@ -151,22 +163,22 @@ export default function ContactPage() {
 
             <form onSubmit={handleSubmit} className="ct-form">
               <div className="ct-field">
-                <label htmlFor="name">Họ và tên</label>
+                <label htmlFor="name">Họ và tên <span className="ct-req-mark">*</span></label>
                 <input id="name" name="name" type="text" placeholder="Nguyễn Văn A"
                   value={formData.name} onChange={handleChange} required />
               </div>
               <div className="ct-field">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">Email <span className="ct-req-mark">*</span></label>
                 <input id="email" name="email" type="email" placeholder="ban@congty.com"
                   value={formData.email} onChange={handleChange} required />
               </div>
               <div className="ct-field ct-field-full">
-                <label htmlFor="subject">Chủ đề</label>
+                <label htmlFor="subject">Chủ đề <span className="ct-optional">(không bắt buộc)</span></label>
                 <input id="subject" name="subject" type="text" placeholder="Đề xuất phát hành game / Đồng phát hành / Thanh toán"
                   value={formData.subject} onChange={handleChange} />
               </div>
               <div className="ct-field ct-field-full">
-                <label htmlFor="message">Nội dung</label>
+                <label htmlFor="message">Nội dung <span className="ct-req-mark">*</span></label>
                 <textarea id="message" name="message" rows={5} placeholder="Hãy cho chúng tôi biết bạn cần gì…"
                   value={formData.message} onChange={handleChange} required />
               </div>
@@ -234,15 +246,45 @@ export default function ContactPage() {
           --ct-purple: #6c5ce7;
           --ct-purple-light: #8b7ae8;
           --ct-purple-bright: #b09cff;
-          --ct-hair: rgba(139, 122, 232, 0.14);
-          --ct-text-soft: rgba(255, 255, 255, 0.62);
-          --ct-text-mute: rgba(255, 255, 255, 0.4);
+          --ct-hair: rgba(139, 122, 232, 0.18);
+          --ct-text-soft: rgba(255, 255, 255, 0.82);
+          --ct-text-mute: rgba(255, 255, 255, 0.62);
           --ct-maxw: 1280px;
           --ct-pad: clamp(20px, 5vw, 80px);
           position: relative; z-index: 1;
           background: var(--ct-bg); color: #fff;
           font-family: var(--font-body-regular, 'Inter', sans-serif);
           overflow: hidden;
+        }
+        /* The site-wide template forces ALL body text to uppercase, which makes
+           Vietnamese paragraphs hard to read. Reset it here and re-apply caps
+           only to the few short labels where it reads as intentional styling. */
+        .ct-root, .ct-root p, .ct-root h1, .ct-root h2, .ct-root h3,
+        .ct-root span, .ct-root a, .ct-root label, .ct-root input,
+        .ct-root textarea, .ct-root button, .ct-root strong {
+          text-transform: none;
+        }
+        .ct-root .ct-section-kicker,
+        .ct-root .ct-breadcrumb,
+        .ct-root .ct-company-label,
+        .ct-root .ct-btn,
+        .ct-root .ct-submit {
+          text-transform: uppercase;
+        }
+        /* Long-form reading text uses a clean proportional sans instead of the
+           template's monospace body font — much easier to scan in Vietnamese. */
+        .ct-root .ct-hero-sub,
+        .ct-root .ct-form-lead,
+        .ct-root .ct-reason-d,
+        .ct-root .ct-channel-value,
+        .ct-root .ct-channel-label,
+        .ct-root .ct-field label,
+        .ct-root .ct-field input,
+        .ct-root .ct-field textarea,
+        .ct-root .ct-company-card p,
+        .ct-root .ct-reasons-cta p,
+        .ct-root .ct-alert {
+          font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         .ct-root .ct-section-kicker {
           display: inline-block;
@@ -307,27 +349,28 @@ export default function ContactPage() {
           max-width: 56ch; margin: 0 0 44px; transform: translateY(16px);
         }
         .ct-hero-channels {
-          display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-          background: var(--ct-hair); border: 1px solid var(--ct-hair); border-radius: 14px; overflow: hidden;
-          transform: translateY(16px);
+          display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
         }
         .ct-channel {
-          display: flex; align-items: center; gap: 14px; padding: 22px 22px;
-          background: rgba(13, 10, 24, 0.5); text-decoration: none; transition: background 0.25s ease;
+          display: flex; align-items: flex-start; gap: 15px; padding: 20px 22px;
+          background: rgba(13, 10, 24, 0.6); border: 1px solid var(--ct-hair); border-radius: 14px;
+          text-decoration: none; transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
         }
-        .ct-channel:hover { background: rgba(139, 122, 232, 0.08); }
+        .ct-channel:hover { background: rgba(139, 122, 232, 0.1); border-color: rgba(139, 122, 232, 0.4); transform: translateY(-2px); }
         .ct-channel-icon {
-          flex: 0 0 auto; width: 42px; height: 42px; border-radius: 10px;
+          flex: 0 0 auto; width: 44px; height: 44px; border-radius: 11px;
           display: inline-flex; align-items: center; justify-content: center;
-          background: rgba(139, 122, 232, 0.12); border: 1px solid rgba(139, 122, 232, 0.25);
-          color: var(--ct-purple-bright); font-size: 15px;
+          background: rgba(139, 122, 232, 0.14); border: 1px solid rgba(139, 122, 232, 0.3);
+          color: var(--ct-purple-bright); font-size: 16px;
         }
-        .ct-channel-text { display: flex; flex-direction: column; min-width: 0; }
+        .ct-channel-text { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
         .ct-channel-label {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ct-text-mute); margin-bottom: 4px;
+          font-size: 13px; font-weight: 600; color: var(--ct-text-mute); letter-spacing: 0;
         }
-        .ct-channel-value { font-size: 14px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ct-channel-value {
+          font-size: 15.5px; color: #fff; font-weight: 600; line-height: 1.4;
+          word-break: break-word; overflow-wrap: anywhere;
+        }
 
         /* ── MAIN ── */
         .ct-main { max-width: var(--ct-maxw); margin: 0 auto; padding: clamp(60px, 8vw, 110px) var(--ct-pad); }
@@ -349,19 +392,24 @@ export default function ContactPage() {
         .ct-field { display: flex; flex-direction: column; }
         .ct-field-full { grid-column: 1 / -1; }
         .ct-field label {
-          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
-          font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-          color: var(--ct-text-mute); margin-bottom: 9px;
+          font-size: 14px; font-weight: 600; letter-spacing: 0;
+          color: rgba(255, 255, 255, 0.9); margin-bottom: 9px;
+        }
+        .ct-req-mark { color: #ff7a8a; font-weight: 700; }
+        .ct-optional { color: var(--ct-text-mute); font-weight: 400; font-size: 13px; }
+        .ct-form-lead {
+          font-size: 15px; line-height: 1.7; color: var(--ct-text-soft);
+          margin: -10px 0 26px; max-width: 52ch;
         }
         .ct-root .ct-field input,
         .ct-root .ct-field textarea {
           width: 100%; font-family: var(--font-body-regular, 'Inter', sans-serif);
-          font-size: 15px; color: #fff; padding: 14px 16px;
-          background: rgba(8, 6, 15, 0.6); border: 1px solid var(--ct-hair); border-radius: 9px;
+          font-size: 16px; color: #fff; padding: 15px 16px;
+          background: rgba(8, 6, 15, 0.6); border: 1px solid rgba(139, 122, 232, 0.28); border-radius: 9px;
           transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; resize: vertical;
         }
         .ct-root .ct-field input::placeholder,
-        .ct-root .ct-field textarea::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .ct-root .ct-field textarea::placeholder { color: rgba(255, 255, 255, 0.42); }
         .ct-root .ct-field input:focus,
         .ct-root .ct-field textarea:focus {
           outline: none; border-color: rgba(139, 122, 232, 0.6);
@@ -395,7 +443,7 @@ export default function ContactPage() {
           font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
           font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 7px; letter-spacing: -0.01em;
         }
-        .ct-reason-d { font-size: 14px; line-height: 1.7; color: var(--ct-text-soft); margin: 0; }
+        .ct-reason-d { font-size: 14.5px; line-height: 1.72; color: var(--ct-text-soft); margin: 0; }
         .ct-company-card {
           margin-top: 28px;
           padding: 24px;
@@ -456,7 +504,6 @@ export default function ContactPage() {
 
         /* ── RESPONSIVE ── */
         @media (max-width: 991px) {
-          .ct-hero-channels { grid-template-columns: 1fr 1fr; }
           .ct-main-inner { grid-template-columns: 1fr; gap: 40px; }
         }
         @media (max-width: 575px) {

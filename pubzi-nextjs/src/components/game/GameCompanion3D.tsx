@@ -51,10 +51,6 @@ const IDLE_BOB_HZ = 0.15; // bob frequency (Hz)
 type Mode = 'idle' | 'drifting' | 'dragging' | 'orbiting';
 type Vec = { x: number; y: number };
 
-// This component only mounts on /game and unmounts with it, but guard against a
-// StrictMode/HMR double-invoke booting two WebGL contexts.
-let companionMounted = false;
-
 export default function GameCompanion3D() {
   const rootRef = useRef<HTMLDivElement>(null); // the moving box
   const mountRef = useRef<HTMLDivElement>(null); // WebGL canvas mount
@@ -87,8 +83,6 @@ export default function GameCompanion3D() {
     const mount = mountRef.current;
     const grip = gripRef.current;
     if (!root || !mount || !grip) return;
-    if (companionMounted) return; // StrictMode / HMR second boot → no-op
-    companionMounted = true;
 
     // The absolute containing block: .gm-root (position:relative, page-tall).
     const container: HTMLElement = (root.offsetParent as HTMLElement) ?? document.body;
@@ -109,6 +103,7 @@ export default function GameCompanion3D() {
       // never exceed the viewport's small dimension
       const cap = Math.min(window.innerWidth, window.innerHeight) - 2 * EDGE_PAD;
       boxSize.current = Math.max(220, Math.min(target, cap));
+      root.style.setProperty('--gmc-box-size', `${boxSize.current}px`);
     };
     applyBoxSize();
 
@@ -212,24 +207,48 @@ export default function GameCompanion3D() {
     // initial placement (re-measured after layout settles below)
     recenterHome();
 
-    // -- reveal: fade in once placed / model ready ----------------------
-    const reveal = () => root.classList.add('is-ready');
+    // -- reveal: fade in only after both the model and its measured page
+    // position are ready. This prevents a first-frame snap on hard refresh.
+    let placementReady = false;
+    let modelReady = false;
+    const reveal = () => {
+      if (!placementReady || !modelReady) return;
+      root.classList.add('is-ready');
+    };
+    const markPlacementReady = () => {
+      placementReady = true;
+      reveal();
+    };
 
     // Re-measure after the first frames so late font/image layout shifts don't
     // leave the companion off-centre in the portal.
     let settleFrame = 0;
+    let settleTimer = 0;
     const settle = () => {
       if (!homeLocked) recenterHome();
     };
     settleFrame = window.requestAnimationFrame(() => {
       settle();
-      settleFrame = window.requestAnimationFrame(settle);
+      settleFrame = window.requestAnimationFrame(() => {
+        settle();
+        settleTimer = window.setTimeout(() => {
+          settle();
+          markPlacementReady();
+        }, 120);
+        void document.fonts?.ready.then(() => {
+          if (placementReady) return;
+          window.clearTimeout(settleTimer);
+          settle();
+          markPlacementReady();
+        });
+      });
     });
 
     // -- reduced motion: static fallback, no WebGL, non-interactive ------
     if (reduceMotion) {
       const frame = window.requestAnimationFrame(() => {
         setUseFallback(true);
+        modelReady = true;
         reveal();
       });
       const onResizeRm = () => {
@@ -240,9 +259,9 @@ export default function GameCompanion3D() {
       return () => {
         window.cancelAnimationFrame(frame);
         window.cancelAnimationFrame(settleFrame);
+        window.clearTimeout(settleTimer);
         window.removeEventListener('resize', onResizeRm);
         container.removeEventListener('contextmenu', onContextMenu);
-        companionMounted = false;
       };
     }
 
@@ -266,6 +285,10 @@ export default function GameCompanion3D() {
         const THREE = await import('three');
         const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
         const { DRACOLoader } = await import('three/examples/jsm/loaders/DRACOLoader.js');
+        const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js');
+        const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js');
+        const { UnrealBloomPass } = await import('three/examples/jsm/postprocessing/UnrealBloomPass.js');
+        const { OutputPass } = await import('three/examples/jsm/postprocessing/OutputPass.js');
         if (disposed || !mountRef.current) return;
 
         const scene = new THREE.Scene();
@@ -280,8 +303,10 @@ export default function GameCompanion3D() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
         renderer.setClearColor(0x000000, 0);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
+        // Tone mapping is applied by the composer's OutputPass (after bloom reads
+        // the HDR buffer). Exposure matched to the About-section glow.
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.36;
+        renderer.toneMappingExposure = 1.88;
         renderer.setSize(boxSize.current, boxSize.current, false);
         mount.appendChild(renderer.domElement);
 
@@ -292,15 +317,29 @@ export default function GameCompanion3D() {
         const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
         keyLight.position.set(2.5, 4.2, 4.4);
         scene.add(keyLight);
-        const purpleCore = new THREE.PointLight(0x9b7cff, 5.4, 9);
+        const purpleCore = new THREE.PointLight(0x9b7cff, 12, 9);
         purpleCore.position.set(0, 1.2, 2.2);
         scene.add(purpleCore);
-        const coolRim = new THREE.PointLight(0x44d6ff, 2.2, 7);
+        const coolRim = new THREE.PointLight(0x44d6ff, 0, 7);
         coolRim.position.set(2.4, -0.8, 2.6);
         scene.add(coolRim);
         const magentaRim = new THREE.PointLight(0xff7adf, 1.9, 7);
         magentaRim.position.set(-2.7, 1.5, 2.8);
         scene.add(magentaRim);
+
+        // ── Post-processing: UnrealBloom (game-character glow) ───────────────
+        // Same pipeline + tuned values as the About-section model so both 3D
+        // characters share one glow language.
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        const bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(boxSize.current, boxSize.current),
+          0.16, // strength
+          0,    // radius
+          0     // threshold
+        );
+        composer.addPass(bloomPass);
+        composer.addPass(new OutputPass());
 
         // Fit camera to the model's bounding sphere so the WHOLE model (sword
         // included) fills the square box with a small margin. Aspect is constant
@@ -320,8 +359,11 @@ export default function GameCompanion3D() {
 
         const resizeRenderer = () => {
           renderer.setSize(boxSize.current, boxSize.current, false);
+          const dpr = Math.min(window.devicePixelRatio, 1.8);
+          composer.setSize(boxSize.current * dpr, boxSize.current * dpr);
+          bloomPass.setSize(boxSize.current * dpr, boxSize.current * dpr);
           fitCamera();
-          renderer.render(scene, camera);
+          composer.render();
         };
 
         // Soft elastic boundary, measured against the CURRENT VIEWPORT (not the
@@ -406,7 +448,7 @@ export default function GameCompanion3D() {
             modelGroup.rotation.z = Math.sin(phase * 0.5) * 0.05 + spin.current.x * 0.6;
           }
 
-          renderer.render(scene, camera);
+          composer.render();
           animationFrame = window.requestAnimationFrame(frame);
         };
 
@@ -651,11 +693,29 @@ export default function GameCompanion3D() {
           (gltf) => {
             if (disposed) return;
             const model = gltf.scene;
+            // Self-illumination feeding the bloom pass: emit from the base
+            // texture (toneMapped=false keeps values HDR) so the character's
+            // bright areas glow — same approach as the About model.
+            const tintColor = new THREE.Color(0x7a5cff);
             model.traverse((child) => {
               const mesh = child as Mesh;
               if (!mesh.isMesh) return;
               mesh.castShadow = false;
               mesh.receiveShadow = false;
+              const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+              mats.forEach((mat) => {
+                const m = mat as InstanceType<typeof THREE.MeshStandardMaterial>;
+                if (!m || !('emissive' in m) || !m.emissive) return;
+                if (m.map) {
+                  m.emissiveMap = m.map;
+                  m.emissive.copy(tintColor);
+                } else {
+                  m.emissive.copy(m.color).lerp(tintColor, 0.4);
+                }
+                m.emissiveIntensity = 0.43;
+                m.toneMapped = false;
+                m.needsUpdate = true;
+              });
             });
 
             const box = new THREE.Box3().setFromObject(model);
@@ -671,12 +731,14 @@ export default function GameCompanion3D() {
             fitCamera();
             resizeRenderer();
             startLoop();
+            modelReady = true;
             reveal();
           },
           undefined,
           () => {
             if (disposed) return;
             setUseFallback(true);
+            modelReady = true;
             reveal();
           }
         );
@@ -696,6 +758,8 @@ export default function GameCompanion3D() {
           document.removeEventListener('visibilitychange', onVisibility);
           canvas.removeEventListener('webglcontextlost', onContextLost as EventListener);
           draco.dispose();
+          composer.dispose();
+          bloomPass.dispose();
           scene.traverse((child) => {
             const mesh = child as Mesh;
             if (!mesh.isMesh) return;
@@ -711,6 +775,7 @@ export default function GameCompanion3D() {
       } catch {
         if (!disposed) {
           setUseFallback(true);
+          modelReady = true;
           reveal();
         }
       }
@@ -722,11 +787,11 @@ export default function GameCompanion3D() {
       disposed = true;
       stopLoop();
       window.cancelAnimationFrame(settleFrame);
+      window.clearTimeout(settleTimer);
       rootResize?.disconnect();
       canvasResize?.disconnect();
       disposeScene?.();
       container.removeEventListener('contextmenu', onContextMenu);
-      companionMounted = false;
     };
   }, []);
 
@@ -757,8 +822,8 @@ export default function GameCompanion3D() {
           left: 0;
           /* Big square box sized to fill/overflow the portal ring; JS caps it to
              the viewport and swaps the mobile size. These are the defaults. */
-          width: 820px;
-          height: 820px;
+          width: var(--gmc-box-size, 820px);
+          height: var(--gmc-box-size, 820px);
           z-index: 12;
           pointer-events: none;
           touch-action: none;
@@ -805,8 +870,8 @@ export default function GameCompanion3D() {
         }
         @media (max-width: 767px), (pointer: coarse) {
           .gmc-root {
-            width: 420px;
-            height: 420px;
+            width: var(--gmc-box-size, 420px);
+            height: var(--gmc-box-size, 420px);
           }
         }
       `}</style>
