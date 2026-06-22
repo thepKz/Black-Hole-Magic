@@ -278,6 +278,10 @@ export default function AboutSection7() {
           letter-spacing: 0;
           text-transform: none;
           color: rgba(255, 255, 255, 0.86);
+          /* Body copy is justified (căn đều hai bên); the last line falls back to
+             left so it doesn't inherit the stage's right alignment and look odd. */
+          text-align: justify;
+          text-align-last: left;
         }
 
         .stage-body--lead {
