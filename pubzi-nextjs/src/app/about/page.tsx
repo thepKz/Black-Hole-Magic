@@ -76,20 +76,32 @@ const PROOF_ITEMS = [
 
 const TEAM_CAPABILITIES = [
   {
-    title: 'Sản phẩm',
-    copy: 'Chuyển mục tiêu của nhà phát triển thành kế hoạch phát hành có thể triển khai tại Việt Nam.',
+    title: 'Kinh nghiệm đến từ thực chiến',
+    points: [
+      'Blackhole không bắt đầu từ con số 0.',
+      'Đội ngũ của chúng tôi đã trải qua quá trình phát hành, vận hành và xây dựng cộng đồng trước khi Blackhole được thành lập.',
+    ],
   },
   {
-    title: 'Người chơi',
-    copy: 'Đọc tín hiệu từ hành vi, phản hồi, kênh nội dung và các rào cản trước ngày ra mắt.',
+    title: 'Một đầu mối cho toàn bộ quy trình',
+    points: [
+      'Từ phát hành, thanh toán đến pháp lý.',
+      'Đối tác không cần làm việc với nhiều đơn vị khác nhau.',
+    ],
   },
   {
-    title: 'Cộng đồng',
-    copy: 'Tổ chức nhà sáng tạo nội dung, bang hội, mạng xã hội và sự kiện thành một nhịp giao tiếp rõ ràng.',
+    title: 'Hiểu người chơi Việt Nam',
+    points: [
+      'Không chỉ dịch ngôn ngữ.',
+      'Chúng tôi bản địa hóa cách vận hành sản phẩm, cộng đồng và hành vi người chơi.',
+    ],
   },
   {
-    title: 'Vận hành',
-    copy: 'Giữ nhịp cập nhật, hỗ trợ và phản hồi sau ra mắt để sản phẩm có đời sống dài hơn.',
+    title: 'Đồng hành dài hạn',
+    points: [
+      'Chúng tôi không tìm kiếm những chiến dịch ngắn hạn.',
+      'Mục tiêu của Blackhole là xây dựng những sản phẩm có thể phát triển trong nhiều năm.',
+    ],
   },
 ];
 
@@ -545,19 +557,21 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="ab2-capability-map" aria-label="Đội ngũ vận hành của BlackHole">
+        <section className="ab2-capability-map" aria-label="Điều gì khiến BlackHole khác biệt">
           <div className="ab2-capability-head ab2-reveal">
-            <h2>Đội ngũ vận hành như một phòng điều phối.</h2>
-            <p>
-              Không tách rời phát hành, cộng đồng và hỗ trợ. Các nhóm cùng đọc một tín hiệu để phản ứng nhanh hơn.
-            </p>
+            <span className="ab2-note-label">Điều gì khiến BlackHole khác biệt</span>
+            <h2>Khác biệt nằm ở cách chúng tôi làm.</h2>
           </div>
 
           <div className="ab2-capability-rail">
             {TEAM_CAPABILITIES.map((capability) => (
               <article className="ab2-capability-item ab2-reveal" key={capability.title}>
                 <h3>{capability.title}</h3>
-                <p>{capability.copy}</p>
+                <ul className="ab2-capability-points">
+                  {capability.points.map((point, i) => (
+                    <li key={i}>{point}</li>
+                  ))}
+                </ul>
               </article>
             ))}
           </div>
@@ -1017,20 +1031,24 @@ export default function AboutPage() {
           text-shadow: none;
         }
 
+        /* 01 ABOUT and 02 OUR STORY share ONE reading column (same width + left
+           edge) so the two blocks line up and the text no longer looks unevenly
+           split. The old big padding-right that squeezed 01 into a narrow off-
+           centre column is gone. */
         .ab2-manifesto-note {
           display: block;
-          width: min(100%, 1280px);
-          max-width: none;
-          margin: 0 auto;
-          padding-left: clamp(28px, 6vw, 96px);
-          padding-right: clamp(28px, 34vw, 480px);
+          width: min(100%, 760px);
+          margin: 0;
+          padding: 0;
           text-shadow: 0 14px 38px rgba(0, 0, 0, 0.58);
         }
 
         .ab2-manifesto-note p {
-          color: rgba(255, 255, 255, 0.78);
-          font-size: clamp(0.95rem, 1vw, 1.08rem);
-          line-height: 1.78;
+          color: rgba(255, 255, 255, 0.82);
+          font-size: clamp(1rem, 1.05vw, 1.12rem);
+          line-height: 1.82;
+          text-align: justify;
+          text-align-last: left;
         }
 
         .ab2-manifesto-note p + p {
@@ -1325,8 +1343,8 @@ export default function AboutPage() {
           min-height: 260px;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          gap: 34px;
+          justify-content: flex-start;
+          gap: 20px;
           padding: 28px clamp(18px, 2.4vw, 34px) 0 0;
         }
 
@@ -1336,13 +1354,42 @@ export default function AboutPage() {
         }
 
         .ab2-capability-item h3 {
-          font-size: clamp(1.9rem, 3.1vw, 3.1rem);
-          line-height: 1;
+          /* Titles are now full phrases, not one-word labels — smaller so they
+             wrap to 2–3 tidy lines instead of dominating the column. */
+          font-size: clamp(1.25rem, 1.7vw, 1.6rem);
+          line-height: 1.16;
+          text-wrap: balance;
         }
 
-        .ab2-capability-item p {
-          max-width: 32ch;
+        .ab2-capability-points {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: grid;
+          gap: 12px;
+        }
+
+        .ab2-capability-points li {
+          position: relative;
+          max-width: 34ch;
+          padding-left: 18px;
+          color: var(--ab2-soft);
+          font-family: 'Chakra Petch', var(--font-body-regular, Arial, sans-serif);
+          font-weight: 500;
           font-size: 0.98rem;
+          line-height: 1.62;
+        }
+
+        .ab2-capability-points li::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0.62em;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--ab2-accent-strong), var(--ab2-accent));
+          box-shadow: 0 0 10px rgba(159, 140, 255, 0.5);
         }
 
         .ab2-final-contact {
@@ -1866,6 +1913,11 @@ export default function AboutPage() {
             padding: 24px 0;
             border-left: 0;
             border-top: 1px solid rgba(194, 180, 255, 0.18);
+          }
+
+          .ab2-capability-points li {
+            max-width: none;
+            font-size: 0.95rem;
           }
 
           .ab2-final-contact {
