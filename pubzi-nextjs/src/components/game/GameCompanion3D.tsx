@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import type { Material, Mesh } from 'three';
+import { mount3DTuningPanel } from '../shared/use3DTuningPanel';
 
 // ---------------------------------------------------------------------------
 // /game floating 3D companion.
@@ -306,7 +307,7 @@ export default function GameCompanion3D() {
         // Tone mapping is applied by the composer's OutputPass (after bloom reads
         // the HDR buffer). Exposure matched to the About-section glow.
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.88;
+        renderer.toneMappingExposure = 0.87;
         renderer.setSize(boxSize.current, boxSize.current, false);
         mount.appendChild(renderer.domElement);
 
@@ -314,7 +315,7 @@ export default function GameCompanion3D() {
 
         // Lighting mirrors the original portal look.
         scene.add(new THREE.AmbientLight(0xffffff, 1.55));
-        const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+        const keyLight = new THREE.DirectionalLight(0xffffff, 5.36);
         keyLight.position.set(2.5, 4.2, 4.4);
         scene.add(keyLight);
         const purpleCore = new THREE.PointLight(0x9b7cff, 12, 9);
@@ -334,12 +335,15 @@ export default function GameCompanion3D() {
         composer.addPass(new RenderPass(scene, camera));
         const bloomPass = new UnrealBloomPass(
           new THREE.Vector2(boxSize.current, boxSize.current),
-          0.16, // strength
-          0,    // radius
-          0     // threshold
+          0.575, // strength
+          0.426, // radius
+          1      // threshold
         );
         composer.addPass(bloomPass);
         composer.addPass(new OutputPass());
+
+        // Live tuning panel (dev / ?tune only) — wired after the model loads.
+        let disposeTuning: (() => void) | null = null;
 
         // Fit camera to the model's bounding sphere so the WHOLE model (sword
         // included) fills the square box with a small margin. Aspect is constant
@@ -696,7 +700,8 @@ export default function GameCompanion3D() {
             // Self-illumination feeding the bloom pass: emit from the base
             // texture (toneMapped=false keeps values HDR) so the character's
             // bright areas glow — same approach as the About model.
-            const tintColor = new THREE.Color(0x7a5cff);
+            const tintColor = new THREE.Color(0x000000);
+            const tunedMaterials: InstanceType<typeof THREE.MeshStandardMaterial>[] = [];
             model.traverse((child) => {
               const mesh = child as Mesh;
               if (!mesh.isMesh) return;
@@ -712,9 +717,10 @@ export default function GameCompanion3D() {
                 } else {
                   m.emissive.copy(m.color).lerp(tintColor, 0.4);
                 }
-                m.emissiveIntensity = 0.43;
+                m.emissiveIntensity = 4.1;
                 m.toneMapped = false;
                 m.needsUpdate = true;
+                tunedMaterials.push(m);
               });
             });
 
@@ -733,6 +739,23 @@ export default function GameCompanion3D() {
             startLoop();
             modelReady = true;
             reveal();
+
+            // Dev-only live tuning panel. The loop renders every frame, so
+            // requestRender is a no-op here.
+            disposeTuning = mount3DTuningPanel({
+              label: 'Game Companion',
+              bloomPass,
+              renderer,
+              materials: tunedMaterials,
+              tintColor,
+              lights: [
+                { name: 'key', light: keyLight },
+                { name: 'purpleCore', light: purpleCore },
+                { name: 'coolRim', light: coolRim },
+                { name: 'magentaRim', light: magentaRim },
+              ],
+              requestRender: () => {},
+            });
           },
           undefined,
           () => {
@@ -757,6 +780,7 @@ export default function GameCompanion3D() {
           window.removeEventListener('resize', onResize);
           document.removeEventListener('visibilitychange', onVisibility);
           canvas.removeEventListener('webglcontextlost', onContextLost as EventListener);
+          disposeTuning?.();
           draco.dispose();
           composer.dispose();
           bloomPass.dispose();

@@ -9,23 +9,23 @@ gsap.registerPlugin(ScrollTrigger);
 const VALUES = [
   {
     num: '01',
-    title: 'Thực chiến',
-    body: 'Không lý thuyết, không template. Mọi chiến lược đều xuất phát từ dữ liệu thực và kinh nghiệm vận hành thực tế.',
+    title: 'THỰC CHIẾN',
+    body: 'Mọi chiến lược đều được xây dựng từ dữ liệu thực tế và kinh nghiệm vận hành nhiều năm trong ngành game. Không lý thuyết. Không template. Không tăng trưởng ngắn hạn.',
   },
   {
     num: '02',
-    title: 'Hệ sinh thái khép kín',
-    body: 'Từ bản địa hóa đến thanh toán và pháp lý, mọi mắt xích đều nằm trong cùng một hệ sinh thái tối ưu.',
+    title: 'HỆ SINH THÁI KHÉP KÍN',
+    body: 'Publishing, Payment và Legal được kết nối trong cùng một quy trình vận hành nhằm tối ưu hiệu suất và rút ngắn thời gian triển khai.',
   },
   {
     num: '03',
-    title: 'ROI làm trọng tâm',
-    body: 'Mọi quyết định đều được đo lường bằng chỉ số. Tối ưu ROI là ngôn ngữ chung với mọi đối tác và nhà đầu tư.',
+    title: 'ROI LÀ TRỌNG TÂM',
+    body: 'Mọi quyết định đều được đo lường bằng hiệu quả thực tế. Tối ưu ROI và LTV là ngôn ngữ chung giữa Blackhole và đối tác.',
   },
   {
     num: '04',
-    title: 'Tư duy toàn cầu',
-    body: 'Am hiểu thị trường địa phương, kết nối tiêu chuẩn quốc tế. Cầu nối tin cậy giữa game studio và người chơi Việt Nam.',
+    title: 'PLAYER FIRST',
+    body: 'Chúng tôi không chỉ dịch ngôn ngữ. Chúng tôi bản địa hóa trải nghiệm, văn hóa cộng đồng và hành vi người chơi để tạo ra vòng đời sản phẩm dài hạn.',
   },
 ];
 
@@ -124,7 +124,7 @@ export default function ServiceSection7() {
               <Words text="GIÁ TRỊ CỐT LÕI" />
             </h2>
             <p className="values-lede">
-              Bốn nguyên tắc vận hành đứng sau mọi sản phẩm chúng tôi đồng phát hành tại thị trường Việt Nam.
+              Thực chiến, hệ sinh thái khép kín, ROI là trọng tâm và Player First.
             </p>
           </div>
         </div>

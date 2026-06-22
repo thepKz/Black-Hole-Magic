@@ -8,8 +8,6 @@ const NAV = [
   { href: '/', label: 'Trang chủ' },
   { href: '/about', label: 'Về chúng tôi' },
   { href: '/game', label: 'Danh sách game' },
-  { href: '/service', label: 'ICS GROUP' },
-  { href: '/news', label: 'Tin tức' },
   { href: '/contact', label: 'Liên hệ' },
 ]
 

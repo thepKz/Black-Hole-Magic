@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { mount3DTuningPanel } from '../shared/use3DTuningPanel';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -176,20 +177,22 @@ export default function AboutSection7() {
 
         <div className="about-stage about-stage--right stage-0">
           <div className="stage-inner">
-            <h6 className="stage-kicker text-purple">VỀ BLACKHOLE GAME</h6>
-            <h2 className="glow-text stage-finale">
-              Local Partner chiến lược{' '}
-              <br className="finale-break" />
-              cho thị trường game Việt Nam
-            </h2>
+            <h6 className="stage-kicker text-purple">BLACKHOLE GAME</h6>
+            <h2 className="glow-text stage-title">CHÚNG TÔI KHÔNG CHỈ PHÁT HÀNH GAME</h2>
+            <p className="glow-text-subtle stage-body stage-body--lead">
+              Blackhole Game được xây dựng với mục tiêu trở thành hệ sinh thái đồng phát hành tiêu chuẩn tại Đông Nam Á.
+            </p>
           </div>
         </div>
 
         <div className="about-stage about-stage--right stage-1">
           <div className="stage-inner">
-            <h2 className="glow-text stage-title">Không chỉ phát hành game</h2>
+            <h2 className="glow-text stage-title">Publishing - Payment - Legal</h2>
             <p className="glow-text-subtle stage-body stage-body--lead">
-              Chúng tôi tháo gỡ rào cản bản địa, tối ưu ROI và tăng LTV bằng dữ liệu vận hành thực tế.
+              Thông qua ba mảnh ghép cốt lõi gồm Publishing, Payment và Legal, chúng tôi giúp các studio quốc tế tiếp cận thị trường Việt Nam nhanh hơn, vận hành hiệu quả hơn và xây dựng tăng trưởng dài hạn.
+              <br />
+              <br />
+              Chúng tôi tin rằng tăng trưởng bền vững không đến từ may mắn, mà đến từ dữ liệu, kinh nghiệm vận hành và sự am hiểu người chơi bản địa.
             </p>
           </div>
         </div>
@@ -198,7 +201,10 @@ export default function AboutSection7() {
           <div className="stage-inner">
             <h2 className="glow-text stage-title">Tầm nhìn 2030</h2>
             <p className="glow-text-subtle stage-body">
-              Trở thành hệ sinh thái đồng phát hành tiêu chuẩn tại Đông Nam Á, là lựa chọn đầu tiên của studio quốc tế khi vào thị trường Việt Nam.
+              Trở thành hệ sinh thái đồng phát hành tiêu chuẩn tại Đông Nam Á, là lựa chọn hàng đầu của các studio quốc tế khi mở rộng sang Việt Nam và khu vực.
+              <br />
+              <br />
+              Không chỉ đưa game quốc tế đến với người chơi Việt Nam, Blackhole Game còn đưa năng lực vận hành của Việt Nam ra thị trường toàn cầu.
             </p>
           </div>
         </div>
@@ -207,7 +213,10 @@ export default function AboutSection7() {
           <div className="stage-inner">
             <h2 className="glow-text stage-title">Sứ mệnh</h2>
             <p className="glow-text-subtle stage-body">
-              Kết nối game quốc tế với 100 triệu người chơi Đông Nam Á, đưa năng lực vận hành Việt Nam ra thị trường toàn cầu.
+              Kết nối những tựa game chất lượng với hàng trăm triệu người chơi Đông Nam Á.
+              <br />
+              <br />
+              Thông qua năng lực vận hành, dữ liệu và hệ sinh thái khép kín, Blackhole Game giúp các studio quốc tế xây dựng tăng trưởng dài hạn và cộng đồng bền vững.
             </p>
           </div>
         </div>
@@ -844,24 +853,25 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       // Tone mapping is set below and applied by the composer's OutputPass —
       // after bloom has read the HDR buffer, so bright emissive isn't clamped.
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.3;
+      renderer.toneMappingExposure = 0.26;
       mount.appendChild(renderer.domElement);
 
       camera.position.set(0, 0.16, 9.5);
       scene.add(modelGroup);
-      scene.add(new THREE.AmbientLight(0xffffff, 1.55));
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0);
+      scene.add(ambientLight);
 
-      const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
+      const keyLight = new THREE.DirectionalLight(0x242424, 17.56);
       keyLight.position.set(2.8, 4.6, 4.2);
       scene.add(keyLight);
 
       // Purple accent lights — pushed up for a "game character" look: bright
       // enough that the lit areas spill past the bloom threshold and glow.
-      const haloLight = new THREE.PointLight(0x8b7ae8, 3.4, 7.5);
+      const haloLight = new THREE.PointLight(0x8b7ae8, 0, 7.5);
       haloLight.position.set(0, 1.25, 2.3);
       scene.add(haloLight);
 
-      const purpleRim = new THREE.PointLight(0x9b7cff, 3.6, 8);
+      const purpleRim = new THREE.PointLight(0x9b7cff, 0, 8);
       purpleRim.position.set(-2.4, 1.8, 2.8);
       scene.add(purpleRim);
 
@@ -873,7 +883,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       // silhouette edges (hair, shoulders, sword) and create the bright outline
       // that reads as a glowing game character. High intensity so the rim pixels
       // blow out and bloom into a halo.
-      const rimLeft = new THREE.PointLight(0xb09cff, 12, 9);
+      const rimLeft = new THREE.PointLight(0xb09cff, 2.25, 9);
       rimLeft.position.set(-3.2, 2.2, -2.6);
       scene.add(rimLeft);
 
@@ -887,10 +897,12 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       composer.addPass(new RenderPass(scene, camera));
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(1, 1), // sized properly in resize()
-        0.31, // strength
-        0.43, // radius
-        0.23  // threshold
+        0.104, // strength
+        0,     // radius
+        0.077  // threshold
       );
+      // Live tuning panel (dev / ?tune only) — wired after the model loads.
+      let disposeTuning: (() => void) | null = null;
       composer.addPass(bloomPass);
       // OutputPass applies tone mapping + sRGB after bloom, so colors match the
       // previous look without clamping the HDR values bloom needs.
@@ -942,7 +954,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       const loader = new GLTFLoader();
       loader.setDRACOLoader(dracoLoader);
       loader.load(
-        '/assets/img/home-7/3d/3d_10.glb',
+        '/assets/img/home-7/3d/3d_9.glb',
         (gltf) => {
           if (disposed) return;
 
@@ -952,7 +964,8 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
           // skin, sword) push past the bloom threshold and bloom selectively —
           // dark areas stay dark and don't glow. toneMapped=false keeps those
           // values HDR so bloom reads them before the OutputPass tone-maps.
-          const tintColor = new THREE.Color(0x7a5cff);
+          const tintColor = new THREE.Color(0xffffff);
+          const tunedMaterials: InstanceType<typeof THREE.MeshStandardMaterial>[] = [];
           model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
               child.castShadow = true;
@@ -972,6 +985,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
                   m.emissiveIntensity = 4;
                   m.toneMapped = false;
                   m.needsUpdate = true;
+                  tunedMaterials.push(m);
                 }
               });
             }
@@ -994,6 +1008,28 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
           needsRender = true;
           setLoadingProgress(100);
 
+          // Dev-only live tuning panel. requestRender flips needsRender so the
+          // on-demand loop repaints after each slider tweak.
+          disposeTuning = mount3DTuningPanel({
+            label: 'About 3D',
+            bloomPass,
+            renderer,
+            materials: tunedMaterials,
+            tintColor,
+            lights: [
+              { name: 'ambient', light: ambientLight },
+              { name: 'key', light: keyLight },
+              { name: 'halo', light: haloLight },
+              { name: 'purpleRim', light: purpleRim },
+              { name: 'softFill', light: softFill },
+              { name: 'rimLeft', light: rimLeft },
+              { name: 'rimRight', light: rimRight },
+            ],
+            requestRender: () => {
+              needsRender = true;
+            },
+          });
+
           gsap.fromTo(
             mount,
             { opacity: 0, scale: 0.92, filter: 'blur(8px)' },
@@ -1014,6 +1050,7 @@ function AboutGlbModel({ rotationRef }: { rotationRef: React.RefObject<number> }
       resizeObserver.observe(mount);
 
       disposeScene = () => {
+        disposeTuning?.();
         dracoLoader.dispose();
         composer.dispose();
         bloomPass.dispose();

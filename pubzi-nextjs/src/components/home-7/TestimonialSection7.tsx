@@ -10,72 +10,38 @@ gsap.registerPlugin(ScrollTrigger);
 type Card = {
   text: string;
   name: string;
-  role: string;
+  role?: string;
   avatar: string;
 };
 
 const CARDS: Card[] = [
   {
-    text: 'Blackhole Game hiểu người chơi Việt hơn bất kỳ đối tác nào chúng tôi từng hợp tác. Chỉ số giữ chân sau 30 ngày vượt mọi kỳ vọng của studio.',
-    name: 'Giám đốc Phát hành',
-    role: 'Studio quốc tế · NDA',
+    text: 'Cách tiếp cận dựa trên dữ liệu của Blackhole đã giúp chiến dịch của chúng tôi vượt xa kỳ vọng.',
+    name: 'Publisher Quốc tế',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
   },
   {
-    text: 'Quy trình bản địa hóa và pháp lý gọn đến mức chúng tôi ra mắt sớm hơn kế hoạch một quý. Đây là chuẩn mực mới.',
-    name: 'Trưởng dự án',
-    role: 'NPH Hàn Quốc',
+    text: 'Quy trình bản địa hóa và pháp lý được thực hiện nhanh hơn dự kiến, giúp dự án ra mắt đúng thời điểm.',
+    name: 'Studio Hàn Quốc',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
   },
   {
-    text: 'Một đội ngũ nói chuyện bằng số liệu. Báo cáo ROI minh bạch theo từng tuần vận hành, không có gì bị che khuất.',
-    name: 'Quản lý đầu tư',
-    role: 'Quỹ game khu vực',
+    text: 'Mọi báo cáo đều minh bạch và tập trung vào hiệu quả thực tế.',
+    name: 'Marketing Director',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
   },
   {
-    text: 'Khả năng phân tích đối thủ và xây dựng chiến lược của Black Hole thực sự ở đẳng cấp khác biệt so với thị trường.',
-    name: 'Brand Manager',
-    role: 'Esports SEA · NDA',
+    text: 'Khả năng xây dựng cộng đồng của Blackhole tạo nên giá trị dài hạn cho sản phẩm.',
+    name: 'Community Partner',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face',
-  },
-  {
-    text: 'Hợp tác với Black Hole là quyết định đúng đắn nhất năm nay. Đội ngũ chuyên nghiệp, cam kết và luôn vượt mục tiêu.',
-    name: 'CEO',
-    role: 'TechVN Corp',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop&crop=face',
-  },
-  {
-    text: 'Đầu tư vào sponsorship với Black Hole là khoản chi có hiệu quả nhất trong toàn bộ ngân sách marketing năm nay.',
-    name: 'CFO',
-    role: 'StartupVN',
-    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=80&h=80&fit=crop&crop=face',
-  },
-  {
-    text: 'Màn trình diễn tại giải đấu quốc tế khiến thương hiệu chúng tôi được chú ý rộng rãi. ROI vượt xa kỳ vọng.',
-    name: 'Marketing Director',
-    role: 'GameZone Asia',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&crop=face',
-  },
-  {
-    text: 'Cộng tác với team này mang lại giá trị thực sự cho fanbase. Cộng đồng gaming phản hồi cực kỳ tích cực.',
-    name: 'Community Lead',
-    role: 'VN Gaming Network',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face',
-  },
-  {
-    text: 'Tinh thần chiến đấu và văn hóa đội nhóm của Black Hole là nguồn cảm hứng lớn cho cả tổ chức chúng tôi.',
-    name: 'Operations Director',
-    role: 'TechHub SEA',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face',
   },
 ];
 
 const CARD_HEIGHT = 270;
 const GAP = 20;
-const col1 = CARDS.slice(0, 3);
-const col2 = CARDS.slice(3, 6);
-const col3 = CARDS.slice(6, 9);
+const col1 = CARDS.slice(0, 2);
+const col2 = CARDS.slice(2, 3);
+const col3 = CARDS.slice(3, 4);
 
 function ScrollWords({ children }: { children: string }) {
   return (
@@ -113,7 +79,7 @@ function Column({ cards, duration, delay = 0, reverse = false }: { cards: Card[]
               <img src={card.avatar} alt={card.name} loading="lazy" />
               <div>
                 <strong>{card.name}</strong>
-                <span>{card.role}</span>
+                {card.role ? <span>{card.role}</span> : null}
               </div>
             </div>
           </article>
@@ -214,14 +180,14 @@ export default function TestimonialSection7() {
           <div className="tst-title-block">
           
             <h2 id="tst-title" className="tst-scroll-text">
-              <ScrollWords>Khách hàng nói về chúng tôi</ScrollWords>
+              <ScrollWords>06. KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI</ScrollWords>
             </h2>
           </div>
 
           <aside className="tst-proof-note">
             <span className="tst-header-line" aria-hidden="true" />
             <p className="tst-scroll-text">
-              <ScrollWords>Trích dẫn được ẩn danh theo thỏa thuận NDA, gom từ publisher, studio, community và buyer khu vực.</ScrollWords>
+              <ScrollWords>Được tin tưởng bởi các studio, publisher và đối tác trong khu vực.</ScrollWords>
             </p>
 
           </aside>
@@ -504,7 +470,7 @@ export default function TestimonialSection7() {
           font-weight: 700;
           line-height: 1.78;
           letter-spacing: 0;
-          text-transform: uppercase;
+          text-transform: none;
           margin: 0 0 24px;
         }
 

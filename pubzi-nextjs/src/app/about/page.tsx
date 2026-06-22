@@ -9,10 +9,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const MISSION_LINES: ReactNode[] = [
-  <>Chúng tôi đưa</>,
-  <><span className="ab2-hl">game quốc tế</span> vào</>,
-  <>đời sống của</>,
-  <><span className="ab2-hl">người chơi Việt</span>.</>,
+  <><span className="ab2-hl">BLACK HOLE GAME</span></>,
+  <>You Build</>,
+  <><span className="ab2-hl">Great Games.</span></>,
+  <>We Build</>,
+  <><span className="ab2-hl">Sustainable Growth.</span></>,
 ];
 
 const OPERATING_STEPS = [
@@ -461,15 +462,48 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <p className="ab2-manifesto-note">
-            BlackHole là đối tác bản địa cho nhà phát triển game quốc tế cần bước vào Việt Nam bằng hiểu biết thị trường, cộng đồng và vận hành sau ra mắt.
-          </p>
+          <div className="ab2-manifesto-note">
+            <span className="ab2-note-label">01. About BlackHole Game</span>
+            <p>
+              Blackhole Game xây dựng tăng trưởng bền vững cho các sản phẩm game thông qua năng lực vận hành, thanh toán và pháp lý được tích hợp trong một hệ sinh thái thống nhất.
+            </p>
+            <p>
+              Chúng tôi tin rằng một sản phẩm tốt không chỉ cần được phát hành thành công, mà còn cần phát triển bền vững cùng cộng đồng và người chơi trong nhiều năm.
+            </p>
+          </div>
         </section>
 
-        <section className="ab2-scroll-story" aria-label="Cách BlackHole vận hành sản phẩm">
+        <section className="ab2-scroll-story" aria-label="Câu chuyện của BlackHole Game">
           <div className="ab2-story-head ab2-reveal">
-            <h2>Từ chuẩn bị ra mắt đến vận hành dài hạn.</h2>
-           
+            <span className="ab2-note-label">02. Our Story</span>
+            <h2>Câu chuyện của chúng tôi.</h2>
+          </div>
+
+          <div className="ab2-story-prose ab2-reveal">
+            <p>
+              Blackhole Game được thành lập vào năm 2026, nhưng câu chuyện của chúng tôi không bắt đầu từ đó.
+            </p>
+            <p>
+              Trước khi Blackhole ra đời, đội ngũ của chúng tôi đã có nhiều năm làm việc và tích lũy kinh nghiệm thực tế thông qua 3C Game, nơi chúng tôi tham gia phát hành, vận hành cộng đồng và phát triển sản phẩm dành cho thị trường Việt Nam. Trong hành trình ấy, Võ Lâm Truyền Kỳ 2 đã trở thành một trong những dấu mốc đáng nhớ, không chỉ bởi những con số tăng trưởng, mà bởi cộng đồng người chơi đã được xây dựng và duy trì qua nhiều năm.
+            </p>
+            <p>
+              Chính những trải nghiệm thực tế đó giúp chúng tôi hiểu rằng, một tựa game thành công không đơn thuần được quyết định bởi chất lượng sản phẩm hay ngân sách marketing. Đằng sau sự phát triển bền vững của mỗi trò chơi là cả một hệ thống vận hành được xây dựng cẩn trọng, từ khả năng thấu hiểu người chơi địa phương, xây dựng cộng đồng, tối ưu doanh thu cho đến việc giải quyết các bài toán thanh toán và tuân thủ pháp lý.
+            </p>
+            <p>
+              Chúng tôi cũng nhận ra rằng ngày càng nhiều studio quốc tế sở hữu những sản phẩm tuyệt vời nhưng vẫn gặp khó khăn khi tiếp cận các thị trường mới. Không phải vì sản phẩm của họ chưa đủ tốt, mà bởi mỗi thị trường đều có những đặc điểm riêng cần được thấu hiểu và vận hành đúng cách.
+            </p>
+            <p className="ab2-prose-accent">Đó là lý do Blackhole Game được tạo nên.</p>
+            <p>
+              Không chỉ với vai trò của một nhà phát hành, mà với khát vọng xây dựng một hệ sinh thái tăng trưởng dành cho ngành game — nơi năng lực vận hành, thanh toán và pháp lý được kết nối trong một nền tảng thống nhất, giúp các studio tập trung vào điều họ làm tốt nhất: tạo ra những tựa game tuyệt vời.
+            </p>
+            <p>
+              Chúng tôi tin rằng những sản phẩm vĩ đại xứng đáng có cơ hội chạm tới đúng cộng đồng người chơi, được phát triển bền vững và tiếp tục tạo ra giá trị trong nhiều năm.
+            </p>
+            <p className="ab2-prose-accent">Đó cũng là lý do Blackhole Game tồn tại.</p>
+            <p className="ab2-prose-signoff">
+              You Build Great Games.<br />
+              We Build Sustainable Growth.
+            </p>
           </div>
 
           <div className="ab2-story-layout">
@@ -945,7 +979,7 @@ export default function AboutPage() {
         .ab2-manifesto-copy {
           position: absolute;
           left: clamp(28px, 6vw, 96px);
-          right: clamp(28px, 34vw, 420px);
+          right: clamp(28px, 18vw, 260px);
           bottom: clamp(42px, 8vh, 92px);
           margin: 0;
           display: flex;
@@ -958,8 +992,9 @@ export default function AboutPage() {
           overflow: hidden;
           padding: 0.12em 0.06em;
           margin: -0.12em -0.06em;
-          font-size: clamp(2.15rem, 4.45vw, 4.95rem);
-          line-height: 1;
+          font-size: clamp(1.9rem, 3.9vw, 4.3rem);
+          line-height: 1.04;
+          white-space: nowrap;
         }
 
         .ab2-line-inner {
@@ -988,11 +1023,68 @@ export default function AboutPage() {
           max-width: none;
           margin: 0 auto;
           padding-left: clamp(28px, 6vw, 96px);
-          padding-right: clamp(28px, 48vw, 540px);
-          color: rgba(255, 255, 255, 0.78);
-          font-size: clamp(0.92rem, 0.92vw, 1rem);
-          line-height: 1.78;
+          padding-right: clamp(28px, 34vw, 480px);
           text-shadow: 0 14px 38px rgba(0, 0, 0, 0.58);
+        }
+
+        .ab2-manifesto-note p {
+          color: rgba(255, 255, 255, 0.78);
+          font-size: clamp(0.95rem, 1vw, 1.08rem);
+          line-height: 1.78;
+        }
+
+        .ab2-manifesto-note p + p {
+          margin-top: 18px;
+        }
+
+        /* Small numbered overline used by "01. About …" / "02. Our Story". */
+        .ab2-note-label {
+          display: block;
+          margin-bottom: 18px;
+          color: var(--ab2-accent-strong);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        /* Long-form OUR STORY prose: a comfortable single reading column. */
+        .ab2-story-prose {
+          width: min(100%, 760px);
+          margin: clamp(30px, 4vw, 46px) 0 0;
+        }
+
+        .ab2-story-prose p {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: clamp(1rem, 1.05vw, 1.12rem);
+          line-height: 1.82;
+        }
+
+        .ab2-story-prose p + p {
+          margin-top: 20px;
+        }
+
+        /* Standalone "Đó là lý do …" lines — lifted, brighter, a touch larger. */
+        .ab2-prose-accent {
+          color: #f3efff !important;
+          font-weight: 700;
+          font-size: clamp(1.12rem, 1.4vw, 1.4rem) !important;
+        }
+
+        .ab2-prose-signoff {
+          margin-top: clamp(28px, 3.4vw, 40px) !important;
+          padding-top: clamp(22px, 2.6vw, 32px);
+          border-top: 1px solid rgba(194, 180, 255, 0.22);
+          font-family: var(--font-title-extra, Arial, sans-serif) !important;
+          font-weight: 900 !important;
+          font-size: clamp(1.5rem, 2.6vw, 2.4rem) !important;
+          line-height: 1.18 !important;
+          background: linear-gradient(120deg, var(--ab2-accent), var(--ab2-accent-strong));
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent !important;
         }
 
         .ab2-story-head,
@@ -1653,8 +1745,11 @@ export default function AboutPage() {
           .ab2-line {
             padding: 0.06em 0;
             margin: -0.06em 0;
-            font-size: clamp(2.05rem, 11vw, 3.45rem);
-            line-height: 0.98;
+            font-size: clamp(1.7rem, 8.4vw, 2.85rem);
+            line-height: 1.04;
+            /* Long English phrases ("Sustainable Growth.") must be allowed to
+               wrap on narrow screens — the desktop nowrap would overflow. */
+            white-space: normal;
           }
 
           .ab2-manifesto-note {
@@ -1663,8 +1758,16 @@ export default function AboutPage() {
             margin: 4px 0 0;
             padding-left: 0;
             padding-right: 0;
+          }
+
+          .ab2-manifesto-note p {
             color: rgba(255, 255, 255, 0.74);
             line-height: 1.7;
+          }
+
+          .ab2-story-prose {
+            width: 100%;
+            margin-top: 26px;
           }
 
           .ab2-story-head h2,

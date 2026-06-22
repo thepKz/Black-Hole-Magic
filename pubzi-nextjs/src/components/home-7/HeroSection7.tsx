@@ -433,9 +433,12 @@ export default function HeroSection7() {
               marginBottom: '28px',
               textAlign: 'center',
             }}>
-              Nền tảng gaming Việt
+              You Build Great Games.
+              <br />
+              We Build Sustainable Growth.
             </div>
-            <TitleLetters text="BLACK HOLE GAME" />
+            <TitleLetters text="BLACKHOLE GAME" />
+            <div className="hero-system-line">Publishing - Payment - Legal</div>
           </div>
         </div>
 
@@ -811,6 +814,17 @@ export default function HeroSection7() {
             margin: 0;
             text-transform: uppercase;
             color: #fff;
+          }
+
+          .hero-system-line {
+            margin-top: 22px;
+            color: rgba(255, 255, 255, 0.76);
+            font-family: var(--font-subtitle-krafting);
+            font-size: clamp(12px, 1.15vw, 16px);
+            font-weight: 700;
+            line-height: 1.4;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
           }
 
           .ht-word {
