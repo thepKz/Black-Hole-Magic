@@ -16,28 +16,30 @@ const MISSION_LINES: ReactNode[] = [
   <><span className="ab2-hl">Sustainable Growth.</span></>,
 ];
 
+// OUR STORY kể theo 4 mốc — đổ vào khung step xen kẽ trái/phải có sẵn, mỗi
+// mốc một chương + một poster game, thay cho khối prose dài liền mạch.
 const OPERATING_STEPS = [
   {
-    title: 'Sản phẩm',
-    copy: 'Hiểu vòng chơi, điểm mạnh và rào cản bản địa trước khi lập kế hoạch phát hành.',
+    title: 'Khởi đầu năm 2026',
+    copy: 'Blackhole Game được thành lập vào năm 2026, nhưng câu chuyện của chúng tôi không bắt đầu từ đó. Trước khi Blackhole ra đời, đội ngũ của chúng tôi đã có nhiều năm làm việc và tích lũy kinh nghiệm thực tế thông qua 3C Game — phát hành, vận hành cộng đồng và phát triển sản phẩm cho thị trường Việt Nam. Trong hành trình ấy, Võ Lâm Truyền Kỳ 2 trở thành một dấu mốc đáng nhớ, không chỉ bởi con số tăng trưởng, mà bởi cộng đồng người chơi được xây dựng và duy trì qua nhiều năm.',
     image: '/assets/img/landing-page/list_game_doc/VLTK2.png',
     alt: 'Poster game Võ Lâm Truyền Kỳ 2',
   },
   {
-    title: 'Người chơi',
-    copy: 'Đọc hành vi, thói quen chi trả, kênh cộng đồng và lý do người chơi quyết định thử game.',
+    title: 'Bài học từ thực chiến',
+    copy: 'Chính những trải nghiệm đó giúp chúng tôi hiểu rằng một tựa game thành công không đơn thuần được quyết định bởi chất lượng sản phẩm hay ngân sách marketing. Đằng sau sự phát triển bền vững của mỗi trò chơi là cả một hệ thống vận hành được xây dựng cẩn trọng — từ thấu hiểu người chơi địa phương, xây dựng cộng đồng, tối ưu doanh thu cho đến giải quyết các bài toán thanh toán và tuân thủ pháp lý.',
     image: '/assets/img/landing-page/list_game_doc/tieu-ngao-giang-ho.png',
     alt: 'Poster game Tiếu Ngạo Giang Hồ',
   },
   {
-    title: 'Cộng đồng',
-    copy: 'Kết nối bang hội, nhà sáng tạo nội dung, sự kiện và các điểm hẹn để cộng đồng có nhịp quay lại.',
+    title: 'Khoảng trống của thị trường',
+    copy: 'Chúng tôi nhận ra ngày càng nhiều studio quốc tế sở hữu những sản phẩm tuyệt vời nhưng vẫn gặp khó khăn khi tiếp cận các thị trường mới. Không phải vì sản phẩm của họ chưa đủ tốt, mà bởi mỗi thị trường đều có những đặc điểm riêng cần được thấu hiểu và vận hành đúng cách.',
     image: '/assets/img/landing-page/list_game_doc/kiem-the.png',
     alt: 'Poster game Kiếm Thế',
   },
   {
-    title: 'Vận hành',
-    copy: 'Theo dõi phản hồi, hỗ trợ người chơi, cập nhật nội dung và giữ sản phẩm không mất nhiệt sau ngày ra mắt.',
+    title: 'Lời giải Blackhole',
+    copy: 'Đó là lý do Blackhole Game được tạo nên — không chỉ với vai trò một nhà phát hành, mà với khát vọng xây dựng một hệ sinh thái tăng trưởng cho ngành game, nơi năng lực vận hành, thanh toán và pháp lý được kết nối trong một nền tảng thống nhất, giúp các studio tập trung vào điều họ làm tốt nhất: tạo ra những tựa game tuyệt vời.',
     image: '/assets/img/landing-page/list_game_doc/con-duong-to-lua.png',
     alt: 'Poster game Con Đường Tơ Lụa',
   },
@@ -491,33 +493,6 @@ export default function AboutPage() {
             <h2>Câu chuyện của chúng tôi.</h2>
           </div>
 
-          <div className="ab2-story-prose ab2-reveal">
-            <p>
-              Blackhole Game được thành lập vào năm 2026, nhưng câu chuyện của chúng tôi không bắt đầu từ đó.
-            </p>
-            <p>
-              Trước khi Blackhole ra đời, đội ngũ của chúng tôi đã có nhiều năm làm việc và tích lũy kinh nghiệm thực tế thông qua 3C Game, nơi chúng tôi tham gia phát hành, vận hành cộng đồng và phát triển sản phẩm dành cho thị trường Việt Nam. Trong hành trình ấy, Võ Lâm Truyền Kỳ 2 đã trở thành một trong những dấu mốc đáng nhớ, không chỉ bởi những con số tăng trưởng, mà bởi cộng đồng người chơi đã được xây dựng và duy trì qua nhiều năm.
-            </p>
-            <p>
-              Chính những trải nghiệm thực tế đó giúp chúng tôi hiểu rằng, một tựa game thành công không đơn thuần được quyết định bởi chất lượng sản phẩm hay ngân sách marketing. Đằng sau sự phát triển bền vững của mỗi trò chơi là cả một hệ thống vận hành được xây dựng cẩn trọng, từ khả năng thấu hiểu người chơi địa phương, xây dựng cộng đồng, tối ưu doanh thu cho đến việc giải quyết các bài toán thanh toán và tuân thủ pháp lý.
-            </p>
-            <p>
-              Chúng tôi cũng nhận ra rằng ngày càng nhiều studio quốc tế sở hữu những sản phẩm tuyệt vời nhưng vẫn gặp khó khăn khi tiếp cận các thị trường mới. Không phải vì sản phẩm của họ chưa đủ tốt, mà bởi mỗi thị trường đều có những đặc điểm riêng cần được thấu hiểu và vận hành đúng cách.
-            </p>
-            <p className="ab2-prose-accent">Đó là lý do Blackhole Game được tạo nên.</p>
-            <p>
-              Không chỉ với vai trò của một nhà phát hành, mà với khát vọng xây dựng một hệ sinh thái tăng trưởng dành cho ngành game — nơi năng lực vận hành, thanh toán và pháp lý được kết nối trong một nền tảng thống nhất, giúp các studio tập trung vào điều họ làm tốt nhất: tạo ra những tựa game tuyệt vời.
-            </p>
-            <p>
-              Chúng tôi tin rằng những sản phẩm vĩ đại xứng đáng có cơ hội chạm tới đúng cộng đồng người chơi, được phát triển bền vững và tiếp tục tạo ra giá trị trong nhiều năm.
-            </p>
-            <p className="ab2-prose-accent">Đó cũng là lý do Blackhole Game tồn tại.</p>
-            <p className="ab2-prose-signoff">
-              You Build Great Games.<br />
-              We Build Sustainable Growth.
-            </p>
-          </div>
-
           <div className="ab2-story-layout">
             <div className="ab2-story-list">
               {OPERATING_STEPS.map((step, index) => (
@@ -533,6 +508,18 @@ export default function AboutPage() {
                 </article>
               ))}
             </div>
+          </div>
+
+          <div className="ab2-story-coda ab2-reveal">
+            <p className="ab2-prose-accent">Đó là lý do Blackhole Game được tạo nên.</p>
+            <p>
+              Chúng tôi tin rằng những sản phẩm vĩ đại xứng đáng có cơ hội chạm tới đúng cộng đồng người chơi, được phát triển bền vững và tiếp tục tạo ra giá trị trong nhiều năm.
+            </p>
+            <p className="ab2-prose-accent">Đó cũng là lý do Blackhole Game tồn tại.</p>
+            <p className="ab2-prose-signoff">
+              You Build Great Games.<br />
+              We Build Sustainable Growth.
+            </p>
           </div>
         </section>
 
@@ -1067,19 +1054,25 @@ export default function AboutPage() {
           text-transform: uppercase;
         }
 
-        /* Long-form OUR STORY prose: a comfortable single reading column. */
-        .ab2-story-prose {
-          width: min(100%, 760px);
-          margin: clamp(30px, 4vw, 46px) 0 0;
+        /* OUR STORY closing block: the two "Đó là lý do…" beats + sign-off,
+           centred under the 4-step timeline. The long body now lives inside the
+           timeline steps, so this is short by design. */
+        .ab2-story-coda {
+          width: min(100%, 720px);
+          margin: clamp(56px, 8vw, 104px) auto 0;
+          padding-top: clamp(40px, 5vw, 64px);
+          border-top: 1px solid rgba(194, 180, 255, 0.18);
+          text-align: center;
         }
 
-        .ab2-story-prose p {
+        .ab2-story-coda p {
           color: rgba(255, 255, 255, 0.8);
           font-size: clamp(1rem, 1.05vw, 1.12rem);
           line-height: 1.82;
+          text-align: center;
         }
 
-        .ab2-story-prose p + p {
+        .ab2-story-coda p + p {
           margin-top: 20px;
         }
 
@@ -1091,13 +1084,11 @@ export default function AboutPage() {
         }
 
         .ab2-prose-signoff {
-          margin-top: clamp(28px, 3.4vw, 40px) !important;
-          padding-top: clamp(22px, 2.6vw, 32px);
-          border-top: 1px solid rgba(194, 180, 255, 0.22);
+          margin-top: clamp(30px, 3.8vw, 46px) !important;
           font-family: var(--font-title-extra, Arial, sans-serif) !important;
           font-weight: 900 !important;
           font-size: clamp(1.5rem, 2.6vw, 2.4rem) !important;
-          line-height: 1.18 !important;
+          line-height: 1.22 !important;
           background: linear-gradient(120deg, var(--ab2-accent), var(--ab2-accent-strong));
           -webkit-background-clip: text;
           background-clip: text;
@@ -1214,13 +1205,17 @@ export default function AboutPage() {
 
         .ab2-step-copy h3 {
           margin-bottom: 16px;
-          font-size: clamp(2.35rem, 4.8vw, 4.8rem);
-          line-height: 0.98;
+          /* Titles are short phrases now (e.g. "Khoảng trống của thị trường"),
+             not single words — sized down so they sit on 1–2 lines, not huge. */
+          font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+          line-height: 1.08;
+          text-wrap: balance;
         }
 
         .ab2-step-copy p {
-          max-width: 48ch;
-          font-size: 1.04rem;
+          max-width: 54ch;
+          font-size: 1.02rem;
+          line-height: 1.74;
         }
 
         .ab2-step-inline-media {
@@ -1812,9 +1807,10 @@ export default function AboutPage() {
             line-height: 1.7;
           }
 
-          .ab2-story-prose {
+          .ab2-story-coda {
             width: 100%;
-            margin-top: 26px;
+            margin-top: 48px;
+            padding-top: 32px;
           }
 
           .ab2-story-head h2,
@@ -1878,7 +1874,7 @@ export default function AboutPage() {
           }
 
           .ab2-step-copy h3 {
-            font-size: clamp(2rem, 13vw, 3rem);
+            font-size: clamp(1.5rem, 6.5vw, 2.1rem);
           }
 
           .ab2-proof-grid {
