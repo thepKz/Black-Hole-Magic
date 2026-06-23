@@ -1646,17 +1646,22 @@ export default function AboutPage() {
         }
 
         /* Câu dẫn — tuyên ngôn lớn nhất, là điểm neo đọc đầu tiên. Đo dòng hẹp để
-           ép xuống 2–3 dòng thành một khối headline, không trải dài thành caption. */
+           ép xuống 2–3 dòng thành một khối headline, không trải dài thành caption.
+           Highlight bằng gradient tím accent của trang để bật lên như tuyên ngôn. */
         .ab2-philosophy-lead {
           margin: 0;
           max-width: 22ch;
-          color: #f4f1ff;
           font-family: var(--font-title-extra, Arial, sans-serif);
           font-weight: 900;
           font-size: clamp(2.4rem, 4.4vw, 4.2rem);
           line-height: 1.04;
           letter-spacing: -0.015em;
           text-wrap: balance;
+          background: linear-gradient(116deg, var(--ab2-accent-strong) 12%, var(--ab2-accent) 88%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent;
         }
 
         /* Phần thân — văn xuôi căn trái, font body, thoáng, đo dòng dễ đọc. */
