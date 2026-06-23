@@ -429,7 +429,8 @@ export default function HeroSection7() {
               fontWeight: 600,
               letterSpacing: '3px',
               textTransform: 'uppercase',
-              color: 'var(--bh-purple)',
+              color: '#C6BBFF',
+              textShadow: '0 0 14px rgba(108,92,231,0.55)',
               marginBottom: '28px',
               textAlign: 'center',
             }}>
@@ -450,8 +451,8 @@ export default function HeroSection7() {
           }
 
           .hero-scroll-spacer {
-            height: 120vh;
-            height: 120dvh;
+            height: 145vh;
+            height: 145dvh;
           }
 
           .home-scroll-content {

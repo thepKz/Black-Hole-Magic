@@ -11,37 +11,41 @@ type Card = {
   text: string;
   name: string;
   role?: string;
-  avatar: string;
 };
 
 const CARDS: Card[] = [
   {
-    text: 'Cách tiếp cận dựa trên dữ liệu của Blackhole đã giúp chiến dịch của chúng tôi vượt xa kỳ vọng.',
-    name: 'Publisher Quốc tế',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
+    text: 'Điều chúng tôi đánh giá cao ở Blackhole là khả năng phản hồi nhanh và cách đội ngũ luôn chủ động giải quyết vấn đề trong quá trình vận hành.',
+    name: 'Đối tác phát triển sản phẩm',
   },
   {
-    text: 'Quy trình bản địa hóa và pháp lý được thực hiện nhanh hơn dự kiến, giúp dự án ra mắt đúng thời điểm.',
-    name: 'Studio Hàn Quốc',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+    text: 'Blackhole hiểu người chơi Việt Nam nhiều hơn việc đơn thuần dịch ngôn ngữ. Họ hiểu cách xây dựng cộng đồng và duy trì sự gắn kết với sản phẩm.',
+    name: 'Đối tác phát hành',
   },
   {
-    text: 'Mọi báo cáo đều minh bạch và tập trung vào hiệu quả thực tế.',
-    name: 'Marketing Director',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
+    text: 'Quy trình làm việc rõ ràng, báo cáo minh bạch và luôn tập trung vào hiệu quả thực tế thay vì những chỉ số mang tính hình thức.',
+    name: 'Đối tác Marketing',
   },
   {
-    text: 'Khả năng xây dựng cộng đồng của Blackhole tạo nên giá trị dài hạn cho sản phẩm.',
-    name: 'Community Partner',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face',
+    text: 'Điều khiến chúng tôi yên tâm là Blackhole luôn nhìn sản phẩm theo góc độ dài hạn, thay vì chỉ tập trung vào giai đoạn ra mắt.',
+    name: 'Đối tác vận hành',
+  },
+  {
+    text: 'Mỗi dự án đều có những thách thức riêng, nhưng tinh thần đồng hành và sự linh hoạt của đội ngũ Blackhole luôn tạo ra sự khác biệt.',
+    name: 'Đối tác chiến lược',
+  },
+  {
+    text: 'Điều khiến chúng tôi tiếp tục đồng hành cùng Blackhole không chỉ là kết quả, mà còn là tinh thần trách nhiệm và sự cam kết đối với sản phẩm.',
+    name: 'X Legend Studio',
+    role: 'CEO',
   },
 ];
 
 const CARD_HEIGHT = 270;
 const GAP = 20;
 const col1 = CARDS.slice(0, 2);
-const col2 = CARDS.slice(2, 3);
-const col3 = CARDS.slice(3, 4);
+const col2 = CARDS.slice(2, 4);
+const col3 = CARDS.slice(4, 6);
 
 function ScrollWords({ children }: { children: string }) {
   return (
@@ -76,7 +80,7 @@ function Column({ cards, duration, delay = 0, reverse = false }: { cards: Card[]
             <span className="tst-card-line" aria-hidden="true" />
             <p>&ldquo;{card.text}&rdquo;</p>
             <div className="tst-author">
-              <img src={card.avatar} alt={card.name} loading="lazy" />
+              <span className="tst-author-mark" aria-hidden="true" />
               <div>
                 <strong>{card.name}</strong>
                 {card.role ? <span>{card.role}</span> : null}
@@ -180,7 +184,7 @@ export default function TestimonialSection7() {
           <div className="tst-title-block">
           
             <h2 id="tst-title" className="tst-scroll-text">
-              <ScrollWords>06. KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI</ScrollWords>
+              <ScrollWords>KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI</ScrollWords>
             </h2>
           </div>
 
@@ -481,14 +485,13 @@ export default function TestimonialSection7() {
           margin-top: auto;
         }
 
-        .tst-author img {
-          width: 38px;
-          height: 38px;
+        .tst-author-mark {
+          width: 3px;
+          height: 30px;
           flex: 0 0 auto;
-          object-fit: cover;
-          border-radius: 50%;
-          border: 1px solid rgba(139, 122, 232, 0.42);
-          filter: saturate(0.82);
+          border-radius: 999px;
+          background: linear-gradient(180deg, rgba(139, 122, 232, 0.85), rgba(0, 206, 201, 0.4));
+          box-shadow: 0 0 14px rgba(139, 122, 232, 0.4);
         }
 
         .tst-author strong,

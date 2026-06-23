@@ -45,36 +45,37 @@ const OPERATING_STEPS = [
   },
 ];
 
-const PROOF_ITEMS = [
-  {
-    title: 'Võ Lâm Truyền Kỳ 2',
-    copy: 'Một sản phẩm kiếm hiệp cần được đọc bằng thói quen bang hội, chiến trường và cộng đồng lâu năm.',
-    image: '/assets/img/landing-page/game/VLTK.png',
-    alt: 'Key art Võ Lâm Truyền Kỳ 2',
-    aspect: 'landscape',
-  },
-  {
-    title: 'Thiên Long Bát Bộ',
-    copy: 'Danh mục nhiều nền tảng đòi hỏi thông điệp, lịch ra mắt và hỗ trợ người chơi thống nhất.',
-    image: '/assets/img/landing-page/game/thien-long-bat-bo.png',
-    alt: 'Key art Thiên Long Bát Bộ',
-    aspect: 'landscape',
-  },
-  {
-    title: 'Tru Tiên',
-    copy: 'Poster dọc được giữ đúng tỉ lệ để hình ảnh không bị cắt sai hoặc mất trọng tâm.',
-    image: '/assets/img/landing-page/list_game_doc/tru-tien.png',
-    alt: 'Poster game Tru Tiên',
-    aspect: 'portrait',
-  },
-  {
-    title: 'Con Đường Tơ Lụa',
-    copy: 'Sản phẩm có vòng lặp cộng đồng riêng cần cách vận hành riêng, không dùng một mẫu chung cho mọi game.',
-    image: '/assets/img/landing-page/game/con-duong-to-lua.png',
-    alt: 'Key art Con Đường Tơ Lụa',
-    aspect: 'landscape',
-  },
-];
+// PROOF_ITEMS tạm ẩn cùng section "Bằng chứng" — bỏ comment để dùng lại
+// const PROOF_ITEMS = [
+//   {
+//     title: 'Võ Lâm Truyền Kỳ 2',
+//     copy: 'Một sản phẩm kiếm hiệp cần được đọc bằng thói quen bang hội, chiến trường và cộng đồng lâu năm.',
+//     image: '/assets/img/landing-page/game/VLTK.png',
+//     alt: 'Key art Võ Lâm Truyền Kỳ 2',
+//     aspect: 'landscape',
+//   },
+//   {
+//     title: 'Thiên Long Bát Bộ',
+//     copy: 'Danh mục nhiều nền tảng đòi hỏi thông điệp, lịch ra mắt và hỗ trợ người chơi thống nhất.',
+//     image: '/assets/img/landing-page/game/thien-long-bat-bo.png',
+//     alt: 'Key art Thiên Long Bát Bộ',
+//     aspect: 'landscape',
+//   },
+//   {
+//     title: 'Tru Tiên',
+//     copy: 'Poster dọc được giữ đúng tỉ lệ để hình ảnh không bị cắt sai hoặc mất trọng tâm.',
+//     image: '/assets/img/landing-page/list_game_doc/tru-tien.png',
+//     alt: 'Poster game Tru Tiên',
+//     aspect: 'portrait',
+//   },
+//   {
+//     title: 'Con Đường Tơ Lụa',
+//     copy: 'Sản phẩm có vòng lặp cộng đồng riêng cần cách vận hành riêng, không dùng một mẫu chung cho mọi game.',
+//     image: '/assets/img/landing-page/game/con-duong-to-lua.png',
+//     alt: 'Key art Con Đường Tơ Lụa',
+//     aspect: 'landscape',
+//   },
+// ];
 
 const TEAM_CAPABILITIES = [
   {
@@ -106,6 +107,63 @@ const TEAM_CAPABILITIES = [
     ],
   },
 ];
+
+// 03. NĂNG LỰC VẬN HÀNH — 6 năng lực cốt lõi, đổ vào lưới glass card 3×2.
+const OPERATING_CAPABILITIES = [
+  {
+    title: 'Vận hành sản phẩm',
+    copy: 'Xây dựng và phát triển sản phẩm theo mô hình LiveOps, tối ưu trải nghiệm và vòng đời người chơi.',
+  },
+  {
+    title: 'Tối ưu sản phẩm',
+    copy: 'Triển khai hoạt động tăng trưởng, tối ưu chi phí và hiệu quả ở từng giai đoạn của sản phẩm.',
+  },
+  {
+    title: 'Xây dựng cộng đồng',
+    copy: 'Tạo dựng cộng đồng người chơi trung thành và duy trì sự gắn kết lâu dài với sản phẩm.',
+  },
+  {
+    title: 'Việt Hóa',
+    copy: 'Điều chỉnh nội dung, hoạt động và trải nghiệm phù hợp với thị trường Việt Nam.',
+  },
+  {
+    title: 'Tối ưu doanh thu',
+    copy: 'Nâng cao giá trị vòng đời người chơi thông qua hệ thống vận hành và thanh toán phù hợp.',
+  },
+  {
+    title: 'Pháp Lý',
+    copy: 'Đảm bảo sản phẩm đáp ứng các quy định và giảm thiểu rủi ro trong quá trình phát hành.',
+  },
+];
+
+// 04. HỆ SINH THÁI BLACKHOLE — 3 trụ cột dịch vụ, mỗi trụ một pillar card cao.
+const ECOSYSTEM_PILLARS = [
+  {
+    name: 'Blackhole Publishing',
+    copy: 'Đảm nhận toàn bộ quá trình phát hành và vận hành sản phẩm, từ bản địa hóa, xây dựng cộng đồng, phát triển người chơi cho đến các hoạt động LiveOps nhằm duy trì vòng đời lâu dài của sản phẩm.',
+  },
+  {
+    name: 'Blackhole Pay',
+    copy: 'Cung cấp giải pháp thanh toán nhanh chóng, hiệu quả cho đối tác. Đề xuất giải pháp kết nối phù hợp với thị hiếu sử dụng tại Việt Nam.',
+  },
+  {
+    name: 'Blackhole Legal',
+    copy: 'Đồng hành cùng đối tác trong các vấn đề pháp lý, cấp phép và tuân thủ quy định, giúp sản phẩm tiếp cận thị trường một cách thuận lợi và an toàn hơn.',
+  },
+];
+
+// 05. TRIẾT LÝ HỢP TÁC — pull-quote, mỗi dòng là một nhịp đọc riêng.
+// 05. TRIẾT LÝ HỢP TÁC — chia theo nhịp đọc: 1 câu dẫn lớn (lead), phần thân
+// chạy như văn xuôi cho dễ đọc, và 1 câu ký tên (signoff) nhẹ hơn ở cuối.
+const PHILOSOPHY = {
+  lead: 'Chúng tôi không xem mình là một đơn vị cung cấp dịch vụ.',
+  body: [
+    'Blackhole luôn mong muốn trở thành một phần trong hành trình phát triển của mỗi sản phẩm.',
+    'Sự minh bạch, hiệu quả và niềm tin là nền tảng cho mọi mối quan hệ hợp tác.',
+    'Chúng tôi tin rằng thành công bền vững chỉ có thể được xây dựng khi nhà phát triển, nhà phát hành và cộng đồng cùng hướng tới một mục tiêu chung.',
+  ],
+  signoff: 'Đó cũng là cách Blackhole lựa chọn và đồng hành cùng các đối tác của mình.',
+};
 
 function PortalVideoSources() {
   return (
@@ -523,6 +581,69 @@ export default function AboutPage() {
           </div>
         </section>
 
+        <section className="ab2-capabilities" aria-label="Năng lực vận hành của BlackHole">
+          <div className="ab2-capabilities-head ab2-reveal">
+            <span className="ab2-note-label">03. Năng lực vận hành</span>
+            <h2>Khả năng thực thi.</h2>
+            <p>
+              Blackhole được xây dựng từ kinh nghiệm vận hành thực tế. Chúng tôi tập trung vào những năng lực cốt lõi giúp sản phẩm phát triển bền vững và tạo ra giá trị dài hạn.
+            </p>
+          </div>
+
+          <div className="ab2-capabilities-grid">
+            {OPERATING_CAPABILITIES.map((capability, index) => (
+              <article className="ab2-cap-card ab2-reveal" key={capability.title}>
+                <span className="ab2-cap-index">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{capability.title}</h3>
+                <p>{capability.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="ab2-ecosystem" aria-label="Hệ sinh thái BlackHole">
+          <div className="ab2-ecosystem-head ab2-reveal">
+            <span className="ab2-note-label">04. Hệ sinh thái BlackHole</span>
+            <h2>Một hệ sinh thái đồng hành.</h2>
+            <p>
+              Blackhole được xây dựng với mục tiêu trở thành một hệ sinh thái đồng hành cùng sản phẩm, từ giai đoạn chuẩn bị phát hành cho đến quá trình vận hành lâu dài.
+            </p>
+          </div>
+
+          <div className="ab2-ecosystem-grid">
+            {ECOSYSTEM_PILLARS.map((pillar, index) => (
+              <article className="ab2-pillar-card ab2-reveal" key={pillar.name}>
+                <span className="ab2-pillar-index">{String(index + 1).padStart(2, '0')}</span>
+                <h3>{pillar.name}</h3>
+                <p>{pillar.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="ab2-philosophy" aria-label="Triết lý hợp tác của BlackHole">
+          <div className="ab2-philosophy-inner">
+            <div className="ab2-philosophy-aside ab2-reveal">
+              <span className="ab2-philosophy-eyebrow">05 — Triết lý hợp tác</span>
+              <span className="ab2-philosophy-mark" aria-hidden="true">&ldquo;</span>
+            </div>
+
+            <blockquote className="ab2-philosophy-quote ab2-reveal">
+              <p className="ab2-philosophy-lead">{PHILOSOPHY.lead}</p>
+              <div className="ab2-philosophy-body">
+                {PHILOSOPHY.body.map((line, i) => (
+                  <p key={i}>{line}</p>
+                ))}
+              </div>
+              <footer className="ab2-philosophy-signoff">
+                <span className="ab2-philosophy-rule" aria-hidden="true" />
+                <span>{PHILOSOPHY.signoff}</span>
+              </footer>
+            </blockquote>
+          </div>
+        </section>
+
+        {/* Section "Bằng chứng" tạm ẩn theo yêu cầu — bỏ comment để hiển thị lại
         <section className="ab2-proof-gallery" aria-label="Danh mục game làm bằng chứng năng lực">
           <div className="ab2-proof-head ab2-reveal">
             <h2>Bằng chứng nằm trong cách game được giữ đúng nhịp.</h2>
@@ -543,10 +664,11 @@ export default function AboutPage() {
             ))}
           </div>
         </section>
+        */}
 
         <section className="ab2-capability-map" aria-label="Điều gì khiến BlackHole khác biệt">
           <div className="ab2-capability-head ab2-reveal">
-            <span className="ab2-note-label">Điều gì khiến BlackHole khác biệt</span>
+            <span className="ab2-note-label">06. Điều gì khiến BlackHole khác biệt</span>
             <h2>Khác biệt nằm ở cách chúng tôi làm.</h2>
           </div>
 
@@ -913,6 +1035,9 @@ export default function AboutPage() {
         .ab2-manifesto,
         .ab2-scroll-story,
         .ab2-proof-gallery,
+        .ab2-capabilities,
+        .ab2-ecosystem,
+        .ab2-philosophy,
         .ab2-capability-map,
         .ab2-final-contact {
           width: min(100%, 1360px);
@@ -1098,12 +1223,16 @@ export default function AboutPage() {
 
         .ab2-story-head,
         .ab2-proof-head,
+        .ab2-capabilities-head,
+        .ab2-ecosystem-head,
         .ab2-capability-head {
           max-width: 820px;
         }
 
         .ab2-story-head h2,
         .ab2-proof-head h2,
+        .ab2-capabilities-head h2,
+        .ab2-ecosystem-head h2,
         .ab2-capability-head h2,
         .ab2-final-contact h2 {
           max-width: 13ch;
@@ -1114,6 +1243,8 @@ export default function AboutPage() {
 
         .ab2-story-head p,
         .ab2-proof-head p,
+        .ab2-capabilities-head p,
+        .ab2-ecosystem-head p,
         .ab2-capability-head p,
         .ab2-final-contact p {
           margin-top: 22px;
@@ -1305,6 +1436,277 @@ export default function AboutPage() {
           font-weight: 500;
           font-size: 0.95rem;
           line-height: 1.65;
+        }
+
+        /* 03. NĂNG LỰC VẬN HÀNH — lưới 6 glass card, mỗi card một năng lực. */
+        .ab2-capabilities {
+          padding-top: clamp(80px, 10vh, 132px);
+          padding-bottom: clamp(80px, 11vh, 140px);
+        }
+
+        .ab2-capabilities-grid {
+          margin-top: clamp(44px, 6vw, 74px);
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(16px, 1.6vw, 24px);
+        }
+
+        .ab2-cap-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          min-height: 248px;
+          padding: clamp(26px, 2.6vw, 36px);
+          border-radius: var(--ab2-radius);
+          border: 1px solid var(--ab2-line);
+          background: var(--ab2-panel);
+          overflow: hidden;
+          transition: transform 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+        }
+
+        .ab2-cap-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse 120% 90% at 0% 0%, rgba(159, 140, 255, 0.14), transparent 62%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          pointer-events: none;
+        }
+
+        .ab2-cap-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(194, 180, 255, 0.4);
+          background: var(--ab2-panel-strong);
+        }
+
+        .ab2-cap-card:hover::before {
+          opacity: 1;
+        }
+
+        .ab2-cap-index {
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          font-size: 1.05rem;
+          letter-spacing: 0.08em;
+          background: linear-gradient(120deg, var(--ab2-accent), var(--ab2-accent-strong));
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent;
+        }
+
+        .ab2-cap-card h3 {
+          font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+          line-height: 1.16;
+          text-wrap: balance;
+        }
+
+        .ab2-cap-card p {
+          font-size: 0.98rem;
+          line-height: 1.66;
+        }
+
+        /* 04. HỆ SINH THÁI — 3 pillar card cao, nhỉnh hơn glass card ở mục 03. */
+        .ab2-ecosystem {
+          padding-top: clamp(80px, 10vh, 132px);
+          padding-bottom: clamp(80px, 11vh, 140px);
+        }
+
+        .ab2-ecosystem-grid {
+          margin-top: clamp(44px, 6vw, 74px);
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: clamp(18px, 2vw, 28px);
+        }
+
+        .ab2-pillar-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+          min-height: 360px;
+          padding: clamp(30px, 3vw, 44px);
+          border-radius: 14px;
+          border: 1px solid rgba(194, 180, 255, 0.26);
+          background:
+            linear-gradient(180deg, rgba(28, 18, 58, 0.5), rgba(14, 10, 30, 0.86));
+          box-shadow: 0 30px 70px rgba(8, 6, 20, 0.45);
+          overflow: hidden;
+          isolation: isolate;
+          transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+
+        .ab2-pillar-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          background: radial-gradient(ellipse 90% 70% at 50% -10%, rgba(159, 140, 255, 0.22), transparent 64%);
+          opacity: 0.7;
+          transition: opacity 0.4s ease;
+        }
+
+        .ab2-pillar-card::after {
+          content: '';
+          position: absolute;
+          left: clamp(30px, 3vw, 44px);
+          right: clamp(30px, 3vw, 44px);
+          top: calc(clamp(30px, 3vw, 44px) + 1.6em);
+          height: 1px;
+          background: linear-gradient(90deg, rgba(194, 180, 255, 0.5), transparent);
+        }
+
+        .ab2-pillar-card:hover {
+          transform: translateY(-6px);
+          border-color: rgba(194, 180, 255, 0.5);
+        }
+
+        .ab2-pillar-card:hover::before {
+          opacity: 1;
+        }
+
+        .ab2-pillar-index {
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          font-size: 1.15rem;
+          letter-spacing: 0.08em;
+          color: var(--ab2-accent-strong);
+        }
+
+        .ab2-pillar-card h3 {
+          font-size: clamp(1.5rem, 2vw, 1.95rem);
+          line-height: 1.14;
+          text-wrap: balance;
+        }
+
+        .ab2-pillar-card p {
+          margin-top: auto;
+          font-size: 1rem;
+          line-height: 1.72;
+        }
+
+        /* 05. TRIẾT LÝ HỢP TÁC — pull-quote kiểu editorial, bố cục lệch trái: cột
+           trái là dấu ngoặc kép khổng lồ làm neo thị giác + eyebrow; cột phải là
+           nội dung căn trái trong một cột đọc có kiểm soát. Không còn text trôi
+           giữa trang. */
+        .ab2-philosophy {
+          padding-top: clamp(96px, 13vh, 168px);
+          padding-bottom: clamp(96px, 13vh, 168px);
+          position: relative;
+          isolation: isolate;
+        }
+
+        .ab2-philosophy-inner {
+          position: relative;
+          width: min(100%, 1180px);
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr);
+          gap: clamp(24px, 5vw, 80px);
+          align-items: start;
+        }
+
+        /* Cột trái: eyebrow + dấu ngoặc kép như một khối typographic lớn. */
+        .ab2-philosophy-aside {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(10px, 1.4vw, 18px);
+          padding-top: 0.2em;
+        }
+
+        .ab2-philosophy-eyebrow {
+          color: var(--ab2-accent-strong);
+          font-family: var(--font-subtitle-krafting, Arial, sans-serif);
+          font-size: 0.82rem;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .ab2-philosophy-mark {
+          display: block;
+          font-family: 'Georgia', 'Times New Roman', serif;
+          font-weight: 700;
+          font-size: clamp(7rem, 16vw, 16rem);
+          line-height: 0.72;
+          background: linear-gradient(160deg, var(--ab2-accent-strong), rgba(159, 140, 255, 0.18));
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          color: transparent;
+          user-select: none;
+        }
+
+        .ab2-philosophy-quote {
+          margin: 0;
+          max-width: 60ch;
+        }
+
+        /* Câu dẫn — tuyên ngôn lớn nhất, là điểm neo đọc đầu tiên. Đo dòng hẹp để
+           ép xuống 2–3 dòng thành một khối headline, không trải dài thành caption. */
+        .ab2-philosophy-lead {
+          margin: 0;
+          max-width: 22ch;
+          color: #f4f1ff;
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          font-size: clamp(2.4rem, 4.4vw, 4.2rem);
+          line-height: 1.04;
+          letter-spacing: -0.015em;
+          text-wrap: balance;
+        }
+
+        /* Phần thân — văn xuôi căn trái, font body, thoáng, đo dòng dễ đọc. */
+        .ab2-philosophy-body {
+          margin-top: clamp(34px, 4vw, 56px);
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 1.4vw, 22px);
+        }
+
+        .ab2-philosophy-body p {
+          margin: 0;
+          max-width: 56ch;
+          color: rgba(255, 255, 255, 0.8);
+          font-family: 'Chakra Petch', var(--font-body-regular, Arial, sans-serif);
+          font-weight: 500;
+          font-size: clamp(1.02rem, 1.15vw, 1.2rem);
+          line-height: 1.85;
+          text-align: left;
+          text-wrap: pretty;
+        }
+
+        /* Phần thân lớn dần ở câu đầu để dẫn nhịp xuống prose nhỏ hơn. */
+        .ab2-philosophy-body p:first-child {
+          color: rgba(255, 255, 255, 0.92);
+          font-size: clamp(1.12rem, 1.35vw, 1.4rem);
+          line-height: 1.66;
+        }
+
+        /* Câu ký tên — dòng attribution có gạch accent dẫn vào, nhịp đóng rõ ràng. */
+        .ab2-philosophy-signoff {
+          display: flex;
+          align-items: baseline;
+          gap: 16px;
+          margin-top: clamp(36px, 4vw, 56px);
+          color: var(--ab2-accent-strong);
+          font-family: var(--font-title-extra, Arial, sans-serif);
+          font-weight: 900;
+          font-size: clamp(1.15rem, 1.55vw, 1.5rem);
+          line-height: 1.34;
+          text-wrap: balance;
+        }
+
+        .ab2-philosophy-rule {
+          flex: 0 0 auto;
+          width: clamp(28px, 3vw, 52px);
+          height: 2px;
+          margin-top: 0.7em;
+          border-radius: 2px;
+          background: linear-gradient(90deg, var(--ab2-accent-strong), transparent);
         }
 
         .ab2-capability-map {
@@ -1625,6 +2027,37 @@ export default function AboutPage() {
 
           .ab2-capability-item:nth-child(3) {
             border-left: 0;
+          }
+
+          .ab2-capabilities-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .ab2-ecosystem-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-pillar-card {
+            min-height: 0;
+          }
+
+          .ab2-pillar-card p {
+            margin-top: 14px;
+          }
+
+          .ab2-philosophy-inner {
+            grid-template-columns: 1fr;
+            gap: clamp(8px, 2vw, 20px);
+          }
+
+          .ab2-philosophy-aside {
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            gap: 4px;
+          }
+
+          .ab2-philosophy-mark {
+            font-size: clamp(5rem, 22vw, 8rem);
           }
 
           .ab2-actions {
@@ -1951,9 +2384,19 @@ export default function AboutPage() {
 
           .ab2-story-head h2,
           .ab2-proof-head h2,
+          .ab2-capabilities-head h2,
+          .ab2-ecosystem-head h2,
           .ab2-capability-head h2,
           .ab2-final-contact h2 {
             max-width: 12ch;
+          }
+
+          .ab2-capabilities-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .ab2-cap-card {
+            min-height: 0;
           }
         }
 
@@ -1962,6 +2405,8 @@ export default function AboutPage() {
           .ab2-reveal,
           .ab2-step-copy,
           .ab2-proof-card,
+          .ab2-cap-card,
+          .ab2-pillar-card,
           .ab2-capability-item,
           .ab2-content-backdrop {
             opacity: 1 !important;
