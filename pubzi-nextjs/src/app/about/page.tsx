@@ -1653,7 +1653,7 @@ export default function AboutPage() {
           max-width: 22ch;
           font-family: var(--font-title-extra, Arial, sans-serif);
           font-weight: 900;
-          font-size: clamp(2.4rem, 4.4vw, 4.2rem);
+          font-size: clamp(2.9rem, 5.4vw, 5.1rem);
           line-height: 1.04;
           letter-spacing: -0.015em;
           text-wrap: balance;
@@ -1703,6 +1703,13 @@ export default function AboutPage() {
           font-size: clamp(1.15rem, 1.55vw, 1.5rem);
           line-height: 1.34;
           text-wrap: balance;
+        }
+
+        /* Bỏ nền tối khi bôi đen — highlight chọn dịu theo accent thay vì hộp đen. */
+        .ab2-philosophy-signoff ::selection,
+        .ab2-philosophy-signoff::selection {
+          background: rgba(194, 180, 255, 0.18);
+          color: var(--ab2-accent-strong);
         }
 
         .ab2-philosophy-rule {
