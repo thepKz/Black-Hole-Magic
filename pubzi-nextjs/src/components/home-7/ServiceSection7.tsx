@@ -19,7 +19,7 @@ const VALUES = [
   },
   {
     num: '03',
-    title: 'ROI LÀ TRỌNG TÂM',
+    title: 'LỢI NHUẬN LÀ TRỌNG TÂM',
     body: 'Mọi quyết định đều được đo lường bằng hiệu quả thực tế. Tối ưu ROI và LTV là ngôn ngữ chung giữa Blackhole và đối tác.',
   },
   {
