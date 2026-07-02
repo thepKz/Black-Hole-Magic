@@ -60,16 +60,22 @@ export default function ContactPage() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.classList.remove('ct-pending');
+      return;
+    }
 
     const ctx = gsap.context(() => {
       // Hero: a quick, gentle entrance only — title lines rise, the rest just fades.
       // Keep it short so nothing important is hidden for long.
-      gsap.set('.ct-hero-eyebrow, .ct-hero-sub, .ct-hero-channels', { autoAlpha: 0, y: 12 });
+      gsap.set('.ct-hero-eyebrow, .ct-hero-title, .ct-hero-sub, .ct-hero-channels', {
+        autoAlpha: 0,
+        y: 12,
+      });
+      root.classList.remove('ct-pending');
       gsap.timeline({ delay: 0.05 })
         .to('.ct-hero-eyebrow', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-        .fromTo('.ct-hero-title .ct-line span', { yPercent: 115 },
-          { yPercent: 0, duration: 0.85, stagger: 0.1, ease: 'power4.out' }, '-=0.25')
+        .to('.ct-hero-title', { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power2.out' }, '-=0.2')
         .to('.ct-hero-sub', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.4')
         .to('.ct-hero-channels', { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35');
 
@@ -101,7 +107,7 @@ export default function ContactPage() {
   }, []);
 
   return (
-    <div className="ct-root" ref={rootRef}>
+    <div className="ct-root ct-pending" ref={rootRef}>
 
       {/* ══ HERO ════════════════════════════════════════════════════════════ */}
       <section className="ct-hero">
@@ -337,13 +343,16 @@ export default function ContactPage() {
         .ct-bc-sep { color: rgba(139, 122, 232, 0.4); }
         .ct-bc-current { color: var(--ct-purple-bright); }
         .ct-hero-title {
-          font-family: var(--font-title-extra, 'Chakra Petch', sans-serif);
-          font-weight: 900; font-size: clamp(40px, 6.4vw, 88px); line-height: 1.02; letter-spacing: -0.02em;
-          margin: 0 0 24px; color: #fff;
+          font-family: 'Chakra Petch', var(--font-title-extra), sans-serif;
+          font-weight: 800; font-size: clamp(40px, 6vw, 82px); line-height: 1.08; letter-spacing: 0;
+          margin: 0 0 24px; color: #f6f2ff;
+          text-shadow: none;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: geometricPrecision;
         }
-        .ct-hero-title .ct-line { display: block; overflow: hidden; padding-bottom: 0.05em; }
+        .ct-hero-title .ct-line { display: block; overflow: visible; padding-bottom: 0.02em; }
         .ct-hero-title .ct-line span { display: block; }
-        .ct-hero-title .ct-line-accent span { color: var(--ct-purple-bright); text-shadow: 0 0 40px rgba(139, 122, 232, 0.5); }
+        .ct-hero-title .ct-line-accent span { color: #d8cffd; text-shadow: none; }
         .ct-hero-sub {
           font-size: clamp(15px, 1.4vw, 18px); line-height: 1.8; color: var(--ct-text-soft);
           max-width: 56ch; margin: 0 0 44px; transform: translateY(16px);
@@ -510,8 +519,24 @@ export default function ContactPage() {
           .ct-hero-channels { grid-template-columns: 1fr; }
           .ct-form { grid-template-columns: 1fr; }
         }
+        .ct-root.ct-pending .ct-hero-eyebrow,
+        .ct-root.ct-pending .ct-hero-title,
+        .ct-root.ct-pending .ct-hero-sub,
+        .ct-root.ct-pending .ct-hero-channels {
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(12px);
+          animation: ct-pending-reveal 0s linear 1.2s forwards;
+        }
+        @keyframes ct-pending-reveal {
+          to {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
-          .ct-hero-eyebrow, .ct-hero-sub, .ct-hero-channels, .ct-form-wrap, .ct-reason, .ct-map { opacity: 1 !important; visibility: visible !important; transform: none !important; }
+          .ct-hero-eyebrow, .ct-hero-title, .ct-hero-sub, .ct-hero-channels, .ct-form-wrap, .ct-reason, .ct-map { opacity: 1 !important; visibility: visible !important; transform: none !important; }
           .ct-hero-title .ct-line span { transform: none !important; }
         }
       `}</style>

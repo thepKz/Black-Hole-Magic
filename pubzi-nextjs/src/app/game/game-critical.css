@@ -151,14 +151,15 @@
   max-width: 11.5ch;
   margin: 0;
   color: #f7f4ff !important;
-  font-family: var(--font-title-extra, "Chakra Petch", sans-serif);
-  font-size: clamp(42px, 5.55vw, 82px);
-  font-weight: 900;
-  line-height: 1.02;
+  font-family: "Chakra Petch", var(--font-title-extra), sans-serif;
+  font-size: clamp(42px, 5.2vw, 76px);
+  font-weight: 800;
+  line-height: 1.08;
   letter-spacing: 0;
   background: transparent !important;
-  -webkit-text-fill-color: #f7f4ff !important;
   text-shadow: none !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 .gm-hero-title span {
@@ -167,7 +168,6 @@
 
 .gm-hero-title span:last-child {
   color: #d4c7ff !important;
-  -webkit-text-fill-color: #d4c7ff !important;
 }
 
 .gm-hero-sub {

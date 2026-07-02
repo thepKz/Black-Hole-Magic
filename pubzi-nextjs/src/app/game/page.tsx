@@ -198,11 +198,6 @@ export default function GamePage() {
           // Drifting starfield in the hero background: keep the first viewport
           // already visible, then add motion once GSAP has loaded.
           gsap.utils.toArray<HTMLElement>('.gm-star').forEach((star) => {
-            gsap.set(star, {
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              scale: 0.5 + Math.random() * 1.1,
-            });
             gsap.to(star, {
               x: () => (Math.random() - 0.5) * 80,
               y: () => (Math.random() - 0.5) * 80,
@@ -341,7 +336,16 @@ export default function GamePage() {
         <div className="gm-hero-grid" aria-hidden="true" />
         <div className="gm-hero-stars" aria-hidden="true">
           {Array.from({ length: 26 }).map((_, i) => (
-            <span key={i} className="gm-star" />
+            <span
+              key={i}
+              className="gm-star"
+              style={{
+                left: `${(11 + i * 37) % 100}%`,
+                top: `${(17 + i * 53) % 100}%`,
+                opacity: 0.18 + ((i * 7) % 6) * 0.055,
+                transform: `scale(${0.58 + ((i * 5) % 9) * 0.11})`,
+              }}
+            />
           ))}
         </div>
 
@@ -678,13 +682,17 @@ export default function GamePage() {
           text-transform: none;
           color: #f7f4ff !important;
           background: transparent !important;
-          -webkit-text-fill-color: #f7f4ff !important;
           text-shadow: none !important;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: geometricPrecision;
         }
 
         .gm-hero-title {
           max-width: 11.5ch;
-          font-size: clamp(42px, 5.55vw, 82px);
+          font-family: 'Chakra Petch', var(--font-title-extra), sans-serif;
+          font-size: clamp(42px, 5.2vw, 76px);
+          font-weight: 800;
+          line-height: 1.08;
         }
 
         .gm-hero-title span {
@@ -693,7 +701,6 @@ export default function GamePage() {
 
         .gm-hero-title span:last-child {
           color: #d4c7ff !important;
-          -webkit-text-fill-color: #d4c7ff !important;
         }
 
         .gm-hero-sub,

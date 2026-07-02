@@ -20,7 +20,7 @@ import { mount3DTuningPanel } from '../shared/use3DTuningPanel';
 // pointer delta to the page-coord position (the page doesn't move during a
 // pointer-captured drag, so viewport delta == page delta).
 //
-// The box is a small render target moved by left/top; the 3D model fills it and
+// The box is a small render target moved by transform; the 3D model fills it and
 // tumbles gently on 3 axes ("floating in space"). Physics live in refs - never
 // React state - so dragging causes zero re-renders. On release it stays put
 // (no inertia, by design).
@@ -174,8 +174,7 @@ export default function GameCompanion3D() {
 
     const applyTransform = () => {
       clampBottomHard();
-      root.style.left = `${pos.current.x}px`;
-      root.style.top = `${pos.current.y}px`;
+      root.style.transform = `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)`;
       revealSecretIfNeeded();
     };
 
@@ -681,8 +680,11 @@ export default function GameCompanion3D() {
         // The page/footer height can change when content settles → re-clamp Y
         // so a dropped companion never ends up stuck off-page.
         rootResize = new ResizeObserver(() => {
-          if (!homeLocked) recenterHome();
-          else {
+          if (!homeLocked && !placementReady) recenterHome();
+          else if (!homeLocked) {
+            clampHard();
+            applyTransform();
+          } else {
             clampHard();
             idleAnchor.current.y = Math.min(Math.max(EDGE_PAD, idleAnchor.current.y), maxY());
             applyTransform();
