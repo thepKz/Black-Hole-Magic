@@ -1,0 +1,125 @@
+---
+description: I18n strategy and coding rules for the Black Hole Magic Next.js site
+globs:
+  - "pubzi-nextjs/src/**/*.{ts,tsx}"
+  - "pubzi-nextjs/src/app/**/*.{ts,tsx}"
+  - "pubzi-nextjs/src/components/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# I18n Rules For Black Hole Magic
+
+Vai trò khi áp dụng rule này: senior engineer 20 năm, ưu tiên KISS, YAGNI, DRY. Không biến i18n thành một cuộc refactor toàn site nếu task không yêu cầu.
+
+## Brainstorm Nhanh
+
+Hiện trạng đã kiểm tra:
+
+- Project dùng Next.js App Router, `next` 16.2.7.
+- Chưa có dependency i18n trong `package.json`.
+- `src/app/layout.tsx` đang cố định `<html lang="vi">` và metadata một ngôn ngữ.
+- Text user-facing đang hard-code rải trong `src/app/**` và `src/components/**`, gồm header, offcanvas, footer, page data, form placeholder, `aria-label`, metadata, ngày tháng.
+- Next docs local tại `node_modules/next/dist/docs/01-app/02-guides/internationalization.md` khuyến nghị App Router dùng route segment `app/[lang]`, dictionary theo locale, `generateStaticParams`, và `proxy.ts` cho redirect locale.
+
+Các hướng khả thi:
+
+1. Native Next dictionary + locale subpath (`/vi`, `/en`)
+   - Ưu: ít dependency, hợp App Router, bundle client nhẹ nếu load dictionary ở Server Component.
+   - Nhược: phải tự làm helper link, typed keys, missing-key check.
+   - Phù hợp nhất cho site marketing/game hiện tại vì nội dung chủ yếu là page copy, CTA, card data.
+
+2. `next-intl`
+   - Ưu: DX tốt hơn cho plural, rich text, message formatting, client hooks.
+   - Nhược: thêm dependency và convention mới; chưa cần nếu chỉ có 2 locale và copy tĩnh.
+   - Chỉ chọn khi bắt đầu có nhiều dynamic messages, plural, format phức tạp, hoặc nhiều component client cần dịch trực tiếp.
+
+3. CMS/content layer đa ngôn ngữ
+   - Ưu: tốt cho đội content vận hành thường xuyên.
+   - Nhược: quá nặng cho giai đoạn hiện tại, thêm chi phí data model, preview, auth, migration.
+   - Chưa nên làm cho đến khi có nhu cầu biên tập không qua code.
+
+Khuyến nghị: dùng hướng 1. Chuẩn hóa `vi` là locale mặc định, thêm `en` là locale thứ hai. Dịch theo từng module, bắt đầu từ shell dùng chung trước, không dời toàn bộ route trong một commit lớn.
+
+## Architecture Rule
+
+- Locale source of truth phải nằm ở một module dùng chung, ví dụ `src/i18n/config.ts`.
+- Locale mặc định: `vi`.
+- Locale hỗ trợ ban đầu: `vi`, `en`.
+- Routing mục tiêu: `/{locale}/...`, ví dụ `/vi/about`, `/en/about`.
+- Root path `/` nên redirect sang locale mặc định hoặc locale match từ `Accept-Language` bằng `proxy.ts` theo Next 16 docs. Không tự dùng pattern `middleware.ts` nếu chưa verify lại với docs local của version đang cài.
+- Khi chuyển route, đặt page/layout đặc biệt dưới `src/app/[lang]/...` để Next truyền `lang` xuống layout/page.
+- `html lang` phải lấy từ route param, không hard-code `vi` sau khi i18n routing đã bật.
+
+## Dictionary Rule
+
+- Không hard-code user-facing text mới trong component/page.
+- Mọi copy hiển thị cho người dùng phải đi qua dictionary theo locale, gồm:
+  - heading, paragraph, CTA, nav label
+  - card data, status, tag, testimonial, FAQ, news metadata giả lập
+  - form label, placeholder, validation text
+  - `aria-label`, `alt`, `title`, empty-state, loading/error text
+  - page `metadata.title` và `metadata.description`
+- Không dùng câu tiếng Việt làm key. Dùng key ổn định theo domain:
+  - `common.nav.home`
+  - `home.hero.title`
+  - `game.cards.vltk2.hook`
+  - `contact.form.placeholder.email`
+- Brand name, product/game title chính thức, slug, file asset path, phone, email, URL không bắt buộc dịch nếu đó là proper noun hoặc dữ liệu định danh.
+- Dictionary tiếng Việt là bản canonical. Locale khác phải cùng shape key với `vi`.
+- Missing key không được fallback âm thầm trong UI quan trọng. Khi implement, cần có type/check để thiếu key bị phát hiện trong dev, lint, test hoặc build.
+
+## Server/Client Boundary
+
+- Ưu tiên load dictionary trong Server Component page/layout, sau đó truyền plain strings/object xuống Client Component.
+- Không import toàn bộ JSON dictionary vào Client Component nếu chỉ cần một subset nhỏ.
+- Component client dùng GSAP, jQuery, Three.js chỉ nên nhận copy đã được resolve; không để animation logic biết về locale.
+- Với data array đang nằm trong page như game list, ops steps, news cards: tách phần copy vào dictionary, giữ asset path/code/accent/href trong data config nếu các field đó không dịch.
+
+## Link And Route Rule
+
+- Trong UI đã locale hóa, không hard-code `href="/about"` cho internal links.
+- Dùng helper locale-aware, ví dụ concept `localizedHref(locale, "/about")`.
+- Link tới asset, mail, tel, external URL giữ nguyên.
+- Switch language phải preserve pathname tương đương nếu có thể: `/vi/game` -> `/en/game`.
+- Không đổi slug game/news nếu slug đó là định danh business đã ổn định, trừ khi task yêu cầu localized slug.
+
+## Formatting Rule
+
+- Ngày, số, tiền, phần trăm phải format bằng `Intl.DateTimeFormat`, `Intl.NumberFormat` theo locale.
+- Không viết cứng date dạng `"08 Tháng 6, 2025"` trong data mới.
+- Không nối chuỗi theo kiểu `"Trao đổi về " + title` cho câu cần dịch. Dùng template trong dictionary có placeholder rõ ràng.
+- Plural/rich text nếu bắt đầu nhiều hơn mức đơn giản thì cân nhắc `next-intl`; không tự viết mini ICU parser.
+
+## SEO And Accessibility Rule
+
+- Mỗi locale phải có metadata riêng.
+- Khi i18n route hoàn chỉnh, cân nhắc `alternates.languages` cho SEO.
+- `aria-label`, `alt`, visually hidden text phải được dịch như text thường.
+- `html lang` và any locale-specific metadata phải đúng locale hiện tại.
+
+## Migration Order
+
+1. Tạo `src/i18n/config.ts`, dictionary loader, và messages cho `vi`/`en`.
+2. Dịch shell dùng chung: Header, Offcanvas, Footer, BackToTop/search/menu labels.
+3. Dịch root layout metadata và chuẩn bị `html lang` lấy từ locale.
+4. Dịch từng route theo độ ưu tiên: home, game, about, contact, news, service, FAQ/gallery/match/pricing/team.
+5. Tách page data hard-code ra dictionary hoặc content map theo locale.
+6. Thêm locale-aware link helper và thay internal links trong UI.
+7. Thêm `proxy.ts` và route segment `[lang]` khi đã sẵn sàng đổi URL.
+8. Kiểm tra missing key, build/lint, và rà lại hard-coded user-facing text.
+
+## Guardrails
+
+- Không refactor animation, layout, CSS, asset pipeline khi task chỉ là i18n.
+- Không đổi brand voice khi dịch: tiếng Việt trực diện, game/publisher context; tiếng Anh business-friendly nhưng không sáo rỗng.
+- Không dịch code identifier, className, asset filename, route segment, import path.
+- Không sửa encoding lẻ tẻ bằng tay nếu thấy mojibake; phải xác định nguyên nhân file/terminal/encoding trước.
+- Mọi file text mới phải lưu UTF-8.
+
+## Validation Checklist
+
+- `npm run lint`
+- `npm run build` nếu task có đổi route/layout/dictionary loader.
+- Rà bằng `rg` cho các pattern hard-code phổ biến trong `src`: `aria-label=`, `placeholder=`, `title:`, `label:`, `text:`, `status:`, `ctaLabel:`.
+- Mở ít nhất `/vi` và `/en` của route được sửa, kiểm tra text, link, metadata, `html lang`.
+- Kiểm tra mobile vì tiếng Anh thường dài hơn tiếng Việt ở CTA/nav.

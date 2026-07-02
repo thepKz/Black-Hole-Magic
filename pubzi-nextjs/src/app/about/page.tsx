@@ -1697,12 +1697,20 @@ export default function AboutPage() {
           align-items: baseline;
           gap: 16px;
           margin-top: clamp(36px, 4vw, 56px);
+          padding: 0;
+          background: transparent !important;
+          box-shadow: none !important;
           color: var(--ab2-accent-strong);
           font-family: var(--font-title-extra, Arial, sans-serif);
           font-weight: 900;
           font-size: clamp(1.15rem, 1.55vw, 1.5rem);
           line-height: 1.34;
           text-wrap: balance;
+        }
+
+        .ab2-philosophy-signoff span {
+          background: transparent !important;
+          box-shadow: none !important;
         }
 
         /* Bỏ nền tối khi bôi đen — highlight chọn dịu theo accent thay vì hộp đen. */

@@ -11,6 +11,7 @@ import MouseCursor from "@/components/shared/MouseCursor";
 import SmoothScroll from "@/components/shared/SmoothScroll";
 import ScrollReset from "@/components/shared/ScrollReset";
 import ClientInit from "@/components/ClientInit";
+import LegacyI18n from "@/components/shared/LegacyI18n";
 
 export const metadata: Metadata = {
   title: "Black Hole - eSports and Gaming",
@@ -28,7 +29,8 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/assets/img/favicon.svg" />
         <script
           dangerouslySetInnerHTML={{
-            __html: "try{history.scrollRestoration='manual'}catch(e){}",
+            __html:
+              "try{history.scrollRestoration='manual';var l=location.pathname.split('/').filter(Boolean)[0];if(l==='vi'||l==='en')document.documentElement.lang=l}catch(e){}",
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,6 +48,7 @@ export default function RootLayout({
       <body>
         <SmoothScroll />
         <ScrollReset />
+        <LegacyI18n />
         <BackToTop />
         <MouseCursor />
         {children}

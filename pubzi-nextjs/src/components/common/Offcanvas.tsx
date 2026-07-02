@@ -2,20 +2,23 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { localeLabels, locales } from '@/i18n/config';
+import { useI18n } from '@/i18n/useI18n';
 
 interface OffcanvasProps {
   variant?: 'default' | 'style-2';
 }
 
 const NAV_LINKS = [
-  { href: '/', label: 'Trang chủ' },
-  { href: '/about', label: 'Về chúng tôi' },
-  { href: '/game', label: 'Danh sách game' },
-  { href: '/contact', label: 'Liên hệ' },
-];
+  { href: '/', key: 'home' },
+  { href: '/about', key: 'about' },
+  { href: '/game', key: 'game' },
+  { href: '/contact', key: 'contact' },
+] as const;
 
 export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
   const styleClass = variant === 'style-2' ? 'style-2' : '';
+  const { locale, messages, localizedPath, switchLocalePath } = useI18n();
   const closeOffcanvas = () => {
     document.querySelector('.offcanvas__info')?.classList.remove('info-open');
     document.querySelector('.offcanvas__overlay')?.classList.remove('overlay-open');
@@ -38,13 +41,13 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
             <div className="offcanvas__content">
               <div className="offcanvas__top mb-5 d-flex justify-content-between align-items-center">
                 <div className="offcanvas__logo">
-                  <Link href="/" prefetch={false} onClick={closeOffcanvas} className="offcanvas__brand">
+                  <Link href={localizedPath('/')} prefetch={false} onClick={closeOffcanvas} className="offcanvas__brand">
                     <img src="/assets/img/logo/white-logo-2.png" alt="BlackHole" />
                     <span>BlackHole</span>
                   </Link>
                 </div>
                 <div className="offcanvas__close">
-                  <button type="button" aria-label="Đóng menu" onClick={closeOffcanvas}>
+                  <button type="button" aria-label={messages.common.actions.closeMenu} onClick={closeOffcanvas}>
                     <i className="fas fa-times"></i>
                   </button>
                 </div>
@@ -53,8 +56,8 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                 <ul>
                   {NAV_LINKS.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} prefetch={false} onClick={closeOffcanvas}>
-                        {item.label}
+                      <Link href={localizedPath(item.href)} prefetch={false} onClick={closeOffcanvas}>
+                        {messages.common.nav[item.key]}
                         <i className="fas fa-arrow-right"></i>
                       </Link>
                     </li>
@@ -62,12 +65,26 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                 </ul>
               </nav>
 
-              <Link href="/contact" prefetch={false} className="offcanvas__cta" onClick={closeOffcanvas}>
-                Liên hệ ngay
+              <div className="offcanvas__lang" aria-label="Language switcher">
+                {locales.map((item) => (
+                  <Link
+                    key={item}
+                    href={switchLocalePath(item)}
+                    prefetch={false}
+                    className={item === locale ? 'is-active' : ''}
+                    onClick={closeOffcanvas}
+                  >
+                    {localeLabels[item]}
+                  </Link>
+                ))}
+              </div>
+
+              <Link href={localizedPath('/contact')} prefetch={false} className="offcanvas__cta" onClick={closeOffcanvas}>
+                {messages.common.actions.contactNow}
               </Link>
 
               <div className="offcanvas__contact">
-                <h4>Liên hệ</h4>
+                <h4>{messages.common.contact.heading}</h4>
                 <ul>
                   <li className="d-flex align-items-center">
                     <div className="offcanvas__contact-icon">
@@ -79,7 +96,7 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
                         rel="noreferrer"
                         href="https://www.google.com/maps/search/?api=1&query=S%E1%BB%91%20777%20Nguy%E1%BB%85n%20Thi%E1%BB%87n%20Thu%E1%BA%ADt%2C%20M%E1%BB%B9%20H%C3%A0o%2C%20H%C6%B0ng%20Y%C3%AAn"
                       >
-                        777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên
+                        {messages.common.contact.address}
                       </a>
                     </div>
                   </li>
@@ -157,6 +174,51 @@ export default function Offcanvas({ variant = 'default' }: OffcanvasProps) {
 
         .offcanvas__nav {
           margin-bottom: 28px;
+        }
+
+        .offcanvas__lang {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          margin-bottom: 14px;
+        }
+
+        .offcanvas__lang a {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 38px;
+          border: 1px solid rgba(155, 124, 255, 0.18);
+          color: rgba(243, 241, 255, 0.5) !important;
+          font-family: var(--font-subtitle-krafting, 'Chakra Petch', sans-serif);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-decoration: none;
+          background: rgba(20, 14, 40, 0.28);
+          transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .offcanvas__lang a.is-active {
+          color: #fff !important;
+          border-color: rgba(255, 255, 255, 0.78);
+          background: #6c5ce7;
+          box-shadow:
+            0 0 0 1px rgba(155, 124, 255, 0.36),
+            0 0 18px rgba(108, 92, 231, 0.62);
+        }
+
+        .offcanvas__lang a.is-active::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: 5px;
+          width: 4px;
+          height: 4px;
+          border-radius: 999px;
+          background: #fff;
+          transform: translateX(-50%);
         }
 
         .offcanvas__nav ul {

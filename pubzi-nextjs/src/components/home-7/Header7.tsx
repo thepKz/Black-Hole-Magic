@@ -3,21 +3,24 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { localeLabels, locales } from '@/i18n/config'
+import { useI18n } from '@/i18n/useI18n'
 
 const NAV = [
-  { href: '/', label: 'Trang chủ' },
-  { href: '/about', label: 'Về chúng tôi' },
-  { href: '/game', label: 'Danh sách game' },
-  { href: '/contact', label: 'Liên hệ' },
-]
+  { href: '/', key: 'home' },
+  { href: '/about', key: 'about' },
+  { href: '/game', key: 'game' },
+  { href: '/contact', key: 'contact' },
+] as const
 
 export default function Header7() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
+  const { locale, messages, localizedPath, switchLocalePath } = useI18n()
+  const cleanPathname = pathname.replace(/^\/(vi|en)(?=\/|$)/, '') || '/'
 
-  // "/" chỉ active khi đúng trang chủ; các mục khác active khi pathname bắt đầu bằng href
   const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href)
+    href === '/' ? cleanPathname === '/' : cleanPathname.startsWith(href)
 
   const openOffcanvas = () => {
     document.querySelector('.offcanvas__info')?.classList.add('info-open')
@@ -55,7 +58,7 @@ export default function Header7() {
           <div className="mega-menu-wrapper">
             <div className="header-main">
               <div className="logo">
-                <Link href="/" prefetch={false} className="header-logo" aria-label="BlackHole Game">
+                <Link href={localizedPath('/')} prefetch={false} className="header-logo" aria-label="BlackHole Game">
                   <img src="/assets/img/logo/white-logo-2.png" alt="logo-img" />
                   <span className="header-wordmark">BlackHole</span>
                 </Link>
@@ -66,7 +69,7 @@ export default function Header7() {
                     <ul>
                       {NAV.map((item) => (
                         <li key={item.href} className={isActive(item.href) ? 'active' : ''}>
-                          <Link href={item.href} prefetch={false}>{item.label}</Link>
+                          <Link href={localizedPath(item.href)} prefetch={false}>{messages.common.nav[item.key]}</Link>
                         </li>
                       ))}
                     </ul>
@@ -79,12 +82,25 @@ export default function Header7() {
                     <i className="fa-regular fa-magnifying-glass"></i>
                   </a>
                   <div className="header-button">
-                    <Link href="/contact" prefetch={false} className="header-electric-btn">
-                      Liên hệ
+                    <Link href={localizedPath('/contact')} prefetch={false} className="header-electric-btn">
+                      {messages.common.actions.contact}
                     </Link>
                   </div>
+                  <div className="header-lang-switcher" aria-label="Language switcher">
+                    {locales.map((item) => (
+                      <Link
+                        key={item}
+                        href={switchLocalePath(item)}
+                        prefetch={false}
+                        className={item === locale ? 'is-active' : ''}
+                        aria-label={`Switch to ${item}`}
+                      >
+                        {localeLabels[item]}
+                      </Link>
+                    ))}
+                  </div>
                   <div className="header__hamburger bh-burger my-auto">
-                    <button type="button" className="sidebar__toggle" aria-label="Mở menu" onClick={openOffcanvas}>
+                    <button type="button" className="sidebar__toggle" aria-label={messages.common.actions.openMenu} onClick={openOffcanvas}>
                       <span className="bh-burger-bars" aria-hidden="true">
                         <span></span>
                         <span></span>
@@ -104,8 +120,8 @@ export default function Header7() {
         <div className="search-popup__overlay search-toggler"></div>
         <div className="search-popup__content">
           <form role="search" method="get" className="search-popup__form" action="#">
-            <input type="text" id="search" name="search" placeholder="Tìm trận đấu, đội tuyển, tin tức..." />
-            <button type="submit" aria-label="gửi tìm kiếm" className="search-btn">
+            <input type="text" id="search" name="search" placeholder={messages.common.search.placeholder} />
+            <button type="submit" aria-label={messages.common.actions.submitSearch} className="search-btn">
               <span><i className="fa-regular fa-magnifying-glass"></i></span>
             </button>
           </form>
@@ -269,6 +285,55 @@ export default function Header7() {
 
         #header-sticky.bh-header .header-right-icon {
           gap: 16px !important;
+        }
+
+        #header-sticky .header-lang-switcher {
+          display: inline-flex;
+          align-items: center;
+          gap: 2px;
+          padding: 2px;
+          height: 34px;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          background: rgba(7, 5, 16, 0.78);
+          box-shadow: inset 0 0 0 1px rgba(155, 124, 255, 0.12);
+        }
+
+        #header-sticky .header-lang-switcher a {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 34px;
+          height: 28px;
+          padding: 0 8px;
+          color: rgba(229, 226, 255, 0.48) !important;
+          font-family: var(--font-subtitle-krafting);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          text-decoration: none;
+          background: transparent;
+          transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #header-sticky .header-lang-switcher a.is-active {
+          color: #ffffff !important;
+          background: #6c5ce7;
+          box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.78),
+            0 0 16px rgba(108, 92, 231, 0.68);
+        }
+
+        #header-sticky .header-lang-switcher a.is-active::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: 3px;
+          width: 4px;
+          height: 4px;
+          border-radius: 999px;
+          background: #ffffff;
+          transform: translateX(-50%);
         }
 
         #header-sticky.bh-header .sidebar__toggle img {
@@ -694,7 +759,8 @@ export default function Header7() {
 
           #header-sticky .header-electric-btn,
           #header-sticky .header-live-pill,
-          #header-sticky .main-header__search {
+          #header-sticky .main-header__search,
+          #header-sticky .header-lang-switcher {
             display: none !important;
           }
 

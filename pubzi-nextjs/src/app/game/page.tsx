@@ -1,6 +1,7 @@
 'use client';
 
 import GameCompanion3D from '@/components/game/GameCompanion3D';
+import { useI18n } from '@/i18n/useI18n';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, type CSSProperties } from 'react';
@@ -27,7 +28,7 @@ type Game = {
   // forWho: helps the player self-identify ("this game is for someone like me").
   forWho: string;
   status: string;
-  details: string[];
+  details: readonly string[];
   accent: string;
   ctaLabel: string;
   ctaHref: string;
@@ -121,25 +122,6 @@ const GAMES: Game[] = [
   },
 ];
 
-const OPS_STEPS = [
-  {
-    label: 'Chọn game',
-    text: 'Đọc cộng đồng, thể loại, nền tảng và khả năng vận hành lâu dài trước khi đưa vào catalog.',
-  },
-  {
-    label: 'Định vị ra mắt',
-    text: 'Tách rõ game đang vận hành, game sắp mở và nhóm cần truyền thông trước launch.',
-  },
-  {
-    label: 'Vận hành nội địa',
-    text: 'Theo dõi nhịp sự kiện, cộng đồng, phản hồi người chơi và kênh hỗ trợ tại Việt Nam.',
-  },
-  {
-    label: 'Mở rộng vòng đời',
-    text: 'Giữ game sống bằng nội dung, chiến dịch, cộng đồng và lịch cập nhật có nhịp.',
-  },
-];
-
 function PlatformIcon({ platform }: { platform: Game['platform'] }) {
   if (platform === 'Mobile') return <Smartphone size={17} strokeWidth={1.8} aria-hidden="true" />;
   if (platform === 'PC & Mobile') return <Layers3 size={17} strokeWidth={1.8} aria-hidden="true" />;
@@ -152,6 +134,14 @@ function accentStyle(game: Game): CSSProperties {
 
 export default function GamePage() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const { messages, localizedPath } = useI18n();
+  const pageCopy = messages.gamePage;
+  const games = GAMES.map((game) => ({
+    ...game,
+    ...pageCopy.games[game.code as keyof typeof pageCopy.games],
+  }));
+  const opsSteps = pageCopy.opsSteps;
+
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -358,30 +348,27 @@ export default function GamePage() {
         <div className="gm-hero-inner">
           <div className="gm-hero-copy">
             <h1 className="gm-hero-title">
-              <span>Bước qua cổng,</span>
-              <span>chọn thế giới của bạn</span>
+              <span>{pageCopy.hero.title1}</span>
+              <span>{pageCopy.hero.title2}</span>
             </h1>
-            <p className="gm-hero-sub">
-              Mỗi tựa game được chọn vì có cộng đồng, nhịp vận hành và câu chuyện riêng.
-              Black Hole dựng bối cảnh để người chơi muốn ở lại.
-            </p>
-            <div className="gm-hero-facts" aria-label="Thông tin catalog">
+            <p className="gm-hero-sub">{pageCopy.hero.subtitle}</p>
+            <div className="gm-hero-facts" aria-label={pageCopy.hero.factsLabel}>
               <span>
                 <Gamepad2 size={18} strokeWidth={1.8} aria-hidden="true" />
-                {GAMES.length} tựa game
+                {games.length} {pageCopy.hero.gameCount}
               </span>
               <span>
                 <Layers3 size={18} strokeWidth={1.8} aria-hidden="true" />
-                PC và Mobile
+                {pageCopy.hero.platforms}
               </span>
               <span>
                 <ShieldCheck size={18} strokeWidth={1.8} aria-hidden="true" />
-                Vận hành nội địa
+                {pageCopy.hero.localOps}
               </span>
             </div>
             <div className="gm-hero-actions">
               <a href="#showcase" className="gm-link gm-link-lg">
-                Xem các thế giới
+                {pageCopy.hero.cta}
                 <ArrowUpRight size={18} strokeWidth={1.8} aria-hidden="true" />
               </a>
             </div>
@@ -395,11 +382,11 @@ export default function GamePage() {
       </section>
 
 
-      <section id="showcase" className="gm-showcase" aria-label="Danh sách game Black Hole">
+      <section id="showcase" className="gm-showcase" aria-label={pageCopy.showcaseLabel}>
         <div className="gm-showcase-track">
-          {GAMES.map((game, index) => (
+          {games.map((game, index) => (
             <article className="gm-panel" key={game.code} style={accentStyle(game)}>
-              <Link href={game.ctaHref} prefetch={false} className="gm-panel-card" aria-label={`Trao đổi về ${game.title}`}>
+              <Link href={localizedPath(game.ctaHref)} prefetch={false} className="gm-panel-card" aria-label={`${pageCopy.cardCtaPrefix} ${game.title}`}>
                 <div className={`gm-panel-visual ${game.backdropSource === 'portrait' ? 'is-portrait-source' : ''}`}>
                   <Image src={game.backdrop} alt={game.title} fill sizes="(max-width: 767px) 92vw, (max-width: 1199px) 46vw, 760px" />
                   <span className="gm-panel-shade" aria-hidden="true" />
@@ -420,7 +407,7 @@ export default function GamePage() {
                   <div className="gm-panel-info-bottom">
                     <p className="gm-panel-genre">{game.genre}</p>
                     <span className="gm-panel-open">
-                      Trao đổi
+                      {pageCopy.cardCta}
                       <ArrowUpRight size={16} strokeWidth={1.8} aria-hidden="true" />
                     </span>
                   </div>
@@ -433,19 +420,16 @@ export default function GamePage() {
 
 
 
-      <section className="gm-ops" aria-label="Cách Black Hole vận hành danh mục game">
+      <section className="gm-ops" aria-label={pageCopy.opsLabel}>
   <div className="gm-ops-inner">
     <div className="gm-ops-copy">
-      <p className="gm-mini-label">Vận hành danh mục game</p>
-      <h2>Không chỉ đưa game lên kệ.</h2>
-      <p>      
-        Với đối tác phát hành, điều quan trọng hơn là thấy rõ Black Hole giới thiệu game ra thị trường,
-        theo dõi hiệu quả và giữ nhịp vận hành ổn định sau khi ra mắt.
-      </p>
+      <p className="gm-mini-label">{pageCopy.opsKicker}</p>
+      <h2>{pageCopy.opsTitle}</h2>
+      <p>{pageCopy.opsBody}</p>
     </div>
 
     <div className="gm-ops-grid">
-      {OPS_STEPS.map((step, index) => (
+      {opsSteps.map((step, index) => (
         <div className="gm-ops-step" key={step.label}>
           <span>{String(index + 1).padStart(2, '0')}</span>
           <strong>{step.label}</strong>
@@ -461,13 +445,11 @@ export default function GamePage() {
           <Image src={partnerBackdrop} alt="" fill sizes="100vw" />
         </div>
         <div className="gm-cta-copy">
-          <p className="gm-mini-label">Đối tác phát hành</p>
-          <h2>Có game cần bước vào thị trường Việt?</h2>
-          <p>
-            Black Hole hỗ trợ bản địa hóa, vận hành cộng đồng, chiến dịch ra mắt và kênh phân phối cho game PC lẫn Mobile.
-          </p>
-          <Link href="/contact" prefetch={false} className="gm-link gm-link-lg">
-            Bắt đầu trao đổi
+          <p className="gm-mini-label">{pageCopy.partnerKicker}</p>
+          <h2>{pageCopy.partnerTitle}</h2>
+          <p>{pageCopy.partnerBody}</p>
+          <Link href={localizedPath('/contact')} prefetch={false} className="gm-link gm-link-lg">
+            {pageCopy.partnerCta}
             <ArrowUpRight size={18} strokeWidth={1.8} aria-hidden="true" />
           </Link>
         </div>
