@@ -216,6 +216,16 @@ export default function GameCompanion3D() {
       if (!placementReady || !modelReady) return;
       root.classList.add('is-ready');
     };
+    const showFallback = (reason: string, error?: unknown) => {
+      root.dataset.gmcStatus = `fallback:${reason}`;
+      setUseFallback(true);
+      modelReady = true;
+      reveal();
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`[GameCompanion3D] fallback:${reason}`, error);
+      }
+    };
     const markPlacementReady = () => {
       placementReady = true;
       reveal();
@@ -248,9 +258,7 @@ export default function GameCompanion3D() {
     // -- reduced motion: static fallback, no WebGL, non-interactive ------
     if (reduceMotion) {
       const frame = window.requestAnimationFrame(() => {
-        setUseFallback(true);
-        modelReady = true;
-        reveal();
+        showFallback('reduced-motion');
       });
       const onResizeRm = () => {
         applyBoxSize();
@@ -341,6 +349,20 @@ export default function GameCompanion3D() {
         );
         composer.addPass(bloomPass);
         composer.addPass(new OutputPass());
+        let renderFailed = false;
+        const renderScene = (reason: string) => {
+          if (renderFailed || disposed) return false;
+
+          try {
+            composer.render();
+            return true;
+          } catch (error) {
+            renderFailed = true;
+            stopLoop();
+            showFallback(reason, error);
+            return false;
+          }
+        };
 
         // Live tuning panel (dev / ?tune only) — wired after the model loads.
         let disposeTuning: (() => void) | null = null;
@@ -367,7 +389,7 @@ export default function GameCompanion3D() {
           composer.setSize(boxSize.current * dpr, boxSize.current * dpr);
           bloomPass.setSize(boxSize.current * dpr, boxSize.current * dpr);
           fitCamera();
-          composer.render();
+          return renderScene('resize-render-error');
         };
 
         // Soft elastic boundary, measured against the CURRENT VIEWPORT (not the
@@ -452,7 +474,7 @@ export default function GameCompanion3D() {
             modelGroup.rotation.z = Math.sin(phase * 0.5) * 0.05 + spin.current.x * 0.6;
           }
 
-          composer.render();
+          if (!renderScene('frame-render-error')) return;
           animationFrame = window.requestAnimationFrame(frame);
         };
 
@@ -684,7 +706,7 @@ export default function GameCompanion3D() {
         const onContextLost = (e: Event) => {
           e.preventDefault();
           stopLoop();
-          setUseFallback(true);
+          showFallback('webgl-context-lost', e);
         };
         canvas.addEventListener('webglcontextlost', onContextLost as EventListener);
 
@@ -696,6 +718,7 @@ export default function GameCompanion3D() {
           '/assets/img/home-7/3d/3d_9.glb',
           (gltf) => {
             if (disposed) return;
+            try {
             const model = gltf.scene;
             // Self-illumination feeding the bloom pass: emit from the base
             // texture (toneMapped=false keeps values HDR) so the character's
@@ -735,8 +758,10 @@ export default function GameCompanion3D() {
 
             modelGroup.add(model);
             fitCamera();
-            resizeRenderer();
+            if (!resizeRenderer() || disposed) return;
             startLoop();
+            setUseFallback(false);
+            root.dataset.gmcStatus = 'ready:webgl';
             modelReady = true;
             reveal();
 
@@ -756,13 +781,14 @@ export default function GameCompanion3D() {
               ],
               requestRender: () => {},
             });
+            } catch (error) {
+              if (!disposed) showFallback('gltf-setup-error', error);
+            }
           },
           undefined,
-          () => {
+          (error) => {
             if (disposed) return;
-            setUseFallback(true);
-            modelReady = true;
-            reveal();
+            showFallback('gltf-load-error', error);
           }
         );
 
@@ -796,11 +822,9 @@ export default function GameCompanion3D() {
           renderer.dispose();
           renderer.domElement.remove();
         };
-      } catch {
+      } catch (error) {
         if (!disposed) {
-          setUseFallback(true);
-          modelReady = true;
-          reveal();
+          showFallback('boot-error', error);
         }
       }
     };

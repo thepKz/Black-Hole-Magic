@@ -52,17 +52,20 @@ export default function ServiceSection7() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.values-kicker',
-        { autoAlpha: 0, y: 18 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: '.values-head', start: 'top 80%', toggleActions: 'play none none reverse' },
-        }
-      );
+      const kicker = section.querySelector<HTMLElement>('.values-kicker');
+      if (kicker) {
+        gsap.fromTo(
+          kicker,
+          { autoAlpha: 0, y: 18 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: '.values-head', start: 'top 80%', toggleActions: 'play none none reverse' },
+          }
+        );
+      }
 
       // Words light up as you scroll and reverse cleanly.
       gsap.utils.toArray<HTMLElement>('.values-title, .vrow-title, .vrow-body').forEach((el) => {
@@ -94,17 +97,21 @@ export default function ServiceSection7() {
       );
 
       gsap.utils.toArray<HTMLElement>('.vrow').forEach((row) => {
+        const line = row.querySelector('.vrow-line');
+        const num = row.querySelector('.vrow-num');
+        if (!line || !num) return;
+
         const tl = gsap.timeline({
           scrollTrigger: { trigger: row, start: 'top 82%', toggleActions: 'play none none reverse' },
         });
         // hairline + ghost number play once; the text itself is scrubbed above
         tl.fromTo(
-          row.querySelector('.vrow-line'),
+          line,
           { scaleX: 0 },
           { scaleX: 1, duration: 0.85, ease: 'power3.inOut' },
           0
         ).fromTo(
-          row.querySelector('.vrow-num'),
+          num,
           { yPercent: 55, autoAlpha: 0 },
           { yPercent: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out' },
           0.15

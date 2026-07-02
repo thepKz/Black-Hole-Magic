@@ -188,9 +188,20 @@ export default function GamePage() {
         ScrollTrigger.clearScrollMemory();
 
         ctx = gsap.context(() => {
-          gsap.set('.gm-showcase-head .gm-word', { opacity: 0.16, y: 12 });
+          const showcaseHead = root.querySelector<HTMLElement>('.gm-showcase-head');
+          const showcaseWords = showcaseHead
+            ? Array.from(showcaseHead.querySelectorAll<HTMLElement>('.gm-word'))
+            : [];
+          const ledgerRows = Array.from(root.querySelectorAll<HTMLElement>('.gm-ledger-row'));
+
+          if (showcaseWords.length) {
+            gsap.set(showcaseWords, { opacity: 0.16, y: 12 });
+          }
           gsap.set('.gm-panel', { autoAlpha: 0, y: 34, scale: 0.985 });
-          gsap.set('.gm-ledger-row, .gm-ops-step', { autoAlpha: 0, y: 24 });
+          if (ledgerRows.length) {
+            gsap.set(ledgerRows, { autoAlpha: 0, y: 24 });
+          }
+          gsap.set('.gm-ops-step', { autoAlpha: 0, y: 24 });
           gsap.set('.gm-cta-visual', { autoAlpha: 0, scale: 1.04 });
           gsap.set('.gm-cta-copy > *', { autoAlpha: 0, y: 30 });
 
@@ -233,18 +244,17 @@ export default function GamePage() {
             },
           });
 
-          gsap.to(
-            '.gm-showcase-head .gm-word',
-            {
+          if (showcaseHead && showcaseWords.length) {
+            gsap.to(showcaseWords, {
               opacity: 1,
               y: 0,
               duration: 0.54,
               stagger: 0.024,
               ease: 'power2.out',
               force3D: true,
-              scrollTrigger: { trigger: '.gm-showcase-head', start: 'top 76%', once: true },
-            }
-          );
+              scrollTrigger: { trigger: showcaseHead, start: 'top 76%', once: true },
+            });
+          }
 
           gsap.to('.gm-panel', {
             autoAlpha: 1,
@@ -257,15 +267,21 @@ export default function GamePage() {
             scrollTrigger: { trigger: '.gm-showcase', start: 'top 76%', once: true },
           });
 
-          gsap.to('.gm-ledger-row', {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.58,
-            stagger: 0.055,
-            ease: 'power3.out',
-            force3D: true,
-            scrollTrigger: { trigger: '.gm-ledger', start: 'top 74%', once: true },
-          });
+          if (ledgerRows.length) {
+            gsap.to(ledgerRows, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.58,
+              stagger: 0.055,
+              ease: 'power3.out',
+              force3D: true,
+              scrollTrigger: {
+                trigger: ledgerRows[0].closest('.gm-ledger') ?? ledgerRows[0],
+                start: 'top 74%',
+                once: true,
+              },
+            });
+          }
 
           gsap.to('.gm-ops-step', {
             autoAlpha: 1,
@@ -379,7 +395,7 @@ export default function GamePage() {
       </section>
 
 
-      <section className="gm-showcase" aria-label="Danh sách game Black Hole">
+      <section id="showcase" className="gm-showcase" aria-label="Danh sách game Black Hole">
         <div className="gm-showcase-track">
           {GAMES.map((game, index) => (
             <article className="gm-panel" key={game.code} style={accentStyle(game)}>
