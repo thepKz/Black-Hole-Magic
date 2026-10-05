@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
-import { adminOnly, anyone, authenticated } from '../access';
+import { adminOnly, anyone, editorOrAdmin } from '../access';
 import { slugField } from '../fields/slug';
 import { revalidateCollection } from '../hooks/revalidate';
 import { CACHE_TAGS } from '../lib/tags';
@@ -22,12 +22,16 @@ export const NewsCategories: CollectionConfig = {
     group: { vi: 'Nội dung', en: 'Content' },
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'order'],
+    description: {
+      vi: 'Nhóm tin hiển thị thành bộ lọc trên trang Tin tức. Chỉ Quản trị viên thêm / xoá (slug nằm trong URL); Biên tập viên có thể đổi tên.',
+      en: 'Groups shown as filters on the News page. Only admins add / delete (the slug is part of the URL); editors may rename.',
+    },
   },
   defaultSort: 'order',
   access: {
     read: anyone,
     create: adminOnly,
-    update: authenticated,
+    update: editorOrAdmin,
     delete: adminOnly,
   },
   hooks: revalidateCollection(CACHE_TAGS.newsCategories, CACHE_TAGS.news),
@@ -52,7 +56,10 @@ export const NewsCategories: CollectionConfig = {
       type: 'number',
       defaultValue: 0,
       label: { vi: 'Thứ tự', en: 'Order' },
-      admin: { position: 'sidebar' },
+      admin: {
+        position: 'sidebar',
+        description: { vi: 'Số nhỏ đứng trước.', en: 'Lower numbers come first.' },
+      },
     },
   ],
 };

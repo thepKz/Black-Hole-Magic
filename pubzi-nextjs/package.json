@@ -14,6 +14,7 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/cms/seed/index.ts",
     "seed:news": "cross-env NODE_OPTIONS=--no-deprecation payload run src/cms/seed/news.ts",
+    "seed:demo-post": "cross-env NODE_OPTIONS=--no-deprecation payload run src/cms/seed/demo-post.ts",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down"
   },

@@ -4,8 +4,7 @@ import { notFound } from 'next/navigation';
 import { GamesBrowser, type GamesBrowserItem } from '@site/components/games/GamesBrowser';
 import { Container } from '@site/components/ui/Container';
 import { GameCard } from '@site/components/ui/GameCard';
-import { SectionHeading } from '@site/components/ui/SectionHeading';
-import { genres as allGenres, getGames, getGenresWithCount } from '@site/data/games';
+import { genres as allGenres, getGameTagSlugs, getGames, getGenresWithCount } from '@site/data/games';
 import { absoluteUrl, getDictionary, href, isLocale, pick, type Locale } from '@site/i18n';
 import { breadcrumbList, buildMetadata, JsonLd, ORGANIZATION_ID, toAbsolute, type JsonLdObject } from '@site/lib/seo';
 
@@ -63,15 +62,31 @@ export default async function GamesPage({ params }: GamesPageProps) {
     slug: game.slug,
     name: game.name,
     keywords: game.code,
-    genres: game.genres,
-    // First row (up to 4 on desktop) is above the fold.
-    card: <GameCard game={game} locale={locale} preload={i === 0} headingLevel="h2" />,
+    // Genre + platform tag slugs, matched by the filter chips.
+    genres: getGameTagSlugs(game),
+    // Only the first cover is preloaded (LCP candidate); the rest lazy-load.
+    // A single published game gets the wide spotlight card instead of a lone grid cell.
+    card: (
+      <GameCard
+        game={game}
+        locale={locale}
+        preload={i === 0}
+        headingLevel="h2"
+        variant={games.length === 1 ? 'spotlight' : 'default'}
+      />
+    ),
   }));
 
   return (
     <main id="main" tabIndex={-1} className="section-b pt-8 outline-none md:pt-12">
       <Container>
-        <SectionHeading as="h1" kicker={t.gamesKicker} title={t.allGames} description={t.gamesSubtitle} />
+        {/* Design v2: kicker + 40px H1, no subtitle. */}
+        <header className="mb-6">
+          <p className="kicker">{t.gamesKicker}</p>
+          <h1 className="m-0 mt-1 text-[30px] tracking-[-0.02em] text-ink md:text-[36px] lg:text-[40px]">
+            {t.allGames}
+          </h1>
+        </header>
         <GamesBrowser
           items={items}
           genres={getGenresWithCount(locale)}

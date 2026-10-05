@@ -30,7 +30,7 @@ export function ServiceCard({ service, locale, headingLevel = 'h3', className }:
       )}
     >
       <div className="grid size-14 place-items-center rounded-xl bg-accent-50 text-accent shadow-[inset_0_0_0_1px_var(--color-accent-100)] sm:size-[72px]">
-        <Icon className="size-8 sm:size-10" weight="duotone" aria-hidden="true" />
+        <Icon className="size-8 sm:size-10" weight="regular" aria-hidden="true" />
       </div>
       <div className="flex flex-col gap-2">
         <Heading className="m-0 text-[17px] leading-[1.3] font-medium text-ink sm:text-[19px]">{pick(service.title, locale)}</Heading>

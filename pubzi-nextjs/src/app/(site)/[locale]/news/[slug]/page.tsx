@@ -1,8 +1,10 @@
 import { ArrowLeftIcon } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
-import { draftMode } from 'next/headers';
+import config from '@payload-config';
+import { draftMode, headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getPayload } from 'payload';
 import { cache } from 'react';
 
 import { lexicalHeadings, lexicalToPlainText } from '@/cms/lib/lexical';
@@ -43,11 +45,30 @@ export async function generateStaticParams({ params }: { params: { locale: strin
   return entries.filter((e) => e.locales.includes(locale)).map((e) => ({ slug: e.slug }));
 }
 
+/**
+ * Draft Mode alone is not trusted: its cookie outlives the admin session, so
+ * drafts are only served while a Payload user is still logged in (otherwise a
+ * shared machine would keep showing unpublished drafts after /admin logout).
+ * Cookies can't be cleared during render; the stale bypass cookie is simply
+ * ignored (it is cleared by /api/draft/exit, the banner's exit form).
+ */
+const isDraftViewer = cache(async (): Promise<boolean> => {
+  const { isEnabled } = await draftMode();
+  if (!isEnabled) return false;
+  try {
+    const payload = await getPayload({ config });
+    const { user } = await payload.auth({ headers: await headers() });
+    return Boolean(user);
+  } catch {
+    return false;
+  }
+});
+
 /** One fetch per request for metadata + page (draft reads are uncached). */
 const loadPost = cache(async (locale: Locale, slug: string) => {
-  const { isEnabled } = await draftMode();
-  const post = await getNewsBySlug(locale, slug, { draft: isEnabled, strict: true });
-  return { post, draft: isEnabled };
+  const draft = await isDraftViewer();
+  const post = await getNewsBySlug(locale, slug, { draft, strict: true });
+  return { post, draft };
 });
 
 export async function generateMetadata({ params }: PageProps<'/[locale]/news/[slug]'>): Promise<Metadata> {

@@ -7,6 +7,7 @@ import '@site/styles/site.css';
 import { Analytics } from '@site/components/analytics/Analytics';
 import { Footer } from '@site/components/layout/Footer';
 import { Header } from '@site/components/layout/Header';
+import { MotionObserver } from '@site/components/motion/MotionObserver';
 import { hasRecentNews } from '@site/lib/news';
 import { site, siteUrl } from '@site/data/site';
 import { getDictionary, htmlLang, isLocale, locales, ogLocale, pick } from '@site/i18n';
@@ -88,6 +89,7 @@ export default async function SiteRootLayout({ children, params }: LayoutProps<'
         <Footer locale={locale} />
         <JsonLd data={[organization(locale), website(locale)]} />
         <Analytics />
+        <MotionObserver />
       </body>
     </html>
   );

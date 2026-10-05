@@ -15,6 +15,7 @@ import {
   type MouseEvent,
   type PointerEvent,
   type ReactNode,
+  type SyntheticEvent,
 } from 'react';
 
 import { track } from '@site/components/analytics/track';
@@ -24,15 +25,21 @@ import styles from './BannerSlider.module.css';
 
 /** Autoplay interval (ms). */
 const DURATION = 6000;
+/** Cross-fade (ms) - keep in sync with --dur-4 (700ms) used on the layers. */
+const FADE = 700;
+/** Longest wait for the next image to decode before swapping anyway (ms). */
+const DECODE_TIMEOUT = 1200;
 /** Minimum horizontal travel (px) for a swipe. */
 const SWIPE_MIN = 48;
 const IMAGE_QUALITY = 85;
+/** Banner slot width: 1200px boxed (container-site), full width below. */
+const SIZES = '(min-width: 1248px) 1200px, calc(100vw - 32px)';
 
 export interface BannerSlideImage {
   src: string;
   width: number;
   height: number;
-  /** Focal point in % -> object-position. */
+  /** Focal point in % -> object-position (and Ken Burns origin). */
   focal?: { x: number; y: number };
 }
 
@@ -94,11 +101,19 @@ const serverTrue = () => true;
 
 const focalPosition = (focal?: { x: number; y: number }) => (focal ? `${focal.x}% ${focal.y}%` : '50% 50%');
 
+const wrap = (i: number, count: number) => ((i % count) + count) % count;
+
 /* ------------------------------------------------------------------------ */
 /* Slide image (single source, or <picture> when a mobile source exists)    */
 /* ------------------------------------------------------------------------ */
 
-function SlideImage({ slide, first }: { slide: BannerSlide; first: boolean }) {
+interface SlideImageProps {
+  slide: BannerSlide;
+  first: boolean;
+  onReady: (e: SyntheticEvent<HTMLImageElement>) => void;
+}
+
+function SlideImage({ slide, first, onReady }: SlideImageProps) {
   const { image, mobileImage, alt } = slide;
   const imgClass =
     'pointer-events-none absolute inset-0 size-full object-cover [object-position:var(--fp-m)] md:[object-position:var(--fp-d)]';
@@ -107,41 +122,39 @@ function SlideImage({ slide, first }: { slide: BannerSlide; first: boolean }) {
     '--fp-m': focalPosition(mobileImage?.focal ?? image.focal),
   } as CSSProperties;
 
+  // First slide = LCP: eager + fetchpriority="high" (Next 16 docs: prefer this
+  // over `preload`, which emits a priority-less <link> and can't be combined
+  // with fetchPriority). The <img> is in the SSR HTML, so it is discovered at
+  // once. Others are only mounted when they are next in line (see `mounted` in
+  // BannerSlider), then load at once with low priority so they never compete.
   if (!mobileImage) {
     return (
       <Image
         src={image.src}
         alt={alt}
         fill
-        sizes="100vw"
+        sizes={SIZES}
         quality={IMAGE_QUALITY}
-        preload={first}
+        loading="eager"
+        fetchPriority={first ? 'high' : 'low'}
+        decoding="async"
         draggable={false}
         className={imgClass}
         style={style}
+        onLoad={onReady}
       />
     );
   }
 
   // Art direction (Next docs, getImageProps): no <link rel=preload> (it would
   // fetch both sources); <picture> + eager/high priority loads only the match.
-  const common = { alt, sizes: '100vw', quality: IMAGE_QUALITY };
+  const common = { alt, sizes: SIZES, quality: IMAGE_QUALITY };
   const {
     props: { srcSet: desktopSet },
-  } = getImageProps({
-    ...common,
-    src: image.src,
-    width: image.width,
-    height: image.height,
-  });
+  } = getImageProps({ ...common, src: image.src, width: image.width, height: image.height });
   const {
     props: { srcSet: mobileSet, ...rest },
-  } = getImageProps({
-    ...common,
-    src: mobileImage.src,
-    width: mobileImage.width,
-    height: mobileImage.height,
-  });
+  } = getImageProps({ ...common, src: mobileImage.src, width: mobileImage.width, height: mobileImage.height });
 
   return (
     <picture>
@@ -150,11 +163,17 @@ function SlideImage({ slide, first }: { slide: BannerSlide; first: boolean }) {
       <img
         {...rest}
         alt={alt}
-        loading={first ? 'eager' : 'lazy'}
-        fetchPriority={first ? 'high' : undefined}
+        loading="eager"
+        fetchPriority={first ? 'high' : 'low'}
+        decoding="async"
         draggable={false}
         className={imgClass}
         style={style}
+        onLoad={onReady}
+        // Already loaded before hydration (SSR first slide): report it now.
+        ref={(el) => {
+          if (el?.complete && el.naturalWidth > 0) el.dispatchEvent(new Event('load'));
+        }}
       />
     </picture>
   );
@@ -165,44 +184,151 @@ function SlideImage({ slide, first }: { slide: BannerSlide; first: boolean }) {
 /* ------------------------------------------------------------------------ */
 
 /**
- * Home banner slider (design v2): full-bleed, 8:3 (>=768) / 16:9 (mobile) with
- * focal-point crop, max height = viewport minus header. Cross-fade .7s, autoplay
- * 6s that pauses on hover, keyboard focus, hidden tab and user pause; autoplay is
- * off under prefers-reduced-motion (the user can still start it). Dots (active =
- * 28px pill with progress), prev/next arrows (>=768, on hover/focus), thumbnails
- * 104x58 bottom-right (>=1060), swipe, ←/→ keys. Fires `banner_click`.
- * APG carousel pattern: region + roledescription, inactive slides inert.
+ * Home banner slider (design v2), boxed in the 1200 container by HomeBanner.
+ * 9:4 (>= 768) / 16:9 (mobile), focal-point crop.
+ *
+ * Motion (transform / opacity only):
+ * - Stacked layers cross-fade 700ms; `will-change: opacity` only on the two
+ *   layers involved, only while the swap runs.
+ * - Subtle Ken Burns (scale 1 -> 1.04 towards the focal point), CSS only,
+ *   desktop + no reduced motion; paused together with autoplay.
+ * - Autoplay progress = scaleX fill in the active dot.
+ *
+ * Loading: slide 1 paints immediately (SSR, eager + fetchpriority high, visible without JS).
+ * Only the NEXT slide's image is mounted (after window load), and a swap waits
+ * for `img.decode()` (max 1.2s) so a slide never fades in half-painted.
+ *
+ * Autoplay 6s pauses on hover, keyboard focus, user pause, hidden tab and when
+ * the banner is scrolled out of view; off by default under reduced motion.
+ * Dots (+ pause), arrows (>= 768, on hover / focus), thumbnails 80x45
+ * (>= 1060), swipe (pointer events, never preventDefault -> scroll stays
+ * smooth), ←/→ keys. APG carousel pattern; inactive slides are inert.
+ * Fires `banner_click`.
  */
 export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
   const count = slides.length;
   const [index, setIndex] = useState(0);
+  /** Layer fading out during a swap (null = no swap running). */
+  const [leaving, setLeaving] = useState<number | null>(null);
+  /** Slides whose image is in the DOM (first slide always; others on demand). */
+  const [mounted, setMounted] = useState<ReadonlySet<number>>(() => new Set([0]));
   /** null = follow the default (paused only under reduced motion). */
   const [userPaused, setUserPaused] = useState<boolean | null>(null);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [inView, setInView] = useState(true);
 
   const reducedMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, serverFalse);
   const visible = useSyncExternalStore(subscribeVisibility, getVisible, serverTrue);
 
   const paused = userPaused ?? reducedMotion;
   const autoplay = count > 1 && !paused;
-  const running = autoplay && !hovered && !focused && visible;
+  const running = autoplay && !hovered && !focused && visible && inView;
 
-  /** Elapsed autoplay time of the slide `index` (survives hover/focus pauses). */
+  const rootRef = useRef<HTMLElement>(null);
+  /** Mirrors `index` for async callbacks (decode); written only in commit(). */
+  const indexRef = useRef(0);
+  /** Slides whose image has loaded + decoded. */
+  const decoded = useRef<Set<number>>(new Set());
+  /** Slide waiting for its image before the swap. */
+  const pending = useRef<{ target: number; timer: number } | null>(null);
+  const leaveTimer = useRef(0);
+  /** Elapsed autoplay time of the slide `index` (survives pauses). */
   const elapsed = useRef({ index: 0, ms: 0 });
   const dotRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const pointer = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
 
-  const goTo = useCallback(
-    (next: number) => {
-      if (count < 2) return;
-      const target = ((next % count) + count) % count;
+  const mount = useCallback((...ids: number[]) => {
+    setMounted((prev) => (ids.every((id) => prev.has(id)) ? prev : new Set([...prev, ...ids])));
+  }, []);
+
+  /** Swap now (image ready or timed out). */
+  const commit = useCallback(
+    (target: number) => {
+      if (pending.current) {
+        window.clearTimeout(pending.current.timer);
+        pending.current = null;
+      }
+      const from = indexRef.current;
+      if (target === from) return;
+      indexRef.current = target;
       elapsed.current = { index: target, ms: 0 };
+      setLeaving(from);
       setIndex(target);
+      // Warm up only the slide after this one.
+      if (count > 1) mount(wrap(target + 1, count));
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = window.setTimeout(() => setLeaving(null), FADE + 80);
+    },
+    [count, mount],
+  );
+
+  /** Ask for a slide: swaps once its image is decoded (or after DECODE_TIMEOUT). */
+  const requestSlide = useCallback(
+    (next: number) => {
+      if (count < 2) return undefined;
+      const target = wrap(next, count);
+      if (target === indexRef.current && !pending.current) return target;
+      if (decoded.current.has(target)) {
+        commit(target);
+        return target;
+      }
+      if (pending.current) window.clearTimeout(pending.current.timer);
+      pending.current = { target, timer: window.setTimeout(() => commit(target), DECODE_TIMEOUT) };
+      mount(target);
       return target;
     },
-    [count],
+    [commit, count, mount],
+  );
+
+  const onImageReady = useCallback(
+    (i: number, e: SyntheticEvent<HTMLImageElement>) => {
+      if (decoded.current.has(i)) return;
+      const img = e.currentTarget;
+      const done = () => {
+        decoded.current.add(i);
+        if (pending.current?.target === i) commit(i);
+      };
+      // decode() resolves once the bitmap is ready to paint -> no half-drawn fade.
+      if (typeof img.decode === 'function') img.decode().then(done, done);
+      else done();
+    },
+    [commit],
+  );
+
+  // After the page has loaded (never competing with the LCP image), mount the
+  // second slide so the first autoplay swap is instant.
+  useEffect(() => {
+    if (count < 2) return;
+    let id = 0;
+    const warm = () => {
+      id = window.setTimeout(() => mount(wrap(indexRef.current + 1, count)), 300);
+    };
+    if (document.readyState === 'complete') warm();
+    else window.addEventListener('load', warm, { once: true });
+    return () => {
+      window.removeEventListener('load', warm);
+      window.clearTimeout(id);
+    };
+  }, [count, mount]);
+
+  // Pause while the banner is scrolled out of view (one observer, this element only).
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || count < 2 || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [count]);
+
+  // Cleanup pending timers on unmount.
+  useEffect(
+    () => () => {
+      window.clearTimeout(leaveTimer.current);
+      if (pending.current) window.clearTimeout(pending.current.timer);
+    },
+    [],
   );
 
   // Autoplay timer: resumes with the remaining time after a pause so the
@@ -215,9 +341,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
     const id = window.setTimeout(
       () => {
         fired = true;
-        const next = (index + 1) % count;
-        elapsed.current = { index: next, ms: 0 };
-        setIndex(next);
+        requestSlide(index + 1);
       },
       Math.max(0, DURATION - elapsed.current.ms),
     );
@@ -227,7 +351,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
         elapsed.current.ms = Math.min(DURATION, elapsed.current.ms + performance.now() - startedAt);
       }
     };
-  }, [running, index, count]);
+  }, [running, index, requestSlide]);
 
   const togglePlay = () => {
     // Restart the current slide's countdown when resuming.
@@ -240,7 +364,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     e.preventDefault();
-    const target = goTo(index + (e.key === 'ArrowRight' ? 1 : -1));
+    const target = requestSlide(index + (e.key === 'ArrowRight' ? 1 : -1));
     // Roving focus when the user is on the dots.
     if (target !== undefined && dotRefs.current.includes(e.target as HTMLButtonElement)) {
       dotRefs.current[target]?.focus();
@@ -263,7 +387,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
   };
 
-  /* ---- swipe ---- */
+  /* ---- swipe (pointer events are never cancelled -> page scroll is untouched) ---- */
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     pointer.current = { x: e.clientX, y: e.clientY };
@@ -277,7 +401,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
     const dy = e.clientY - start.y;
     if (Math.abs(dx) >= SWIPE_MIN && Math.abs(dx) > Math.abs(dy) * 1.2) {
       swiped.current = true;
-      goTo(index + (dx < 0 ? 1 : -1));
+      requestSlide(index + (dx < 0 ? 1 : -1));
     }
   };
   const onClickCapture = (e: MouseEvent<HTMLDivElement>) => {
@@ -299,20 +423,28 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
 
   if (count === 0) return null;
 
+  const swapping = leaving !== null;
+  const rootStyle = {
+    '--kb-play': running ? 'running' : 'paused',
+    '--kb-dur': `${DURATION + FADE}ms`,
+  } as CSSProperties;
+
   return (
     <section
+      ref={rootRef}
       aria-roledescription="carousel"
       aria-label={labels.region}
       className={cn('group/banner relative w-full overflow-hidden bg-[#1a1446] text-white', className)}
+      style={rootStyle}
       onKeyDown={onKeyDown}
       onFocus={onFocus}
       onBlur={onBlur}
       onPointerEnter={(e) => e.pointerType === 'mouse' && setHovered(true)}
       onPointerLeave={(e) => e.pointerType === 'mouse' && setHovered(false)}
     >
-      {/* Viewport: 16:9 mobile, 8:3 >= 768, never taller than the visible viewport. */}
+      {/* Viewport: 16:9 mobile, 9:4 >= 768 (1200x533 when boxed), never taller than the visible viewport. */}
       <div
-        className="relative aspect-video max-h-[calc(100svh-var(--header-h))] w-full touch-pan-y bg-[radial-gradient(60%_80%_at_85%_10%,rgba(24,214,242,.22),transparent_60%),radial-gradient(70%_90%_at_10%_100%,rgba(141,77,255,.55),transparent_65%),linear-gradient(125deg,#2a0f5c_0%,#1a1446_45%,#0b1a3a_100%)] select-none md:aspect-[8/3]"
+        className="relative aspect-video max-h-[calc(100svh-var(--header-h))] w-full touch-pan-y bg-[radial-gradient(60%_80%_at_85%_10%,rgba(24,214,242,.22),transparent_60%),radial-gradient(70%_90%_at_10%_100%,rgba(141,77,255,.55),transparent_65%),linear-gradient(125deg,#2a0f5c_0%,#1a1446_45%,#0b1a3a_100%)] select-none md:aspect-[9/4]"
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => (pointer.current = null)}
@@ -321,6 +453,7 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
         <div className="absolute inset-0" aria-live={running ? 'off' : 'polite'}>
           {slides.map((slide, i) => {
             const active = i === index;
+            const isLeaving = i === leaving;
             return (
               <div
                 key={slide.id}
@@ -329,13 +462,24 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
                 aria-label={labels.slideOf[i]}
                 aria-hidden={!active}
                 inert={!active}
+                data-state={active ? 'active' : isLeaving ? 'leaving' : 'idle'}
                 className={cn(
-                  'absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none',
-                  active ? 'z-[1] opacity-100' : 'z-0 opacity-0',
+                  styles.layer,
+                  'absolute inset-0 transition-opacity duration-(--dur-4) ease-standard',
+                  // Incoming layer on top, fading in over the outgoing one.
+                  active ? 'z-[2] opacity-100' : isLeaving ? 'z-[1] opacity-100' : 'z-0 opacity-0',
                 )}
+                style={swapping && (active || isLeaving) ? { willChange: 'opacity' } : undefined}
               >
                 <SlideLink slide={slide} newTabLabel={labels.newTab} onClick={() => onSlideClick(slide, i)}>
-                  <SlideImage slide={slide} first={i === 0} />
+                  <span
+                    className={styles.kb}
+                    style={{ '--kb-origin': focalPosition(slide.image.focal) } as CSSProperties}
+                  >
+                    {mounted.has(i) ? (
+                      <SlideImage slide={slide} first={i === 0} onReady={(e) => onImageReady(i, e)} />
+                    ) : null}
+                  </span>
                   {slide.title ? <SlideOverlay slide={slide} /> : null}
                 </SlideLink>
               </div>
@@ -346,21 +490,21 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
         {count > 1 ? (
           <>
             {/* Prev / next arrows (>= 768; revealed on hover or keyboard focus). */}
-            <ArrowButton side="left" label={labels.prev} onClick={() => goTo(index - 1)}>
+            <ArrowButton side="left" label={labels.prev} onClick={() => requestSlide(index - 1)}>
               <CaretLeftIcon className="size-5" weight="bold" aria-hidden="true" />
             </ArrowButton>
-            <ArrowButton side="right" label={labels.next} onClick={() => goTo(index + 1)}>
+            <ArrowButton side="right" label={labels.next} onClick={() => requestSlide(index + 1)}>
               <CaretRightIcon className="size-5" weight="bold" aria-hidden="true" />
             </ArrowButton>
 
-            {/* Pause/play + dots. */}
-            <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 md:bottom-4">
+            {/* Pause/play + dots (28x28 hit targets). */}
+            <div className="absolute bottom-1.5 left-1/2 z-10 flex -translate-x-1/2 items-center md:bottom-3">
               <button
                 type="button"
                 data-toggle="play"
                 onClick={togglePlay}
                 aria-label={paused ? labels.play : labels.pause}
-                className="mr-1 grid size-7 place-items-center rounded-full bg-[rgba(20,12,38,.45)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.18)] backdrop-blur-sm transition-colors hover:bg-[rgba(20,12,38,.7)]"
+                className="fx mr-1 grid size-7 place-items-center rounded-full bg-[rgba(20,12,38,.55)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.18)] [--fx-bg:rgba(255,255,255,.14)] [--fx-press:rgba(255,255,255,.22)]"
               >
                 {paused ? (
                   <PlayIcon className="size-3.5" weight="fill" aria-hidden="true" />
@@ -377,23 +521,31 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
                       dotRefs.current[i] = el;
                     }}
                     type="button"
-                    onClick={() => goTo(i)}
+                    onClick={() => requestSlide(i)}
                     aria-label={labels.goTo[i]}
                     aria-current={active ? 'true' : undefined}
-                    className="group/dot grid h-7 place-items-center rounded-full px-0.5"
+                    className="relative grid h-7 w-7 place-items-center rounded-full"
                   >
+                    {/* Inactive: 10px dot. */}
                     <span
+                      aria-hidden="true"
                       className={cn(
-                        'relative block h-1.5 overflow-hidden rounded-full shadow-[0_0_0_1px_rgba(20,12,38,.25)] transition-[width,background-color] duration-300 ease-out-soft',
-                        active
-                          ? cn('w-7', autoplay ? 'bg-white/45' : 'bg-accent')
-                          : 'w-2.5 bg-white/70 group-hover/dot:bg-white',
+                        styles.dot,
+                        'col-start-1 row-start-1 block h-1.5 w-2.5 rounded-full bg-white shadow-[0_0_0_1px_rgba(20,12,38,.25)]',
+                      )}
+                    />
+                    {/* Active: 28px pill with the autoplay progress fill. */}
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        styles.pill,
+                        'relative col-start-1 row-start-1 block h-1.5 w-7 overflow-hidden rounded-full shadow-[0_0_0_1px_rgba(20,12,38,.25)]',
+                        autoplay ? 'bg-white/45' : 'bg-accent',
                       )}
                     >
                       {active && autoplay ? (
                         <span
                           key={index}
-                          aria-hidden="true"
                           className={cn('absolute inset-0 rounded-full bg-accent', styles.progress)}
                           style={{
                             animationDuration: `${DURATION}ms`,
@@ -407,8 +559,8 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
               })}
             </div>
 
-            {/* Thumbnails 104x58 (>= 1060px). Mouse shortcut duplicating the dots -> hidden from AT / tab order. */}
-            <div aria-hidden="true" className="absolute right-5 bottom-5 z-10 hidden gap-2 min-[1060px]:flex">
+            {/* Thumbnails 80x45 (>= 1060px), sized for the boxed 1200 banner. Mouse shortcut duplicating the dots -> hidden from AT / tab order. */}
+            <div aria-hidden="true" className="absolute right-4 bottom-4 z-10 hidden gap-2 min-[1060px]:flex">
               {slides.map((slide, i) => {
                 const active = i === index;
                 return (
@@ -416,26 +568,31 @@ export function BannerSlider({ slides, labels, className }: BannerSliderProps) {
                     key={slide.id}
                     type="button"
                     tabIndex={-1}
-                    onClick={() => goTo(i)}
+                    onClick={() => requestSlide(i)}
                     className={cn(
-                      'relative h-[58px] w-[104px] overflow-hidden rounded-lg border bg-surface shadow-md transition-[opacity,border-color,transform] duration-300 ease-out-soft hover:-translate-y-0.5',
-                      active
-                        ? 'border-accent opacity-100 shadow-glow-accent'
-                        : 'border-white/30 opacity-60 hover:opacity-90',
+                      'group/thumb relative h-[45px] w-[80px] rounded-md transition-[opacity,translate] duration-(--dur-2) ease-standard hover:-translate-y-0.5',
+                      active ? 'opacity-100' : 'opacity-60 hover:opacity-90',
                     )}
                   >
-                    <Image
-                      src={slide.image.src}
-                      alt=""
-                      width={104}
-                      height={58}
-                      sizes="104px"
-                      quality={60}
-                      draggable={false}
-                      className="size-full object-cover"
-                      style={{
-                        objectPosition: focalPosition(slide.image.focal),
-                      }}
+                    <span className="absolute inset-0 overflow-hidden rounded-[inherit] bg-[#1a1446] shadow-[0_0_0_1px_rgba(255,255,255,.3),0_4px_10px_-2px_rgba(0,0,0,.35)]">
+                      <Image
+                        src={slide.image.src}
+                        alt=""
+                        width={80}
+                        height={45}
+                        sizes="80px"
+                        quality={60}
+                        draggable={false}
+                        className="size-full object-cover"
+                        style={{ objectPosition: focalPosition(slide.image.focal) }}
+                      />
+                    </span>
+                    {/* Active ring + glow: separate layer, opacity only. */}
+                    <span
+                      className={cn(
+                        'pointer-events-none absolute -inset-px rounded-[7px] shadow-[inset_0_0_0_2px_var(--color-accent),var(--shadow-glow-accent)] transition-opacity duration-(--dur-3) ease-standard',
+                        active ? 'opacity-100' : 'opacity-0',
+                      )}
                     />
                   </button>
                 );
@@ -468,14 +625,7 @@ function SlideLink({
   if (!slide.href) return <div className="absolute inset-0">{children}</div>;
   if (slide.external) {
     return (
-      <a
-        href={slide.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        draggable={false}
-        onClick={onClick}
-        className={cls}
-      >
+      <a href={slide.href} target="_blank" rel="noopener noreferrer" draggable={false} onClick={onClick} className={cls}>
         {children}
         <span className="sr-only"> {newTabLabel}</span>
       </a>
@@ -497,12 +647,12 @@ function SlideOverlay({ slide }: { slide: BannerSlide }) {
         className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(0deg,rgba(14,8,32,.78)_0%,rgba(14,8,32,.35)_38%,transparent_65%),linear-gradient(90deg,rgba(14,8,32,.55)_0%,transparent_55%)]"
       />
       <span className="absolute inset-0 z-[2] flex items-end">
-        <span className="container-site flex w-full flex-col items-start gap-1.5 pb-11 sm:gap-2 md:pb-16 lg:gap-3 lg:pb-20">
-          <span className="block max-w-[min(560px,70%)] text-xl leading-tight font-semibold tracking-[-0.02em] text-balance text-white drop-shadow-[0_2px_12px_rgba(0,0,0,.35)] sm:text-3xl lg:text-5xl">
+        <span className="flex w-full flex-col items-start gap-1.5 px-5 pb-11 sm:gap-2 md:px-10 md:pb-14 lg:gap-3 lg:px-14 lg:pb-16">
+          <span className="block max-w-[min(560px,70%)] text-xl leading-tight font-semibold tracking-[-0.02em] text-balance text-white drop-shadow-[0_2px_12px_rgba(0,0,0,.35)] sm:text-3xl lg:text-[44px]">
             {slide.title}
           </span>
           {slide.subtitle ? (
-            <span className="hidden max-w-[min(520px,60%)] text-sm leading-relaxed text-white/85 sm:block md:text-base lg:text-lg">
+            <span className="hidden max-w-[min(520px,60%)] text-sm leading-relaxed text-white/85 sm:block md:text-base">
               {slide.subtitle}
             </span>
           ) : null}
@@ -510,7 +660,7 @@ function SlideOverlay({ slide }: { slide: BannerSlide }) {
             <span
               className={cn(
                 buttonClasses({ variant: 'primary', size: 'md' }),
-                'mt-1 h-8 px-3 text-[13px] shadow-glow-accent group-hover/slide:border-accent-600 group-hover/slide:bg-accent-600 sm:h-10 sm:px-4 sm:text-sm lg:mt-2 lg:h-12 lg:px-6 lg:text-[15px]',
+                'mt-1 h-8 px-3 text-[13px] shadow-glow-accent group-hover/slide:border-accent-600 group-hover/slide:bg-accent-600 sm:h-10 sm:px-4 sm:text-sm lg:mt-2 lg:h-11 lg:px-5',
               )}
             >
               {slide.ctaLabel}
@@ -540,9 +690,11 @@ function ArrowButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        'absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-[rgba(20,12,38,.45)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.18)] backdrop-blur-sm md:grid',
-        'opacity-0 transition-[opacity,background-color] duration-200 group-hover/banner:opacity-100 pointer-coarse:opacity-100 hover:bg-[rgba(20,12,38,.72)] focus-visible:opacity-100',
-        side === 'left' ? 'left-3 lg:left-5' : 'right-3 lg:right-5',
+        // No backdrop blur: it would re-blur every frame over the Ken Burns image.
+        'fx absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 place-items-center rounded-full bg-[rgba(20,12,38,.55)] text-white shadow-[0_0_0_1px_rgba(255,255,255,.18)] md:grid',
+        '[--fx-bg:rgba(255,255,255,.14)] [--fx-press:rgba(255,255,255,.22)]',
+        'opacity-0 transition-[opacity,transform] duration-(--dur-2) ease-standard group-hover/banner:opacity-100 pointer-coarse:opacity-100 focus-visible:opacity-100',
+        side === 'left' ? 'left-3 lg:left-4' : 'right-3 lg:right-4',
       )}
     >
       {children}

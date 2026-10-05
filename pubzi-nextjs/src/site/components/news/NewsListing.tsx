@@ -1,9 +1,13 @@
+import { reveal } from '@site/components/motion';
 import { NewsCard } from '@site/components/ui/NewsCard';
 import type { Locale } from '@site/i18n';
 import { cn } from '@site/lib/cn';
 import type { NewsListItem } from '@site/lib/types';
 
-/** 3-column news grid (1 col < 768, 2 cols < 1024). */
+/**
+ * 3-column news grid (1 col < 768, 2 cols < 1024). Cards reveal on scroll,
+ * staggered per row (index mod 3); rows already on screen show at once.
+ */
 export function NewsGrid({
   items,
   locale,
@@ -19,7 +23,7 @@ export function NewsGrid({
   return (
     <ul role="list" className={cn('grid gap-x-5 gap-y-8 md:grid-cols-2 lg:grid-cols-3', className)}>
       {items.map((item, i) => (
-        <li key={item.id} className="min-w-0">
+        <li key={item.id} className="min-w-0" {...reveal(i % 3)}>
           <NewsCard
             item={item}
             locale={locale}

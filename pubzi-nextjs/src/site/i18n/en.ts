@@ -8,10 +8,6 @@ const en: Dictionary = {
   topup: 'Top up',
   news: 'News',
   support: 'Support',
-  login: 'Sign in',
-  playNow: 'Play now',
-  download: 'Download',
-  preReg: 'Pre-register',
   gameSite: 'Game site',
   newKicker: 'Featured',
   newTitle: 'New & Upcoming',
@@ -98,9 +94,9 @@ const en: Dictionary = {
   bannerSlideOf: 'Banner {n} of {total}',
 
   // ---- Status tags ----
-  statusNew: 'New release',
+  statusNew: 'NEW',
   statusSoon: 'Coming soon',
-  statusHot: 'Hot',
+  statusHot: 'HOT',
 
   // ---- Home ----
   featuredGames: 'Featured games',
@@ -112,9 +108,7 @@ const en: Dictionary = {
   clearSearch: 'Clear search',
   loadMore: 'Load more',
   fanpage: 'Fanpage',
-  appStore: 'App Store',
-  googlePlay: 'Google Play',
-  chooseStore: 'Choose a store',
+  /** Disabled game-card button tooltip (link not provided yet). */
   releaseDate: 'Release date',
   platform: 'Platform',
   platformPc: 'PC',

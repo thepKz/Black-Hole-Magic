@@ -34,19 +34,25 @@ export function HomeBanner({ locale }: { locale: Locale }) {
     mobileImage: b.mobileImage ? toSlideImage(b.mobileImage) : undefined,
   }));
 
+  // Boxed inside the 1200 container (not full-bleed): 9:4 on >= 768
+  // (1200x533 at full container width), 16:9 on mobile - see BannerSlider.
+  // A full-bleed banner was ~720px tall on 1920 screens and swallowed the page.
   return (
-    <BannerSlider
-      slides={slides}
-      labels={{
-        region: t.bannerRegion,
-        prev: t.bannerPrev,
-        next: t.bannerNext,
-        pause: t.bannerPause,
-        play: t.bannerPlay,
-        newTab: t.newTab,
-        goTo: banners.map((_, i) => format(t.bannerGoTo, { n: i + 1 })),
-        slideOf: banners.map((_, i) => format(t.bannerSlideOf, { n: i + 1, total })),
-      }}
-    />
+    <div className="container-site pt-4 md:pt-6">
+      <BannerSlider
+        className="rounded-[10px] shadow-[0_0_0_1px_rgba(28,22,51,.06),0_14px_32px_-12px_rgba(28,22,51,.28)] md:rounded-[14px]"
+        slides={slides}
+        labels={{
+          region: t.bannerRegion,
+          prev: t.bannerPrev,
+          next: t.bannerNext,
+          pause: t.bannerPause,
+          play: t.bannerPlay,
+          newTab: t.newTab,
+          goTo: banners.map((_, i) => format(t.bannerGoTo, { n: i + 1 })),
+          slideOf: banners.map((_, i) => format(t.bannerSlideOf, { n: i + 1, total })),
+        }}
+      />
+    </div>
   );
 }

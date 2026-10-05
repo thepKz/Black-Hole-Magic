@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useState, type CSSProperties, type MouseEvent } from 'react';
 
 import { track } from '@site/components/analytics/track';
 import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, format, localeNames, locales, switchLocalePath, type Locale } from '@site/i18n';
@@ -12,13 +12,13 @@ import { useLocaleAlternatesOverride, type LocalePaths } from './LocaleAlternate
 export interface LangSwitcherProps {
   locale: Locale;
   labels: {
-    /** t.langLabel "Ngôn ngữ" */
+    /** t.langLabel "Ngôn ngữ" (group label) */
     label: string;
-    /** t.langSwitchTo "Chuyển sang {lang}" */
+    /** t.langSwitchTo "Chuyển sang {lang}" (tooltip of the inactive option) */
     switchTo: string;
   };
-  /** 'dropdown' (header, Funtap style) or 'buttons' (mobile drawer: two flag buttons). */
-  variant?: 'dropdown' | 'buttons';
+  /** 'md' = header (compact, design v2); 'lg' = mobile drawer (full width, 44px targets). */
+  size?: 'md' | 'lg';
   /** Static override of target paths (locale-prefixed). <LocaleAlternates> in a page wins over this. */
   alternates?: LocalePaths;
   /** Called after a switch is triggered (e.g. close the drawer). */
@@ -34,15 +34,38 @@ function persistLocale(locale: Locale) {
   }
 }
 
+function GlobeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="16" aria-hidden="true" focusable="false">
+      <circle cx="128" cy="128" r="96" />
+      <path d="M32 128h192M128 32c-28 30-28 162 0 192M128 32c28 30 28 162 0 192" />
+    </svg>
+  );
+}
+
 /**
- * Language switcher: flag + native name + caret, keyboard-accessible menu.
- * Keeps the current path + query (+ hash), writes the NEXT_LOCALE cookie,
- * and renders real <a hreflang> links so crawlers see the alternates.
+ * Language switcher - segmented control from design v2:
+ * [globe | flag VI | flag EN]. Each option is a real `<a hreflang>` to the same
+ * page in the other language (crawlable, works without JS). With JS it keeps the
+ * current query + hash, writes the NEXT_LOCALE cookie and navigates client-side.
+ * Per-page targets (news article translations) come from <LocaleAlternates>.
  */
-export function LangSwitcher({ locale, labels, variant = 'dropdown', alternates, onSwitch, className }: LangSwitcherProps) {
+export function LangSwitcher({ locale, labels, size = 'md', alternates, onSwitch, className }: LangSwitcherProps) {
   const pathname = usePathname() || `/${locale}`;
   const router = useRouter();
   const override = useLocaleAlternatesOverride();
+  const lg = size === 'lg';
+  // The indicator slides to the clicked option at once (instant feedback) while
+  // the other-language page loads; the new page then renders with it in place.
+  const [pending, setPending] = useState<Locale | null>(null);
+  const [seenLocale, setSeenLocale] = useState(locale);
+  if (seenLocale !== locale) {
+    // Locale changed (switch done, or back/forward): drop the optimistic state.
+    setSeenLocale(locale);
+    setPending(null);
+  }
+  const shown = pending ?? locale;
+  const shownIndex = Math.max(0, locales.indexOf(shown));
 
   const targetFor = (to: Locale, withQuery: boolean) => {
     const explicit = override?.[to] ?? alternates?.[to];
@@ -57,196 +80,55 @@ export function LangSwitcher({ locale, labels, variant = 'dropdown', alternates,
     persistLocale(to);
     onSwitch?.();
     if (to === locale) return;
+    setPending(to);
     track('lang_switch', { from: locale, to });
     router.push(targetFor(to, true));
   };
 
-  if (variant === 'buttons') {
-    return (
-      <div role="group" aria-label={labels.label} className={cn('grid grid-cols-2 gap-2', className)}>
+  return (
+    <div
+      role="group"
+      aria-label={labels.label}
+      className={cn(
+        'items-stretch overflow-hidden rounded-md border border-divider bg-surface',
+        lg ? 'flex h-11 w-full' : 'inline-flex h-8',
+        className,
+      )}
+    >
+      <span className={cn('flex items-center text-ink/60', lg ? 'pr-2 pl-3.5' : 'pr-1.5 pl-2.5')}>
+        <GlobeIcon className={lg ? 'size-[18px]' : 'size-[15px]'} />
+      </span>
+      <div
+        className="seg-track grid flex-1 grid-cols-[repeat(var(--seg-n),minmax(0,1fr))]"
+        style={{ '--seg-n': locales.length, '--seg-i': shownIndex } as CSSProperties}
+      >
+        <span aria-hidden="true" className="seg-indicator bg-accent-100" />
         {locales.map((l) => {
           const active = l === locale;
+          const lit = l === shown;
           return (
             <a
               key={l}
               href={targetFor(l, false)}
               hrefLang={l}
               lang={l}
+              aria-label={localeNames[l]}
               aria-current={active ? 'true' : undefined}
-              aria-label={active ? localeNames[l] : format(labels.switchTo, { lang: localeNames[l] })}
+              title={active ? undefined : format(labels.switchTo, { lang: localeNames[l] })}
               onClick={(e) => go(e, l)}
               className={cn(
-                'flex h-11 items-center justify-center gap-2.5 rounded-md border text-sm no-underline transition-colors',
-                active
-                  ? 'border-accent bg-accent-50 font-medium text-accent-800 hover:text-accent-800'
-                  : 'border-divider bg-surface text-ink/80 hover:border-neutral-400 hover:text-ink',
+                'fx flex items-center justify-center gap-1.5 tracking-[0.06em] no-underline',
+                'focus-visible:-outline-offset-2',
+                lg ? 'text-sm' : 'px-2.5 text-xs',
+                lit ? 'font-medium text-accent-900 hover:text-accent-900' : 'text-ink/60 hover:text-ink',
               )}
             >
-              <LocaleFlag locale={l} />
-              {localeNames[l]}
+              <LocaleFlag locale={l} size="sm" />
+              <span aria-hidden="true">{l.toUpperCase()}</span>
             </a>
           );
         })}
       </div>
-    );
-  }
-
-  return <LangDropdown locale={locale} labels={labels} targetFor={targetFor} go={go} className={className} />;
-}
-
-function LangDropdown({
-  locale,
-  labels,
-  targetFor,
-  go,
-  className,
-}: {
-  locale: Locale;
-  labels: LangSwitcherProps['labels'];
-  targetFor: (to: Locale, withQuery: boolean) => string;
-  go: (e: MouseEvent<HTMLAnchorElement>, to: Locale) => void;
-  className?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuId = useId();
-  const focusIndex = useRef(0);
-
-  const items = () => Array.from(wrapRef.current?.querySelectorAll<HTMLElement>('[role="menuitemradio"]') ?? []);
-
-  useEffect(() => {
-    if (!open) return;
-    items()[focusIndex.current]?.focus();
-    const onPointer = (e: PointerEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointer);
-    return () => document.removeEventListener('pointerdown', onPointer);
-  }, [open]);
-
-  const openAt = (index: number) => {
-    focusIndex.current = index;
-    setOpen(true);
-  };
-
-  const onTriggerKey = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openAt(Math.max(0, locales.indexOf(locale)));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      openAt(locales.length - 1);
-    }
-  };
-
-  const onMenuKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    const list = items();
-    const i = list.indexOf(document.activeElement as HTMLElement);
-    const focus = (n: number) => list[(n + list.length) % list.length]?.focus();
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        focus(i + 1);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        focus(i - 1);
-        break;
-      case 'Home':
-        e.preventDefault();
-        focus(0);
-        break;
-      case 'End':
-        e.preventDefault();
-        focus(list.length - 1);
-        break;
-      case 'Escape':
-        e.preventDefault();
-        setOpen(false);
-        triggerRef.current?.focus();
-        break;
-      case 'Tab':
-        setOpen(false);
-        break;
-    }
-  };
-
-  return (
-    <div ref={wrapRef} className={cn('relative', className)}>
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        aria-label={`${labels.label}: ${localeNames[locale]}`}
-        onClick={() => (open ? setOpen(false) : openAt(Math.max(0, locales.indexOf(locale))))}
-        onKeyDown={onTriggerKey}
-        className={cn(
-          'flex h-10 items-center gap-2 rounded-md border border-transparent px-2.5 text-sm text-ink/80 transition-colors',
-          'hover:bg-ink/7 hover:text-ink',
-          open && 'bg-ink/7 text-ink',
-        )}
-      >
-        <LocaleFlag locale={locale} />
-        <span className="hidden xl:inline">{localeNames[locale]}</span>
-        <span className="xl:hidden">{locale.toUpperCase()}</span>
-        <svg
-          className={cn('size-3 text-subtle transition-transform duration-200', open && 'rotate-180')}
-          viewBox="0 0 256 256"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="26"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M64 96l64 64 64-64" />
-        </svg>
-      </button>
-
-      {open ? (
-        <div
-          id={menuId}
-          role="menu"
-          aria-label={labels.label}
-          onKeyDown={onMenuKey}
-          className="absolute top-[calc(100%+8px)] right-0 z-50 min-w-[184px] rounded-lg border border-divider bg-surface p-1 shadow-lg"
-        >
-          {locales.map((l) => {
-            const active = l === locale;
-            return (
-              <a
-                key={l}
-                role="menuitemradio"
-                aria-checked={active}
-                tabIndex={-1}
-                href={targetFor(l, false)}
-                hrefLang={l}
-                lang={l}
-                onClick={(e) => {
-                  setOpen(false);
-                  go(e, l);
-                }}
-                className={cn(
-                  'flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm no-underline outline-none',
-                  'focus:bg-accent-50 focus-visible:outline-none',
-                  active ? 'font-medium text-accent-800 hover:text-accent-800' : 'text-ink/80 hover:bg-neutral-50 hover:text-ink',
-                )}
-              >
-                <LocaleFlag locale={l} />
-                <span className="flex-1">{localeNames[l]}</span>
-                {active ? (
-                  <svg className="size-4 text-accent" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M40 136l56 56L216 72" />
-                  </svg>
-                ) : null}
-              </a>
-            );
-          })}
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { headers } from 'next/headers';
 
 import { isLocale } from '@site/i18n';
-import { rateLimit } from './rate-limit';
+import { allowContactSubmission, hashIp } from './rate-limit';
 import {
   CONTACT_FIELDS,
   HONEYPOT_FIELD,
@@ -48,8 +48,10 @@ const str = (v: FormDataEntryValue | null) => (typeof v === 'string' ? v : '');
 /**
  * Contact form server action (use with React `useActionState`).
  * Pipeline: honeypot + fill-time check -> zod -> Turnstile (if secret set) ->
- * rate limit -> `submitContact()` adapter (mock, see ./submit.ts).
- * Bots caught by the honeypot get a fake success so they learn nothing.
+ * rate limit (recent docs per hashed IP) -> `submitContact()` -> Payload
+ * `contact-requests` (read in /admin, see ./submit.ts).
+ * Bots caught by the honeypot (or a provably too-fast fill) get a fake success
+ * so they learn nothing. A missing stamp (no JS) is NOT treated as a bot.
  */
 export async function sendContact(_prev: ContactFormState, formData: FormData): Promise<ContactFormState> {
   const h = await headers();
@@ -58,10 +60,14 @@ export async function sendContact(_prev: ContactFormState, formData: FormData): 
   // 1. Spam traps (silent).
   const honeypot = str(formData.get(HONEYPOT_FIELD));
   const startedAt = Number(str(formData.get(STARTED_AT_FIELD)));
-  // A missing / invalid / future stamp is treated as a bot too (the form always
-  // stamps it on mount and re-applies it after an error response).
+  // The fill-time stamp is written client-side (on mount), so it is ABSENT when
+  // JS is off / not hydrated yet (progressive enhancement posts the action
+  // anyway). A missing / invalid / future stamp is therefore "unknown", not
+  // "bot": such posts continue through validation + Turnstile + the rate limit.
+  // Only a valid stamp proving a sub-MIN_FILL_MS fill (a 20+ char message
+  // typed in < 2.5s) is dropped silently, like a filled honeypot.
   const validStamp = Number.isFinite(startedAt) && startedAt > 0 && startedAt <= Date.now() + 60_000;
-  const tooFast = !validStamp || Date.now() - startedAt < MIN_FILL_MS;
+  const tooFast = validStamp && Date.now() - startedAt < MIN_FILL_MS;
   if (honeypot.trim() !== '' || tooFast) {
     return { status: 'success', id: 'ignored' };
   }
@@ -75,19 +81,23 @@ export async function sendContact(_prev: ContactFormState, formData: FormData): 
   const token = str(formData.get(TURNSTILE_FIELD)) || null;
   if (!(await verifyTurnstile(token, ip))) return { status: 'error', error: 'errCaptcha' };
 
-  // 4. Rate limit.
-  // No usable IP -> one shared bucket (never "no limit").
-  if (!rateLimit(`contact:${ip ?? 'unknown'}`)) return { status: 'error', error: 'errRateLimit' };
+  // 4. Rate limit (counted in the DB per hashed IP; no usable IP -> one shared bucket).
+  const ipHash = hashIp(ip);
+  try {
+    if (!(await allowContactSubmission(ipHash))) return { status: 'error', error: 'errRateLimit' };
+  } catch (err) {
+    console.error(`[contact] rate-limit check failed: ${err instanceof Error ? err.message : 'unknown error'}`);
+    return { status: 'error', error: 'errServer' };
+  }
 
-  // 5. Hand off to the adapter.
+  // 5. Store (Payload Local API).
   const localeRaw = str(formData.get('locale'));
   const result = await submitContact({
     data: parsed.data,
     meta: {
       locale: isLocale(localeRaw) ? localeRaw : 'vi',
-      ip,
+      ipHash,
       userAgent: h.get('user-agent'),
-      referer: h.get('referer'),
       submittedAt: new Date().toISOString(),
     },
   });

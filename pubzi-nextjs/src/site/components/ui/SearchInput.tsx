@@ -159,7 +159,7 @@ function SearchInputInner({
           type="button"
           onClick={clear}
           aria-label={clearLabel}
-          className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-md text-subtle transition-colors hover:bg-neutral-100 hover:text-ink"
+          className="fx absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-md text-subtle hover:text-ink"
         >
           <svg className="size-4" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="22" strokeLinecap="round" aria-hidden="true">
             <path d="M200 56 56 200M56 56l144 144" />

@@ -38,10 +38,6 @@ export interface SiteImage {
 
 export type GameStatus = 'none' | 'new' | 'soon' | 'hot';
 export type Platform = 'pc' | 'ios' | 'android' | 'h5';
-/** Resolved primary CTA of a game card. */
-export type CtaKind = 'play' | 'download' | 'preregister';
-/** Optional manual override; 'auto' = resolve from status/platform. */
-export type CtaType = 'auto' | CtaKind;
 
 export interface Genre {
   slug: string;
@@ -70,30 +66,13 @@ export interface Game {
   poster: SiteImage;
   /** Brand accent of the game (hex), optional decoration. */
   accent: string;
+  /** Card buttons "Trang chủ game" / "Fanpage" (absolute URLs, new tab). null = "Sắp cập nhật". */
   links: {
     homepage: string | null;
     fanpage: string | null;
-    /** H5 play URL. */
-    play: string | null;
-    preregister: string | null;
-    appStore: string | null;
-    googlePlay: string | null;
-    /** PC client download page. */
-    pcDownload: string | null;
   };
-  ctaType: CtaType;
   featured: boolean;
   order: number;
-}
-
-/** Output of `resolveGameCta(game)` in @site/data/games. */
-export interface ResolvedCta {
-  kind: CtaKind;
-  /** Primary target; null = disabled button (no link yet). */
-  href: string | null;
-  /** Store choices for a download popover (empty when not applicable). */
-  stores: { platform: 'ios' | 'android' | 'pc'; href: string }[];
-  external: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -161,11 +140,14 @@ export interface SiteInfo {
     address: Localized;
     /** Address parts for JSON-LD PostalAddress. */
     postal: { street: string; locality: string; region: string; country: 'VN' };
+    /** Short HQ city label (contact page HQ block heading). */
+    hqCity: Localized;
     /** Google Maps query for the contact page map. */
     mapQuery: string;
     taxId: string;
+    /** Display form, e.g. "1900 0000". */
     phone: string;
-    /** E.164 form of `phone`. */
+    /** Dialable form for `tel:` links / JSON-LD (digits, "+84..." for mobiles; 1900 numbers have no country code). */
     phoneE164: string;
   };
   emails: Record<ContactType, string>;
@@ -177,9 +159,11 @@ export interface SiteInfo {
    */
   contentOwner: string;
   healthWarning: Localized;
+  /** Official fanpage: `label` is the short display form (no protocol). */
+  fanpage: { url: string; label: string };
   socials: SocialLink[];
-  /** Trang ID URLs ('#' when env is not set). */
-  id: { loginUrl: string; topupUrl: string };
+  /** Top-up portal (external, opens in a new tab). */
+  topupUrl: string;
   foundingYear: number;
 }
 

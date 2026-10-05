@@ -14,29 +14,35 @@ type AnyNode = {
 
 type EditorStateLike = { root?: AnyNode } | null | undefined;
 
+/** Element nodes that end a line of text. */
+const BLOCK_LEVEL = new Set(['paragraph', 'heading', 'listitem', 'quote', 'tablecell']);
+
 /** Plain text of a Lexical document (text nodes + text-ish block fields). */
 export function lexicalToPlainText(state: EditorStateLike): string {
   const out: string[] = [];
   const walk = (node: AnyNode | undefined) => {
     if (!node) return;
+    // Text nodes carry their own spacing: "H" + "2" (subscript) + "O" is "H2O"
+    // and "word" + "." stays "word.", so text is concatenated as-is.
     if (typeof node.text === 'string') out.push(node.text);
+    if (node.type === 'linebreak') out.push('\n');
     if (node.type === 'block' && node.fields) {
       // Code blocks count as reading material too; captions as well.
       for (const key of ['code', 'caption']) {
         const v = node.fields[key];
-        if (typeof v === 'string') out.push(v);
+        if (typeof v === 'string') out.push('\n', v, '\n');
       }
     }
     if (node.type === 'upload' && node.fields && typeof node.fields.caption === 'string') {
-      out.push(node.fields.caption);
+      out.push('\n', node.fields.caption, '\n');
     }
     if (Array.isArray(node.children)) {
       for (const child of node.children) walk(child);
-      if (node.type === 'paragraph' || node.type === 'heading' || node.type === 'listitem') out.push('\n');
+      if (BLOCK_LEVEL.has(node.type ?? '')) out.push('\n');
     }
   };
   walk(state?.root);
-  return out.join(' ').replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
+  return out.join('').replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
 }
 
 /** Words per minute used for the reading-time estimate (VN syllables ~ EN words). */

@@ -25,13 +25,39 @@ function getPreferredLocale(request: NextRequest): Locale {
   return defaultLocale;
 }
 
+// Payload admin language cookie (payload/dist/utilities/getRequestLanguage.js).
+const adminLangCookie = 'payload-lng';
+
+/**
+ * /admin (Payload): never indexed, Vietnamese by default. Payload picks the
+ * admin language from this cookie first, then Accept-Language, so seed 'vi'
+ * when the editor has not chosen one yet (they can switch in Account).
+ */
+function adminResponse(request: NextRequest) {
+  const seedLang = !request.cookies.has(adminLangCookie);
+  if (seedLang) request.cookies.set(adminLangCookie, 'vi');
+  const response = seedLang
+    ? NextResponse.next({ request: { headers: request.headers } })
+    : NextResponse.next();
+  if (seedLang) {
+    response.cookies.set(adminLangCookie, 'vi', {
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return response;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return adminResponse(request);
 
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
-    pathname.startsWith('/admin') ||
     pathname.startsWith('/assets') ||
     pathname.startsWith('/favicon') ||
     PUBLIC_FILE.test(pathname)
@@ -56,5 +82,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|api|admin|assets|.*\\..*).*)'],
+  // /admin is matched on purpose (see adminResponse); _next, api, assets and files are not.
+  matcher: ['/((?!_next|api|assets|.*\\..*).*)'],
 };

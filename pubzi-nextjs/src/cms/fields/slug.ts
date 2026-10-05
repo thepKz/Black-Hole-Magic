@@ -1,4 +1,4 @@
-import type { Field, FieldHook } from 'payload';
+import type { Field, FieldHook, StaticLabel } from 'payload';
 
 import { foldText, slugify } from '../lib/text';
 
@@ -36,7 +36,7 @@ export function slugField(sourceField: string, overrides: Partial<Field> = {}): 
  * Hidden accent-folded copy of a text field so the public search
  * ("kiem" matches "Kiếm") works with a simple `like` query.
  */
-export function searchField(sourceField: string, localized: boolean): Field {
+export function searchField(sourceField: string, localized: boolean, label?: StaticLabel): Field {
   const compute: FieldHook = ({ data, siblingData, originalDoc }) => {
     const source = siblingData?.[sourceField] ?? data?.[sourceField] ?? originalDoc?.[sourceField];
     return typeof source === 'string' ? foldText(source) : undefined;
@@ -46,7 +46,9 @@ export function searchField(sourceField: string, localized: boolean): Field {
     type: 'text',
     localized,
     index: true,
-    admin: { hidden: true },
+    // Label shows up in the list search placeholder ("Tìm với Tiêu đề, ...").
+    label: label ?? { vi: 'Nội dung tìm kiếm', en: 'Search text' },
+    admin: { hidden: true, disableListColumn: true, disableListFilter: true },
     hooks: { beforeChange: [compute] },
   };
 }

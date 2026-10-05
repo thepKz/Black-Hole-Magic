@@ -32,8 +32,9 @@ export interface ShareButtonsProps {
 const subscribeNoop = () => () => {};
 const canNativeShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+// Hover = `.fx` wash (accent-50, opacity only) + instant colour swap; press nudge from `.fx`.
 const btn =
-  'tip relative inline-grid size-10 shrink-0 place-items-center rounded-md border border-divider bg-surface text-ink/75 no-underline transition-[color,border-color,background-color,box-shadow] duration-150 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700';
+  'fx tip inline-grid size-10 shrink-0 place-items-center rounded-md border border-divider bg-surface text-ink/75 no-underline [--fx-bg:var(--color-accent-50)] [--fx-press:var(--color-accent-100)] hover:border-accent-300 hover:text-accent-700';
 
 function TipLabel({ children }: { children: ReactNode }) {
   return (
@@ -71,17 +72,24 @@ async function copyText(text: string): Promise<boolean> {
 /** Facebook / X / copy link (+ native share sheet where available) with a toast. */
 export function ShareButtons({ url, title, labels, layout = 'row', showLabel = true, className }: ShareButtonsProps) {
   const native = useSyncExternalStore(subscribeNoop, canNativeShare, () => false);
-  const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // `open` false = exit transition running; the node is removed after it.
+  const [toast, setToast] = useState<{ text: string; ok: boolean; open: boolean; n: number } | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const clearTimers = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(() => clearTimers, []);
 
   const showToast = (text: string, ok: boolean) => {
-    setToast({ text, ok });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToast(null), 2600);
+    clearTimers();
+    // A new `n` remounts the pill, so a repeated copy replays the enter motion.
+    setToast((prev) => ({ text, ok, open: true, n: (prev?.n ?? 0) + 1 }));
+    timers.current.push(
+      setTimeout(() => setToast((t) => (t ? { ...t, open: false } : t)), 2400),
+      setTimeout(() => setToast(null), 2400 + 220),
+    );
   };
 
   const enc = encodeURIComponent;
@@ -145,8 +153,12 @@ export function ShareButtons({ url, title, labels, layout = 'row', showLabel = t
           <TipLabel>{labels.shareX}</TipLabel>
         </a>
         <button type="button" onClick={onCopy} className={cn(btn, 'cursor-pointer')} aria-label={labels.copyLink}>
-          {toast?.ok ? (
-            <CheckIcon className="size-[18px] text-success" weight="bold" aria-hidden="true" />
+          {toast?.ok && toast.open ? (
+            <CheckIcon
+              className="size-[18px] text-success transition-[scale] duration-(--dur-2) ease-emphasized starting:scale-50"
+              weight="bold"
+              aria-hidden="true"
+            />
           ) : (
             <LinkSimpleIcon className="size-[18px]" weight="bold" aria-hidden="true" />
           )}
@@ -164,9 +176,14 @@ export function ShareButtons({ url, title, labels, layout = 'row', showLabel = t
       <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-6 z-[90] flex justify-center px-4">
         {toast ? (
           <span
+            key={toast.n}
             className={cn(
               'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-white shadow-lg',
-              'transition-[opacity,translate] duration-200 ease-out-soft starting:translate-y-2 starting:opacity-0',
+              // Enter: rise + fade (@starting-style); exit: faster sink + fade.
+              'transition-[opacity,translate] starting:translate-y-3 starting:opacity-0',
+              toast.open
+                ? 'translate-y-0 opacity-100 duration-(--dur-3) ease-emphasized'
+                : 'translate-y-2 opacity-0 duration-(--dur-2) ease-exit',
               toast.ok ? 'bg-ink' : 'bg-danger',
             )}
           >

@@ -31,7 +31,7 @@ export function SectionHeading({ title, kicker, description, action, as = 'h2', 
     >
       <div className={cn('flex min-w-0 flex-1 flex-col gap-2.5', centered && 'items-center')}>
         {kicker ? (
-          <p className="m-0 text-[11px] font-medium tracking-[0.12em] text-accent-600 uppercase">{kicker}</p>
+          <p className="kicker -mb-1.5">{kicker}</p>
         ) : null}
         <Heading
           id={id}

@@ -2,16 +2,30 @@
  * Games (MOCK - typed). The 5 real titles from the legacy /v2 game page.
  * Art: public/site/games/{slug}.webp (4:3 1200x900), {slug}-wide.webp (16:9
  * 1400x788), {slug}-poster.webp (600x750).
- * TODO(company): real homepage / fanpage / store / H5 links per game.
+ *
+ * Cards only link out to the game's own homepage and fanpage (no download /
+ * play / pre-register flows on the publisher site).
+ * TODO(company): real homepage / fanpage URL per game. null homepage = button
+ * hidden; null fanpage = falls back to the company fanpage (site.fanpageUrl).
  */
-import type { Game, Genre, Locale, ResolvedCta } from '../lib/types';
+import type { Game, Genre, Locale, Platform } from '../lib/types';
 
+/** Gameplay genres (filter chips + card tags). */
 export const genres: Genre[] = [
-  { slug: 'mmorpg', name: { vi: 'MMORPG', en: 'MMORPG' } },
+  { slug: 'mmo', name: { vi: 'MMO', en: 'MMO' } },
   { slug: 'kiem-hiep', name: { vi: 'Kiếm hiệp', en: 'Wuxia' } },
   { slug: 'nhap-vai', name: { vi: 'Nhập vai', en: 'RPG' } },
-  { slug: 'hanh-dong', name: { vi: 'Hành động', en: 'Action' } },
+  { slug: 'chien-thuat', name: { vi: 'Chiến thuật', en: 'Strategy' } },
 ];
+
+/** Platform tags derived from `game.platforms` (iOS/Android/H5 collapse into "Mobile"/"Web"). */
+export const platformTags: Genre[] = [
+  { slug: 'pc', name: { vi: 'PC', en: 'PC' } },
+  { slug: 'mobile', name: { vi: 'Mobile', en: 'Mobile' } },
+  { slug: 'web', name: { vi: 'Web', en: 'Web' } },
+];
+
+const platformTagOf: Record<Platform, string> = { pc: 'pc', ios: 'mobile', android: 'mobile', h5: 'web' };
 
 const img = (slug: string, name: string) => ({
   cover: {
@@ -34,70 +48,19 @@ const img = (slug: string, name: string) => ({
   },
 });
 
-const noLinks = {
-  homepage: null,
-  fanpage: null,
-  play: null,
-  preregister: null,
-  appStore: null,
-  googlePlay: null,
-  pcDownload: null,
-};
+const noLinks = { homepage: null, fanpage: null };
 
+// Only Kiếm Thế is published for now (user decision). The other titles
+// (VLTK2, TLBB, Tiếu Ngạo Giang Hồ, Con Đường Tơ Lụa) are in git history
+// (commit b8a3090) and can be restored when they launch.
 export const games: Game[] = [
-  {
-    slug: 'vo-lam-truyen-ky-2',
-    name: 'Võ Lâm Truyền Kỳ 2',
-    code: 'VLTK2',
-    genres: ['mmorpg', 'kiem-hiep'],
-    status: 'hot',
-    release: { vi: 'Đang vận hành', en: 'Live' },
-    platforms: ['pc'],
-    tagline: {
-      vi: 'Giang hồ vẫn đông như ngày đó. Bang hội, công thành, săn boss mỗi tối.',
-      en: 'The martial world is as crowded as ever. Guilds, sieges and boss hunts every night.',
-    },
-    description: {
-      vi: 'Kiếm hiệp MMORPG dành cho ai mê chiến trường đông và muốn có anh em chinh chiến cùng: bang hội, công thành, boss thế giới.',
-      en: 'A wuxia MMORPG for players who love crowded battlefields and fighting alongside friends: guilds, sieges and world bosses.',
-    },
-    ...img('vo-lam-truyen-ky-2', 'Võ Lâm Truyền Kỳ 2'),
-    accent: '#B79CFF',
-    links: { ...noLinks },
-    ctaType: 'auto',
-    featured: true,
-    order: 1,
-  },
-  {
-    slug: 'thien-long-bat-bo',
-    name: 'Thiên Long Bát Bộ',
-    code: 'TLBB',
-    genres: ['mmorpg', 'kiem-hiep'],
-    status: 'new',
-    release: { vi: '2026', en: '2026' },
-    platforms: ['pc', 'android', 'ios'],
-    tagline: {
-      vi: 'Thiên Long trở lại. Vẫn môn phái đó, giờ chơi được cả trên điện thoại.',
-      en: 'Thiên Long is back. The same sects, now playable on your phone too.',
-    },
-    description: {
-      vi: 'MMORPG võ hiệp cho ai muốn chơi lại huyền thoại mà không phải ngồi mãi bên máy: môn phái, PvP lớn, đồng bộ PC & Mobile.',
-      en: 'A martial-arts MMORPG for players who want the legend back without being tied to a desk: sects, large-scale PvP, PC & mobile cross-play.',
-    },
-    ...img('thien-long-bat-bo', 'Thiên Long Bát Bộ'),
-    accent: '#F2D18A',
-    links: { ...noLinks },
-    ctaType: 'auto',
-    featured: true,
-    order: 2,
-  },
   {
     slug: 'kiem-the',
     name: 'Kiếm Thế',
     code: 'KT',
     genres: ['nhap-vai', 'kiem-hiep'],
-    status: 'soon',
-    release: { vi: 'Sắp mở', en: 'Coming soon' },
+    status: 'new',
+    release: { vi: 'Mới ra mắt', en: 'Just launched' },
     platforms: ['pc'],
     tagline: {
       vi: 'Tống Kim 9 giờ tối, cả server lao vào nhau. Bạn đứng phe nào?',
@@ -110,55 +73,8 @@ export const games: Game[] = [
     ...img('kiem-the', 'Kiếm Thế'),
     accent: '#8FD7FF',
     links: { ...noLinks },
-    ctaType: 'auto',
     featured: true,
-    order: 3,
-  },
-  {
-    slug: 'tieu-ngao-giang-ho',
-    name: 'Tiếu Ngạo Giang Hồ',
-    code: 'TNGH',
-    genres: ['hanh-dong', 'nhap-vai'],
-    status: 'soon',
-    release: { vi: 'Sắp mở', en: 'Coming soon' },
-    platforms: ['pc'],
-    tagline: {
-      vi: 'Combo tay nhanh, phe phái rõ ràng. Giang hồ đúng chất phim kiếm hiệp.',
-      en: 'Fast combos, clear factions. A martial world straight out of a wuxia film.',
-    },
-    description: {
-      vi: 'Hành động nhập vai cho game thủ thích đánh đấm có kỹ năng, không chỉ bấm auto: combo võ học, thế lực, chiến trường.',
-      en: 'An action RPG for players who want skill-based combat, not auto-play: martial combos, factions and battlefields.',
-    },
-    ...img('tieu-ngao-giang-ho', 'Tiếu Ngạo Giang Hồ'),
-    accent: '#9DE6C7',
-    links: { ...noLinks },
-    ctaType: 'auto',
-    featured: true,
-    order: 4,
-  },
-  {
-    slug: 'con-duong-to-lua',
-    name: 'Con Đường Tơ Lụa',
-    code: 'SRO',
-    genres: ['mmorpg'],
-    status: 'soon',
-    release: { vi: 'Sắp mở', en: 'Coming soon' },
-    platforms: ['pc'],
-    tagline: {
-      vi: 'Buôn lụa hay cướp lụa? Mỗi chuyến hàng là một canh bạc.',
-      en: 'Trade silk or steal it? Every caravan is a gamble.',
-    },
-    description: {
-      vi: 'MMORPG thương lộ cho dân thích vai trò xã hội, buôn bán và phục kích nhau trên đường: buôn bán, cướp đường, bảo tiêu.',
-      en: 'A trade-route MMORPG for players who love social roles, trading and ambushes: merchants, thieves and escorts.',
-    },
-    ...img('con-duong-to-lua', 'Con Đường Tơ Lụa'),
-    accent: '#FFB86B',
-    links: { ...noLinks },
-    ctaType: 'auto',
-    featured: false,
-    order: 5,
+    order: 1,
   },
 ];
 
@@ -176,49 +92,35 @@ export function getGameBySlug(slug: string): Game | undefined {
   return games.find((g) => g.slug === slug);
 }
 
-/** Genres with the number of games in each (chips "MMO 3"), only non-empty ones. */
-export function getGenresWithCount(locale: Locale): { slug: string; name: string; count: number }[] {
-  return genres
-    .map((g) => ({
-      slug: g.slug,
-      name: g.name[locale],
-      count: games.filter((game) => game.genres.includes(g.slug)).length,
-    }))
-    .filter((g) => g.count > 0);
+/** Genre slugs followed by platform tag slugs of a game ("mmo", "kiem-hiep", "pc", "mobile"). */
+export function getGameTagSlugs(game: Game): string[] {
+  const platforms = [...new Set(game.platforms.map((p) => platformTagOf[p]))];
+  return [...game.genres, ...platformTags.map((t) => t.slug).filter((slug) => platforms.includes(slug))];
+}
+
+/** Localized tag names of a game for the card ("MMO", "Kiếm hiệp", "PC", "Mobile"). */
+export function getGameTags(game: Game, locale: Locale): string[] {
+  const all = [...genres, ...platformTags];
+  return getGameTagSlugs(game)
+    .map((slug) => all.find((t) => t.slug === slug)?.name[locale])
+    .filter((name): name is string => Boolean(name));
 }
 
 /**
- * Primary CTA of a game card:
- * - ctaType override wins, else
- * - status 'soon'        -> preregister (preregister link, else homepage)
- * - platform includes h5 -> play (H5 link, else homepage)
- * - otherwise            -> download (store links; popover when > 1, else homepage)
- * `href` null means the button renders disabled ("coming soon").
+ * Filter chips with counts ("MMO 3"): genres first, then platform tags. Empty tags
+ * and tags matching every game (e.g. "PC" when all titles are on PC) are dropped,
+ * since they would filter nothing.
  */
-export function resolveGameCta(game: Game): ResolvedCta {
-  const { links } = game;
-  const kind =
-    game.ctaType !== 'auto'
-      ? game.ctaType
-      : game.status === 'soon'
-        ? 'preregister'
-        : game.platforms.includes('h5')
-          ? 'play'
-          : 'download';
-
-  const stores: ResolvedCta['stores'] = [];
-  if (kind === 'download') {
-    if (links.appStore) stores.push({ platform: 'ios', href: links.appStore });
-    if (links.googlePlay) stores.push({ platform: 'android', href: links.googlePlay });
-    if (links.pcDownload) stores.push({ platform: 'pc', href: links.pcDownload });
-  }
-
-  const href =
-    kind === 'preregister'
-      ? (links.preregister ?? links.homepage)
-      : kind === 'play'
-        ? (links.play ?? links.homepage)
-        : (stores.length === 1 ? stores[0].href : null) ?? links.homepage;
-
-  return { kind, href: href ?? null, stores: stores.length > 1 ? stores : [], external: Boolean(href && /^https?:/i.test(href)) };
+export function getGenresWithCount(locale: Locale): { slug: string; name: string; count: number }[] {
+  const total = games.length;
+  const withCount = (list: Genre[]) =>
+    list.map((t) => ({
+      slug: t.slug,
+      name: t.name[locale],
+      count: games.filter((game) => getGameTagSlugs(game).includes(t.slug)).length,
+    }));
+  return [
+    ...withCount(genres).filter((t) => t.count > 0),
+    ...withCount(platformTags).filter((t) => t.count > 0 && t.count < total),
+  ];
 }

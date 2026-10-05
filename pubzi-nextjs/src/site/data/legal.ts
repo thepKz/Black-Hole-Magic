@@ -1,6 +1,7 @@
 /**
  * Terms of use + privacy policy (MOCK static content, VI/EN).
- * TODO(company/legal): have the legal team review and replace this text.
+ * TODO(company/legal): have the legal team review and replace this text
+ * (account / top-up clauses were reworded: no site login; top-up = pay.blackholegame.vn).
  * Body paragraphs starting with "- " are list items (consecutive ones form one list).
  */
 import type { LegalPage } from '../lib/types';
@@ -12,7 +13,7 @@ export const terms: LegalPage = {
     vi: 'Điều khoản sử dụng website và dịch vụ của Black Hole Game.',
     en: 'Terms of use for the Black Hole Game website and services.',
   },
-  updatedAt: '2026-10-01',
+  updatedAt: '2026-10-05',
   sections: {
     vi: [
       {
@@ -27,8 +28,9 @@ export const terms: LegalPage = {
         id: 'tai-khoan',
         heading: '2. Tài khoản',
         body: [
-          'Việc đăng nhập và nạp được thực hiện qua hệ thống Trang ID của Black Hole. Bạn chịu trách nhiệm bảo mật thông tin đăng nhập và mọi hoạt động phát sinh từ tài khoản của mình.',
-          '- Cung cấp thông tin chính xác, đầy đủ khi đăng ký.',
+          'Website này không yêu cầu đăng nhập hay đăng ký. Tài khoản chơi game được tạo và quản lý trong hệ thống tài khoản riêng của từng trò chơi; việc nạp được thực hiện qua cổng nạp chính thức pay.blackholegame.vn. Bạn chịu trách nhiệm bảo mật thông tin tài khoản game và mọi hoạt động phát sinh từ tài khoản của mình.',
+          '- Chỉ nạp qua cổng chính thức pay.blackholegame.vn; Black Hole không chịu trách nhiệm với giao dịch qua kênh không chính thức.',
+          '- Cung cấp thông tin chính xác, đầy đủ khi đăng ký tài khoản game.',
           '- Không chia sẻ, mua bán hoặc chuyển nhượng tài khoản.',
           '- Thông báo ngay cho chúng tôi khi phát hiện truy cập trái phép.',
         ],
@@ -92,8 +94,9 @@ export const terms: LegalPage = {
         id: 'accounts',
         heading: '2. Accounts',
         body: [
-          'Sign-in and top-up are handled by the Black Hole ID portal. You are responsible for keeping your credentials safe and for all activity under your account.',
-          '- Provide accurate and complete information when registering.',
+          'This website does not require sign-in or registration. Game accounts are created and managed in each game’s own account system; top-up is done through the official portal pay.blackholegame.vn. You are responsible for keeping your game account credentials safe and for all activity under your account.',
+          '- Only top up through the official portal pay.blackholegame.vn; Black Hole is not responsible for transactions made through unofficial channels.',
+          '- Provide accurate and complete information when registering a game account.',
           '- Do not share, sell or transfer your account.',
           '- Notify us immediately of any unauthorised access.',
         ],
@@ -152,7 +155,7 @@ export const privacy: LegalPage = {
     vi: 'Cách Black Hole Game thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn.',
     en: 'How Black Hole Game collects, uses and protects your personal data.',
   },
-  updatedAt: '2026-10-01',
+  updatedAt: '2026-10-05',
   sections: {
     vi: [
       {
@@ -161,7 +164,7 @@ export const privacy: LegalPage = {
         body: [
           '- Thông tin bạn cung cấp: họ tên, email, nội dung khi gửi biểu mẫu liên hệ.',
           '- Dữ liệu kỹ thuật: địa chỉ IP, loại trình duyệt, thiết bị, trang đã xem (qua cookie và công cụ phân tích).',
-          '- Dữ liệu tài khoản game được xử lý trên hệ thống Trang ID theo chính sách riêng.',
+          '- Website không có đăng nhập. Dữ liệu tài khoản game được xử lý trong hệ thống tài khoản của từng trò chơi, dữ liệu giao dịch nạp được xử lý trên cổng nạp pay.blackholegame.vn, theo chính sách riêng của các hệ thống đó.',
         ],
       },
       {
@@ -223,7 +226,7 @@ export const privacy: LegalPage = {
         body: [
           '- Information you provide: name, email and message when using the contact form.',
           '- Technical data: IP address, browser, device and pages viewed (via cookies and analytics).',
-          '- Game account data is processed by the Black Hole ID portal under its own policy.',
+          '- This website has no sign-in. Game account data is processed by each game’s own account system, and top-up transaction data by the pay.blackholegame.vn portal, under their own policies.',
         ],
       },
       {

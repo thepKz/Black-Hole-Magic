@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { CSSProperties } from 'react';
 
 import { track } from '@site/components/analytics/track';
 
@@ -12,7 +13,7 @@ export interface NavItem {
   label: string;
   /** Locale-prefixed path or absolute URL. */
   href: string;
-  /** Opens in a new tab + ↗ icon (Trang ID top-up). */
+  /** Opens in a new tab + ↗ icon (top-up portal). */
   external?: boolean;
   /** Cyan "new posts" dot (screen-reader text = dotLabel). */
   dot?: boolean;
@@ -52,14 +53,19 @@ export function NavLinks({ items, homeHref, newTabLabel, dotLabel, variant = 'ba
 
   return (
     <ul className={cn(drawer ? 'flex flex-col gap-1' : 'flex items-center gap-1', className)} role="list">
-      {items.map((item) => {
+      {items.map((item, i) => {
         const active = !item.external && isActivePath(pathname, item.href, homeHref);
+        // Hover wash is a pseudo-element faded with opacity (no background/colour transitions).
         const cls = cn(
-          'group flex items-center gap-1.5 rounded-md no-underline transition-colors duration-150',
-          drawer ? 'h-12 px-4 text-base' : 'h-10 px-3 text-sm',
+          'group relative isolate flex items-center gap-[5px] rounded-md no-underline',
+          drawer ? 'h-12 px-4 text-base' : 'h-9 px-3 text-sm',
           active
             ? 'bg-accent/14 font-medium text-accent-700 hover:text-accent-700'
-            : 'text-ink/70 hover:bg-ink/7 hover:text-ink',
+            : [
+                'text-ink/70 hover:text-ink',
+                'before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-ink/7 before:opacity-0 before:transition-opacity before:duration-150',
+                'hover:before:opacity-100',
+              ],
         );
         const label = (
           <span className="relative">
@@ -77,7 +83,12 @@ export function NavLinks({ items, homeHref, newTabLabel, dotLabel, variant = 'ba
         );
 
         return (
-          <li key={item.key}>
+          <li
+            key={item.key}
+            // Drawer: items rise in with a stagger when the dialog opens (`.drawer-item`, site.css).
+            className={drawer ? 'drawer-item' : undefined}
+            style={drawer ? ({ '--i': i } as CSSProperties) : undefined}
+          >
             {item.external ? (
               <a
                 href={item.href}
@@ -90,7 +101,7 @@ export function NavLinks({ items, homeHref, newTabLabel, dotLabel, variant = 'ba
                 }}
               >
                 {label}
-                <ExternalIcon className="opacity-70 transition-transform group-hover:translate-x-px group-hover:-translate-y-px" />
+                <ExternalIcon className="opacity-70 transition-transform duration-150 group-hover:translate-x-px group-hover:-translate-y-px" />
                 {item.href.startsWith('http') ? <span className="sr-only"> {newTabLabel}</span> : null}
               </a>
             ) : (

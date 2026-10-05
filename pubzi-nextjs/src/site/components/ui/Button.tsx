@@ -15,20 +15,21 @@ interface ButtonStyleOptions {
   block?: boolean;
 }
 
+// `.fx` (site.css): hover wash on ::before (opacity only) + press nudge (transform).
+// Colours swap instantly; nothing but opacity/transform is transitioned.
 const base =
-  'relative inline-flex shrink-0 items-center justify-center gap-2 rounded-md border font-medium leading-none whitespace-nowrap select-none no-underline ' +
-  'transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out-soft active:translate-y-px ' +
-  'disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0 ' +
-  'aria-disabled:cursor-not-allowed aria-disabled:opacity-45 [&_svg]:shrink-0';
+  'fx inline-flex shrink-0 items-center justify-center gap-2 rounded-md border font-medium leading-none whitespace-nowrap select-none no-underline ' +
+  'disabled:cursor-not-allowed disabled:opacity-45 aria-disabled:cursor-not-allowed aria-disabled:opacity-45 [&_svg]:shrink-0';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'border-accent bg-accent text-white hover:border-accent-600 hover:bg-accent-600 hover:text-white active:bg-accent-700',
+    'border-accent bg-accent text-white hover:text-white active:text-white [--fx-inset:-1px] [--fx-bg:var(--color-accent-600)] [--fx-press:var(--color-accent-700)]',
   secondary:
-    'border-divider bg-surface text-ink hover:border-neutral-300 hover:bg-neutral-50 hover:text-ink active:bg-neutral-100',
-  ghost: 'border-transparent bg-transparent text-ink hover:bg-ink/7 hover:text-ink active:bg-ink/12',
-  soft: 'border-transparent bg-neutral-100 text-ink/75 hover:bg-neutral-200 hover:text-ink active:bg-neutral-300',
-  inverse: 'border-white bg-white text-ink hover:border-accent-50 hover:bg-accent-50 hover:text-accent-800',
+    'border-divider bg-surface text-ink hover:border-neutral-300 hover:text-ink [--fx-bg:rgb(28_22_51/.05)] [--fx-press:rgb(28_22_51/.1)]',
+  ghost: 'border-transparent bg-transparent text-ink hover:text-ink [--fx-inset:-1px]',
+  soft: 'border-transparent bg-neutral-100 text-ink/75 hover:text-ink [--fx-inset:-1px] [--fx-bg:var(--color-neutral-200)] [--fx-press:var(--color-neutral-300)]',
+  inverse:
+    'border-white bg-white text-ink hover:text-accent-800 [--fx-inset:-1px] [--fx-bg:var(--color-accent-50)] [--fx-press:var(--color-accent-100)]',
 };
 
 const sizes: Record<ButtonSize, { text: string; icon: string }> = {

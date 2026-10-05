@@ -1,7 +1,7 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { foldText } from '@/cms/lib/text';
 import { track } from '@site/components/analytics/track';
@@ -9,6 +9,7 @@ import { Button } from '@site/components/ui/Button';
 import { Chip } from '@site/components/ui/Chip';
 import { EmptyState } from '@site/components/ui/EmptyState';
 import { SearchInput } from '@site/components/ui/SearchInput';
+import { cn } from '@site/lib/cn';
 
 /** One server-rendered game card + the data needed to filter it on the client. */
 export interface GamesBrowserItem {
@@ -63,6 +64,17 @@ function matches(item: GamesBrowserItem, genre: string, foldedQuery: string) {
   return foldedQuery.split(' ').every((word) => haystack.includes(word));
 }
 
+/**
+ * Enter motion for cards that mount after an interaction (filter / search /
+ * "Xem thêm"): @starting-style fade + 8px rise, staggered by --i (cap 8, 40ms).
+ * Only opacity/translate; the card's own hover lift is a transform on a child,
+ * so the two never fight. Never applied to the first render (SSR content shows at once).
+ */
+const enterItem =
+  'transition-[opacity,translate] duration-(--dur-3) ease-standard delay-[calc(min(var(--i,0),8)*40ms)] starting:translate-y-2 starting:opacity-0';
+const enterBlock =
+  'transition-[opacity,translate] duration-(--dur-3) ease-standard starting:translate-y-1.5 starting:opacity-0';
+
 interface ViewProps extends GamesBrowserProps {
   genre: string;
   query: string;
@@ -72,16 +84,41 @@ interface ViewProps extends GamesBrowserProps {
   onReset?: () => void;
 }
 
-function GamesView({ items, genres, labels, pageSize = 12, className, genre, query, onGenre, onQuery, onReset }: ViewProps) {
+function GamesView({
+  items,
+  genres,
+  labels,
+  pageSize = 12,
+  className,
+  genre,
+  query,
+  onGenre,
+  onQuery,
+  onReset,
+}: ViewProps) {
   const foldedQuery = foldText(query);
-  const filtered = useMemo(() => items.filter((item) => matches(item, genre, foldedQuery)), [items, genre, foldedQuery]);
+  const filtered = useMemo(
+    () => items.filter((item) => matches(item, genre, foldedQuery)),
+    [items, genre, foldedQuery],
+  );
 
   // Reset the "Xem thêm" window whenever the filter changes.
   const filterKey = `${genre}|${foldedQuery}`;
-  const [limit, setLimit] = useState({ key: filterKey, value: pageSize });
-  const visibleCount = limit.key === filterKey ? limit.value : pageSize;
+  // `from` = index of the first card added by the last "Xem thêm" (stagger restarts there).
+  const [limit, setLimit] = useState({ key: filterKey, value: pageSize, from: 0 });
+  const sameFilter = limit.key === filterKey;
+  const visibleCount = sameFilter ? limit.value : pageSize;
+  const staggerFrom = sameFilter ? limit.from : 0;
   const visible = filtered.slice(0, visibleCount);
   const remaining = filtered.length - visible.length;
+
+  // Animate only content that mounts after the first interaction.
+  const [interacted, setInteracted] = useState(false);
+  const [seenKey, setSeenKey] = useState(filterKey);
+  if (seenKey !== filterKey) {
+    setSeenKey(filterKey);
+    if (!interacted) setInteracted(true);
+  }
 
   const listRef = useRef<HTMLUListElement>(null);
   const focusIndex = useRef<number | null>(null);
@@ -95,7 +132,8 @@ function GamesView({ items, genres, labels, pageSize = 12, className, genre, que
 
   const loadMore = () => {
     focusIndex.current = visible.length;
-    setLimit({ key: filterKey, value: visibleCount + pageSize });
+    setInteracted(true);
+    setLimit({ key: filterKey, value: visibleCount + pageSize, from: visible.length });
   };
 
   const total = items.length;
@@ -113,29 +151,38 @@ function GamesView({ items, genres, labels, pageSize = 12, className, genre, que
 
   return (
     <div ref={rootRef} className={className}>
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div
-          role="group"
-          aria-label={labels.genreFilter}
-          className="scrollbar-none -mx-[var(--gutter)] flex gap-1.5 overflow-x-auto px-[var(--gutter)] md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
-        >
-          <Chip label={labels.all} count={total} selected={genre === ALL} onClick={() => onGenre?.(ALL)} />
-          {genres.map((g) => (
-            <Chip key={g.slug} label={g.name} count={g.count} selected={genre === g.slug} onClick={() => onGenre?.(g.slug)} />
-          ))}
+      {/* Filters + search only make sense with 2+ games; hidden while a single title is published. */}
+      {total > 1 ? (
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div
+            role="group"
+            aria-label={labels.genreFilter}
+            className="scrollbar-none -mx-[var(--gutter)] flex gap-1.5 overflow-x-auto px-[var(--gutter)] md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+          >
+            <Chip label={labels.all} count={total} selected={genre === ALL} onClick={() => onGenre?.(ALL)} />
+            {genres.map((g) => (
+              <Chip
+                key={g.slug}
+                label={g.name}
+                count={g.count}
+                selected={genre === g.slug}
+                onClick={() => onGenre?.(g.slug)}
+              />
+            ))}
+          </div>
+          <SearchInput
+            label={labels.searchGame}
+            placeholder={labels.searchGame}
+            clearLabel={labels.clearSearch}
+            param="q"
+            resetParams={[]}
+            navigation="history"
+            trackContext="games"
+            onValueChange={onQuery}
+            className="md:w-[280px] md:shrink-0"
+          />
         </div>
-        <SearchInput
-          label={labels.searchGame}
-          placeholder={labels.searchGame}
-          clearLabel={labels.clearSearch}
-          param="q"
-          resetParams={[]}
-          navigation="router"
-          trackContext="games"
-          onValueChange={onQuery}
-          className="md:w-[280px] md:shrink-0"
-        />
-      </div>
+      ) : null}
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {foldedQuery ? `${fill(labels.resultsFor, { q: query })}: ` : ''}
@@ -144,13 +191,23 @@ function GamesView({ items, genres, labels, pageSize = 12, className, genre, que
 
       {filtered.length ? (
         <>
+          {/* Keyed by the filter: a new result set remounts and fades in as a whole. */}
           <ul
+            key={filterKey}
             ref={listRef}
             role="list"
-            className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:gap-4 md:grid-cols-[repeat(auto-fill,minmax(260px,1fr))]"
+            className={cn(
+              'm-0 grid list-none gap-4 p-0',
+              // Single game -> its spotlight card spans the full row (cn() does not merge, so pick one).
+              items.length === 1 ? 'grid-cols-1' : 'grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))]',
+            )}
           >
-            {visible.map((item) => (
-              <li key={item.slug} className="min-w-0">
+            {visible.map((item, i) => (
+              <li
+                key={item.slug}
+                className={cn('min-w-0', interacted && enterItem)}
+                style={interacted && i > staggerFrom ? ({ '--i': i - staggerFrom } as CSSProperties) : undefined}
+              >
                 {item.card}
               </li>
             ))}
@@ -166,6 +223,7 @@ function GamesView({ items, genres, labels, pageSize = 12, className, genre, que
         </>
       ) : (
         <EmptyState
+          className={cn(interacted && enterBlock)}
           title={labels.emptyTitle}
           description={labels.emptyDesc}
           action={
@@ -182,17 +240,15 @@ function GamesView({ items, genres, labels, pageSize = 12, className, genre, que
 }
 
 function GamesBrowserInner(props: GamesBrowserProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [, startTransition] = useTransition();
 
   const validGenres = useMemo(() => new Set(props.genres.map((g) => g.slug)), [props.genres]);
   const urlGenreRaw = searchParams.get('genre') ?? ALL;
   const urlGenre = validGenres.has(urlGenreRaw) ? urlGenreRaw : ALL;
   const urlQuery = (searchParams.get('q') ?? '').trim();
 
-  // Local state = instant UI; the URL follows via router.replace.
+  // Local state = instant UI; the URL follows via history.replaceState (static page,
+  // no server round-trip; Next keeps useSearchParams in sync).
   const [genre, setGenre] = useState(urlGenre);
   const [query, setQuery] = useState(urlQuery);
 
@@ -205,22 +261,19 @@ function GamesBrowserInner(props: GamesBrowserProps) {
     setQuery(urlQuery);
   }
 
-  const replaceUrl = useCallback(
-    (next: { genre?: string; q?: string }) => {
-      const params = new URLSearchParams(window.location.search);
-      if (next.genre !== undefined) {
-        if (next.genre === ALL) params.delete('genre');
-        else params.set('genre', next.genre);
-      }
-      if (next.q !== undefined) {
-        if (next.q) params.set('q', next.q);
-        else params.delete('q');
-      }
-      const qs = params.toString();
-      startTransition(() => router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false }));
-    },
-    [pathname, router],
-  );
+  const replaceUrl = useCallback((next: { genre?: string; q?: string }) => {
+    const params = new URLSearchParams(window.location.search);
+    if (next.genre !== undefined) {
+      if (next.genre === ALL) params.delete('genre');
+      else params.set('genre', next.genre);
+    }
+    if (next.q !== undefined) {
+      if (next.q) params.set('q', next.q);
+      else params.delete('q');
+    }
+    const qs = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+  }, []);
 
   const onGenre = (slug: string) => {
     if (slug === genre) return;
@@ -239,8 +292,8 @@ function GamesBrowserInner(props: GamesBrowserProps) {
 }
 
 /**
- * /games browser: genre chips with counts, accent-insensitive search, URL state
- * (?genre=&q=, router.replace without scroll), instant client filtering, "Xem thêm"
+ * /games browser: genre / platform chips with counts, accent-insensitive search, URL state
+ * (?genre=&q=, history.replaceState - no scroll, no server round-trip), instant client filtering, "Xem thêm"
  * paging and an empty state with reset. Cards are rendered on the server and passed in.
  * The Suspense fallback (static prerender, before hydration) shows the full list.
  */
@@ -251,4 +304,3 @@ export function GamesBrowser(props: GamesBrowserProps) {
     </Suspense>
   );
 }
-

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -11,6 +10,8 @@ import { format, href, type Locale } from '@site/i18n';
 import { toNewsImage } from '@site/lib/news';
 import type { RichTextContent } from '@site/lib/types';
 
+import { FadeImage } from './FadeImage';
+import { richBlockConverters } from './rich-blocks/converters';
 import { newsStrings } from './strings';
 import { VideoEmbed } from './VideoEmbed';
 
@@ -20,7 +21,7 @@ import { VideoEmbed } from './VideoEmbed';
  * Custom converters:
  * - heading  : deterministic ids on root-level h2/h3 (same algorithm as
  *              `lexicalHeadings()` -> the table of contents links match) + "#" anchor.
- * - upload   : next/image (responsive srcset, lazy) + <figcaption>.
+ * - upload   : next/image (responsive srcset, lazy, fade-in on load) + <figcaption>.
  * - link     : internal news links via next/link, external links get
  *              target/rel (noopener + editor-chosen nofollow/sponsored/ugc).
  * - table    : wrapped in `.table-scroll` (horizontal scroll on mobile), th/td,
@@ -60,6 +61,7 @@ const SAFE_URL = /^(https?:|mailto:|tel:|\/(?!\/)|#)/i;
 
 function makeConverters(locale: Locale): JSXConvertersFunction {
   const s = newsStrings(locale);
+  const rich = richBlockConverters(locale);
   // Fresh per render: ids are de-duplicated in document order (matches lexicalHeadings()).
   const seen = new Map<string, number>();
 
@@ -133,7 +135,8 @@ function makeConverters(locale: Locale): JSXConvertersFunction {
         const isSvg = mime === 'image/svg+xml';
         return (
           <figure>
-            <Image
+            {/* Sized by width/height (no CLS); fades in as it arrives. */}
+            <FadeImage
               src={img.src}
               width={img.width}
               height={img.height}
@@ -177,6 +180,9 @@ function makeConverters(locale: Locale): JSXConvertersFunction {
         );
       },
 
+      // Newsroom blocks + inline image size/alignment (src/site/components/news/rich-blocks).
+      ...rich.nodes,
+
       blocks: {
         ...(defaultConverters as { blocks?: Record<string, unknown> }).blocks,
         videoEmbed: ({ node }) => {
@@ -209,6 +215,7 @@ function makeConverters(locale: Locale): JSXConvertersFunction {
             </div>
           );
         },
+        ...rich.blocks,
       },
     };
     return converters;

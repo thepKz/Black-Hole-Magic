@@ -51,22 +51,68 @@ function useActiveHeading(ids: string[], enabled: boolean) {
   return active;
 }
 
-function TocList({ items, active, onNavigate }: { items: TocItem[]; active: string | null; onNavigate?: () => void }) {
+function TocList({
+  items,
+  active,
+  onNavigate,
+  indicator = false,
+}: {
+  items: TocItem[];
+  active: string | null;
+  onNavigate?: (id: string) => void;
+  /** Sidebar: one accent bar slides to the active item (transform only). */
+  indicator?: boolean;
+}) {
+  const listRef = useRef<HTMLOListElement>(null);
+  const barRef = useRef<HTMLSpanElement>(null);
+
+  // Move the bar when the active item changes (and when the list resizes, e.g.
+  // fonts / wrapping). Reads offsetTop/offsetHeight once per change, writes one
+  // transform: translateY(top) scaleY(height) on a 1px bar - no layout animation.
+  useEffect(() => {
+    if (!indicator) return;
+    const list = listRef.current;
+    const bar = barRef.current;
+    if (!list || !bar) return;
+    const place = () => {
+      const link = active
+        ? Array.from(list.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')).find((a) => a.getAttribute('href') === `#${active}`)
+        : undefined;
+      if (!link) {
+        bar.style.opacity = '0';
+        return;
+      }
+      bar.style.opacity = '1';
+      bar.style.transform = `translateY(${link.offsetTop}px) scaleY(${link.offsetHeight})`;
+    };
+    place();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(place);
+    ro.observe(list);
+    return () => ro.disconnect();
+  }, [active, indicator]);
+
   return (
-    <ol role="list" className="m-0 flex list-none flex-col gap-0.5 p-0">
+    <ol ref={listRef} role="list" className={cn('relative m-0 flex list-none flex-col gap-0.5 p-0', indicator && 'border-l-2 border-divider')}>
+      {indicator ? (
+        <span
+          ref={barRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 -left-0.5 h-px w-0.5 origin-top bg-accent opacity-0 transition-[transform,opacity] duration-(--dur-3) ease-emphasized"
+        />
+      ) : null}
       {items.map((item) => {
         const isActive = item.id === active;
         return (
           <li key={item.id} className={cn(item.level === 3 && 'pl-3.5')}>
             <a
               href={`#${item.id}`}
-              onClick={onNavigate}
+              onClick={() => onNavigate?.(item.id)}
               aria-current={isActive ? 'location' : undefined}
               className={cn(
-                'block border-l-2 py-1.5 pr-1 pl-3 text-[13px] leading-snug no-underline transition-colors duration-150',
-                isActive
-                  ? 'border-accent font-medium text-accent-700'
-                  : 'border-divider text-muted hover:border-accent-300 hover:text-ink',
+                'block py-1.5 pr-1 pl-3 text-[13px] leading-snug no-underline',
+                !indicator && 'border-l-2 border-divider',
+                isActive ? 'font-medium text-accent-700' : 'text-muted hover:text-ink',
               )}
             >
               {item.text}
@@ -82,7 +128,10 @@ function TocList({ items, active, onNavigate }: { items: TocItem[]; active: stri
 export function TableOfContents({ items, label, variant, className }: TableOfContentsProps) {
   const idKey = items.map((i) => i.id).join('|');
   const ids = useMemo(() => (idKey ? idKey.split('|') : []), [idKey]);
-  const active = useActiveHeading(ids, variant === 'sidebar');
+  const observed = useActiveHeading(ids, variant === 'sidebar');
+  // A click jumps the indicator at once (the observer catches up after the scroll).
+  const [clicked, setClicked] = useState<{ id: string; from: string | null } | null>(null);
+  const active = clicked && clicked.from === observed ? clicked.id : observed;
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
   if (variant === 'collapsible') {
@@ -117,7 +166,7 @@ export function TableOfContents({ items, label, variant, className }: TableOfCon
         <ListBulletsIcon className="size-4" aria-hidden="true" weight="bold" />
         {label}
       </p>
-      <TocList items={items} active={active} />
+      <TocList items={items} active={active} indicator onNavigate={(id) => setClicked({ id, from: observed })} />
     </nav>
   );
 }

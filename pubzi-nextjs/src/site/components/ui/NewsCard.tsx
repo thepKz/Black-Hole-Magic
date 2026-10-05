@@ -56,14 +56,14 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
   return (
     <article
       className={cn(
-        'card-lift group relative flex rounded-xl bg-surface p-2.5 shadow-sm',
-        horizontal ? 'flex-col gap-3 sm:flex-row sm:items-start sm:gap-4' : 'h-full flex-col gap-2 pb-5',
+        'card-lift group flex rounded-xl bg-surface p-2.5 shadow-sm',
+        horizontal ? 'flex-col gap-3 sm:flex-row sm:items-start sm:gap-4' : 'h-full flex-col gap-2 pb-[18px]',
         className,
       )}
     >
       <div
         className={cn(
-          'relative aspect-video shrink-0 overflow-hidden rounded-lg bg-neutral-100',
+          'relative aspect-video shrink-0 overflow-hidden rounded-md bg-neutral-100',
           horizontal ? 'w-full sm:w-[42%] sm:max-w-60' : 'mb-1.5 w-full',
           // Large card stretched by a taller sibling column (news featured block):
           // the image grows to fill the height instead of leaving a gap above "Chi tiết".
@@ -77,7 +77,7 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
             fill
             preload={preload}
             sizes={sizes ?? defaultSizes}
-            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04]"
+            className="media-zoom object-cover"
             style={{ objectPosition: `${item.cover.focal.x}% ${item.cover.focal.y}%` }}
           />
         ) : (
@@ -91,14 +91,14 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
       </div>
 
       <div className={cn('flex min-w-0 flex-col gap-2', horizontal ? 'flex-1 sm:py-1' : large ? 'flex-1 px-1.5 lg:flex-none' : 'flex-1 px-1.5')}>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-accent-600">
-          {horizontal && item.category ? <span className="font-medium">{item.category.name}</span> : null}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-subtle">
+          {horizontal && item.category ? <span className="font-medium text-accent-600">{item.category.name}</span> : null}
           {horizontal && item.category ? <span aria-hidden="true" className="text-neutral-300">•</span> : null}
           <time dateTime={item.publishedAt}>{formatDate(item.publishedAt, locale)}</time>
           {item.readingTime > 0 ? (
             <>
               <span aria-hidden="true" className="text-neutral-300">•</span>
-              <span className="text-subtle">{format(t.readTime, { min: item.readingTime })}</span>
+              <span>{format(t.readTime, { min: item.readingTime })}</span>
             </>
           ) : null}
         </div>
@@ -106,12 +106,12 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
         <Heading
           className={cn(
             'm-0 line-clamp-2 font-medium tracking-[-0.01em] text-ink',
-            large ? 'text-xl leading-snug md:text-2xl' : horizontal ? 'text-base leading-snug' : 'text-lg leading-[1.35]',
+            large ? 'text-xl leading-snug md:text-2xl' : horizontal ? 'text-base leading-snug' : 'text-[17px] leading-[1.4]',
           )}
         >
           <Link
             href={url}
-            className="text-inherit no-underline transition-colors after:absolute after:inset-0 after:rounded-xl after:content-[''] group-hover:text-accent-700 hover:text-accent-700"
+            className="text-inherit no-underline after:absolute after:inset-0 after:rounded-xl after:content-[''] group-hover:text-accent-700 hover:text-accent-700 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-accent"
           >
             {item.title}
           </Link>
@@ -126,7 +126,7 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
         {!horizontal ? (
           <span
             aria-hidden="true"
-            className="mt-auto self-start border-b border-accent pt-1 text-[13px] font-medium text-link transition-colors group-hover:text-accent-700"
+            className="mt-auto inline-flex items-center gap-1 self-start border-b border-accent pt-1 text-[13px] font-medium text-link group-hover:text-accent-700"
           >
             {t.detail}
           </span>

@@ -10,10 +10,6 @@ const vi = {
   topup: 'Nạp',
   news: 'Tin tức',
   support: 'Hỗ trợ',
-  login: 'Đăng nhập',
-  playNow: 'Chơi ngay',
-  download: 'Tải xuống',
-  preReg: 'Đăng ký trước',
   gameSite: 'Trang chủ game',
   newKicker: 'Nổi bật',
   newTitle: 'Mới phát hành & Sắp ra mắt',
@@ -100,9 +96,9 @@ const vi = {
   bannerSlideOf: 'Banner {n} / {total}',
 
   // ---- Status tags (spec wording) ----
-  statusNew: 'Mới ra mắt',
+  statusNew: 'MỚI',
   statusSoon: 'Sắp ra mắt',
-  statusHot: 'Đang hot',
+  statusHot: 'HOT',
 
   // ---- Home ----
   featuredGames: 'Game nổi bật',
@@ -114,9 +110,7 @@ const vi = {
   clearSearch: 'Xoá tìm kiếm',
   loadMore: 'Xem thêm',
   fanpage: 'Fanpage',
-  appStore: 'App Store',
-  googlePlay: 'Google Play',
-  chooseStore: 'Chọn kho tải',
+  /** Disabled game-card button tooltip (link not provided yet). */
   releaseDate: 'Ngày phát hành',
   platform: 'Nền tảng',
   platformPc: 'PC',

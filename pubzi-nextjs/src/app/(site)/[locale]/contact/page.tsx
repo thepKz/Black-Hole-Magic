@@ -5,7 +5,6 @@ import { ContactForm } from '@site/components/contact/ContactForm';
 import { ContactInfoCard, HeadquartersInfo } from '@site/components/contact/ContactInfo';
 import { contactFormLabels } from '@site/components/contact/labels';
 import { MapEmbed } from '@site/components/contact/MapEmbed';
-import { Breadcrumb } from '@site/components/ui/Breadcrumb';
 import { Container } from '@site/components/ui/Container';
 import { contactTypes, site } from '@site/data/site';
 import { absoluteUrl, getDictionary, href, isLocale, pick } from '@site/i18n';
@@ -45,19 +44,14 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
   };
 
   return (
-    <main id="main" tabIndex={-1} className="section-b pt-6 outline-none md:pt-8">
+    <main id="main" tabIndex={-1} className="section-b pt-10 outline-none md:pt-14">
       <Container>
-        <Breadcrumb
-          label={t.breadcrumb}
-          items={[{ label: t.home, href: href(locale, '/') }, { label: t.contact }]}
-          className="mb-6 md:mb-10"
-        />
-
+        {/* Design v2: two columns (auto-fit 420px), 48px gap; breadcrumb lives in JSON-LD only. */}
         <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-12">
           {/* Left: heading, channels, HQ + map */}
           <div className="flex min-w-0 flex-col gap-8 md:gap-10">
             <div className="flex flex-col gap-2">
-              <p className="m-0 text-[11px] font-medium tracking-[0.12em] text-accent-600 uppercase">{t.contactKicker}</p>
+              <p className="kicker">{t.contactKicker}</p>
               <h1 className="m-0 text-[30px] leading-tight tracking-[-0.02em] text-ink text-balance md:text-[36px]">
                 {t.contactTitle}
               </h1>

@@ -61,7 +61,7 @@ export function VideoEmbed({ video, aspectRatio, title, playLabel }: VideoEmbedP
         alt=""
         loading="lazy"
         decoding="async"
-        className="absolute inset-0 m-0 size-full rounded-none object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+        className="absolute inset-0 m-0 size-full rounded-none object-cover opacity-90 transition-opacity duration-(--dur-3) group-hover:opacity-100"
       />
       <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/20" />
       <button
@@ -70,7 +70,7 @@ export function VideoEmbed({ video, aspectRatio, title, playLabel }: VideoEmbedP
         aria-label={playLabel}
         className="absolute inset-0 grid size-full cursor-pointer place-items-center border-0 bg-transparent p-0"
       >
-        <span className="grid size-16 place-items-center rounded-full bg-accent text-white shadow-glow-accent transition-transform duration-200 ease-out-soft group-hover:scale-110 md:size-[72px]">
+        <span className="grid size-16 place-items-center rounded-full bg-accent text-white shadow-glow-accent transition-transform duration-(--dur-2) ease-standard group-hover:scale-110 md:size-[72px]">
           <PlayIcon weight="fill" className="ml-1 size-7 md:size-8" aria-hidden="true" />
         </span>
       </button>

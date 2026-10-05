@@ -1,173 +1,192 @@
-import type { Block, TextFieldSingleValidation } from 'payload';
+import type { Field } from 'payload';
 
 import {
+  AlignFeature,
+  BlockquoteFeature,
   BlocksFeature,
-  CodeBlock,
+  BoldFeature,
+  ChecklistFeature,
   EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
+  HorizontalRuleFeature,
+  IndentFeature,
+  InlineCodeFeature,
+  InlineToolbarFeature,
+  ItalicFeature,
   lexicalEditor,
   LinkFeature,
+  OrderedListFeature,
+  ParagraphFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical';
 
-import { parseVideoUrl, VIDEO_ASPECT_RATIOS } from './lib/video';
+import { NEWS_BLOCKS } from './blocks';
 
 /**
  * Rich-text editors.
  *
- * Payload's default features already include: paragraph, headings h1-h6,
- * bold/italic/underline/strikethrough/sub/sup/inline code, ordered/unordered/
- * checklist, link, relationship, blockquote, upload, horizontal rule,
- * text alignment, indent and the floating inline toolbar.
- *
- * `defaultEditor` (config-wide) = defaults + upload caption + fixed toolbar + tables.
- * `newsEditor` (news.content)   = the full article toolkit:
- *   - upload node with a localized `caption` (alt comes from the media doc)
- *   - links: external URL or internal link to another news article, "open in new tab",
- *     plus `rel` options (nofollow / sponsored / ugc)
- *   - EXPERIMENTAL_TableFeature (tables with header rows, cell merge)
- *   - blocks: `videoEmbed` (YouTube / Vimeo / mp4) and `code` (syntax-highlighted)
- *   - relationship node removed (not rendered on the site)
- *   - headings limited to h2-h4 (h1 = article title)
+ * `defaultEditor` (config-wide fallback): Payload defaults + image caption,
+ *   fixed toolbar and tables.
+ * `newsEditor` (news.content): the full newsroom toolkit, features listed
+ *   explicitly (order = toolbar order):
+ *   - text: paragraph, H2-H4 (H1 = article title; H2/H3 feed the table of
+ *     contents), bold / italic / underline / strike, sub / superscript, inline code
+ *   - layout: align (left/center/right/justify), indent, bullet / numbered /
+ *     checklist, blockquote, horizontal rule, table
+ *   - links: external URL or internal link to another article, "open in new tab",
+ *     rel options (nofollow / sponsored / ugc)
+ *   - inline image (upload node, media library only) with caption + display size
+ *     (full / medium / small) + alignment for non-full images
+ *   - blocks (src/cms/blocks): gallery, videoEmbed (link or upload), socialEmbed,
+ *     quote (pull quote with source), callout, relatedNews, cta, code
+ *   - fixed toolbar on top + floating inline toolbar on selection
+ *   - relationship node removed (not rendered on the site; use "Đọc thêm" block).
  */
 
-const uploadWithCaption = () =>
-  UploadFeature({
-    collections: {
-      media: {
-        fields: [
-          {
-            name: 'caption',
-            type: 'text',
-            label: { vi: 'Chú thích ảnh', en: 'Caption' },
-            admin: {
-              description: {
-                vi: 'Hiển thị dưới ảnh. Để trống sẽ dùng chú thích trong thư viện ảnh.',
-                en: 'Shown under the image. Empty = use the caption from the media library.',
-              },
-            },
-          },
-        ],
+/* ------------------------------------------------------------------ */
+/* Inline image (upload node) fields                                    */
+/* ------------------------------------------------------------------ */
+
+/** Values of the upload node's `size` field (renderer maps them to widths). */
+export const IMAGE_DISPLAY_SIZES = ['full', 'medium', 'small'] as const;
+export type ImageDisplaySize = (typeof IMAGE_DISPLAY_SIZES)[number];
+/** Values of the upload node's `align` field (only used when size !== 'full'). */
+export const IMAGE_ALIGNMENTS = ['center', 'left', 'right'] as const;
+export type ImageAlignment = (typeof IMAGE_ALIGNMENTS)[number];
+
+const inlineImageFields: Field[] = [
+  {
+    name: 'caption',
+    type: 'text',
+    label: { vi: 'Chú thích ảnh', en: 'Caption' },
+    admin: {
+      description: {
+        vi: 'Hiện dưới ảnh. Để trống sẽ dùng chú thích trong Thư viện ảnh.',
+        en: 'Shown under the image. Empty = the caption from the media library.',
       },
     },
+  },
+  {
+    type: 'row',
+    fields: [
+      {
+        name: 'size',
+        type: 'select',
+        defaultValue: 'full',
+        label: { vi: 'Kích thước hiển thị', en: 'Display size' },
+        options: [
+          { label: { vi: 'Toàn khung', en: 'Full width' }, value: 'full' },
+          { label: { vi: 'Vừa', en: 'Medium' }, value: 'medium' },
+          { label: { vi: 'Nhỏ', en: 'Small' }, value: 'small' },
+        ],
+        admin: { width: '50%' },
+      },
+      {
+        name: 'align',
+        type: 'select',
+        defaultValue: 'center',
+        label: { vi: 'Căn ảnh', en: 'Alignment' },
+        options: [
+          { label: { vi: 'Căn giữa', en: 'Center' }, value: 'center' },
+          { label: { vi: 'Căn trái (chữ bao quanh)', en: 'Left (text wraps)' }, value: 'left' },
+          { label: { vi: 'Căn phải (chữ bao quanh)', en: 'Right (text wraps)' }, value: 'right' },
+        ],
+        admin: {
+          width: '50%',
+          condition: (_, siblingData) => (siblingData as { size?: string } | undefined)?.size !== 'full',
+        },
+      },
+    ],
+  },
+];
+
+const inlineImage = () =>
+  UploadFeature({
+    enabledCollections: ['media'],
+    collections: { media: { fields: inlineImageFields } },
+    // the media doc itself is all the site needs (url, alt, sizes, caption, credit)
+    maxDepth: 1,
   });
+
+/* ------------------------------------------------------------------ */
+/* Links                                                                */
+/* ------------------------------------------------------------------ */
+
+const newsLink = () =>
+  LinkFeature({
+    enabledCollections: ['news'],
+    maxDepth: 1,
+    fields: ({ defaultFields }) => [
+      ...defaultFields,
+      {
+        name: 'rel',
+        type: 'select',
+        hasMany: true,
+        label: { vi: 'Thuộc tính rel', en: 'Rel attribute' },
+        options: [
+          { label: { vi: 'nofollow (không tin cậy)', en: 'nofollow' }, value: 'nofollow' },
+          { label: { vi: 'sponsored (quảng cáo/tài trợ)', en: 'sponsored' }, value: 'sponsored' },
+          { label: { vi: 'ugc (nội dung người dùng)', en: 'ugc' }, value: 'ugc' },
+        ],
+        admin: {
+          condition: (_, siblingData) => (siblingData as { linkType?: string } | undefined)?.linkType !== 'internal',
+          description: {
+            vi: 'Chỉ dùng cho link ra ngoài. Link quảng cáo/tài trợ hãy chọn "sponsored".',
+            en: 'External links only. Use "sponsored" for paid links.',
+          },
+        },
+      },
+    ],
+  });
+
+/* ------------------------------------------------------------------ */
+/* Editors                                                              */
+/* ------------------------------------------------------------------ */
 
 export const defaultEditor = lexicalEditor({
   features: ({ defaultFeatures }) => [
     ...defaultFeatures.filter((f) => f.key !== 'upload'),
-    uploadWithCaption(),
+    inlineImage(),
     FixedToolbarFeature(),
     EXPERIMENTAL_TableFeature(),
   ],
 });
-
-const validateVideoUrl: TextFieldSingleValidation = (value) => {
-  if (!value) return 'Vui lòng nhập URL video / Video URL is required.';
-  return parseVideoUrl(value)
-    ? true
-    : 'Chỉ hỗ trợ YouTube, Vimeo hoặc file .mp4/.webm / Only YouTube, Vimeo or .mp4/.webm URLs.';
-};
-
-/** Lexical block: responsive video embed. Rendered by the site's RichText converter `blocks.videoEmbed`. */
-export const VideoEmbedBlock: Block = {
-  slug: 'videoEmbed',
-  interfaceName: 'VideoEmbedBlock',
-  labels: {
-    singular: { vi: 'Video (YouTube / Vimeo)', en: 'Video (YouTube / Vimeo)' },
-    plural: { vi: 'Video', en: 'Videos' },
-  },
-  fields: [
-    {
-      name: 'url',
-      type: 'text',
-      required: true,
-      label: { vi: 'URL video', en: 'Video URL' },
-      validate: validateVideoUrl,
-      admin: {
-        placeholder: 'https://www.youtube.com/watch?v=…',
-        description: {
-          vi: 'Dán link YouTube (watch, youtu.be, shorts), Vimeo hoặc file .mp4/.webm.',
-          en: 'Paste a YouTube (watch, youtu.be, shorts), Vimeo or .mp4/.webm link.',
-        },
-      },
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'aspectRatio',
-          type: 'select',
-          defaultValue: '16:9',
-          label: { vi: 'Tỉ lệ khung', en: 'Aspect ratio' },
-          options: VIDEO_ASPECT_RATIOS.map((r) => ({ label: r, value: r })),
-          admin: { width: '50%' },
-        },
-        {
-          name: 'title',
-          type: 'text',
-          label: { vi: 'Tiêu đề (cho trình đọc màn hình)', en: 'Title (for screen readers)' },
-          admin: { width: '50%' },
-        },
-      ],
-    },
-    {
-      name: 'caption',
-      type: 'text',
-      label: { vi: 'Chú thích', en: 'Caption' },
-    },
-  ],
-};
-
-/** Languages offered by the code block (kept short on purpose). */
-export const CODE_LANGUAGES = {
-  plaintext: 'Plain text',
-  bash: 'Bash / Shell',
-  javascript: 'JavaScript',
-  typescript: 'TypeScript',
-  json: 'JSON',
-  html: 'HTML',
-  css: 'CSS',
-  sql: 'SQL',
-  python: 'Python',
-} as const;
 
 export const newsEditor = lexicalEditor({
-  features: ({ defaultFeatures }) => [
-    ...defaultFeatures.filter((f) => !['upload', 'link', 'relationship', 'heading'].includes(f.key)),
-    // h1 is the article title; h5/h6 are not useful in news. h2/h3 feed the table of contents.
+  features: () => [
+    // text
+    ParagraphFeature(),
     HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-    uploadWithCaption(),
-    LinkFeature({
-      enabledCollections: ['news'],
-      fields: ({ defaultFields }) => [
-        ...defaultFields,
-        {
-          name: 'rel',
-          type: 'select',
-          hasMany: true,
-          label: { vi: 'Thuộc tính rel', en: 'Rel attribute' },
-          options: ['nofollow', 'sponsored', 'ugc'],
-          admin: {
-            description: {
-              vi: 'Dùng "sponsored" cho link quảng cáo/tài trợ, "nofollow" cho link không tin cậy.',
-              en: 'Use "sponsored" for paid links, "nofollow" for untrusted links.',
-            },
-          },
-        },
-      ],
-    }),
-    BlocksFeature({
-      blocks: [
-        VideoEmbedBlock,
-        CodeBlock({
-          slug: 'code',
-          defaultLanguage: 'plaintext',
-          languages: { ...CODE_LANGUAGES },
-        }),
-      ],
-    }),
-    FixedToolbarFeature(),
+    BoldFeature(),
+    ItalicFeature(),
+    UnderlineFeature(),
+    StrikethroughFeature(),
+    SubscriptFeature(),
+    SuperscriptFeature(),
+    InlineCodeFeature(),
+    newsLink(),
+    // layout
+    AlignFeature(),
+    IndentFeature(),
+    UnorderedListFeature(),
+    OrderedListFeature(),
+    ChecklistFeature(),
+    BlockquoteFeature(),
+    HorizontalRuleFeature(),
     EXPERIMENTAL_TableFeature(),
+    // media + blocks
+    inlineImage(),
+    BlocksFeature({ blocks: NEWS_BLOCKS }),
+    // toolbars
+    FixedToolbarFeature(),
+    InlineToolbarFeature(),
   ],
 });
+
+export { CODE_LANGUAGES, NEWS_BLOCKS, NEWS_BLOCK_SLUGS, type NewsBlockSlug } from './blocks';

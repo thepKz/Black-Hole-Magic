@@ -54,7 +54,7 @@ export interface PaginationProps {
 }
 
 const itemBase =
-  'inline-grid h-10 min-w-10 place-items-center rounded-md px-2 text-sm tabular-nums no-underline transition-colors duration-150';
+  'fx inline-grid h-10 min-w-10 place-items-center rounded-md px-2 text-sm tabular-nums no-underline';
 
 function Arrow({ dir }: { dir: 'prev' | 'next' }) {
   return (
@@ -81,7 +81,7 @@ export function Pagination({ page, totalPages, pathname, searchParams, param = '
     const label = dir === 'prev' ? t.prevPage : t.nextPage;
     const cls = cn(itemBase, 'border border-divider bg-surface', extra);
     return target ? (
-      <Link href={target} rel={dir} aria-label={label} className={cn(cls, 'text-ink hover:border-accent hover:text-accent-700')}>
+      <Link href={target} rel={dir} aria-label={label} className={cn(cls, 'text-ink hover:border-accent hover:text-accent-700 [--fx-bg:var(--color-accent-50)]')}>
         <Arrow dir={dir} />
       </Link>
     ) : (
@@ -111,7 +111,7 @@ export function Pagination({ page, totalPages, pathname, searchParams, param = '
               {item === current ? (
                 <span
                   aria-current="page"
-                  className={cn(itemBase, 'bg-accent font-medium text-white shadow-glow-accent')}
+                  className={cn(itemBase, 'bg-accent font-medium text-white shadow-glow-accent hover:text-white')}
                 >
                   {item}
                 </span>
@@ -120,7 +120,7 @@ export function Pagination({ page, totalPages, pathname, searchParams, param = '
                   href={pageHref(pathname, searchParams, item, param)}
                   aria-label={format(t.pageN, { page: item })}
                   rel={item === current - 1 ? 'prev' : item === current + 1 ? 'next' : undefined}
-                  className={cn(itemBase, 'text-ink/75 hover:bg-neutral-100 hover:text-ink')}
+                  className={cn(itemBase, 'text-ink/75 hover:text-ink')}
                 >
                   {item}
                 </Link>

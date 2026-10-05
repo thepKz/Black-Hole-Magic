@@ -3,15 +3,17 @@ import { notFound } from 'next/navigation';
 
 import { FeaturedGamesSection } from '@site/components/home/FeaturedGamesSection';
 import { HomeBanner } from '@site/components/home/HomeBanner';
-import { PartnersSection } from '@site/components/home/PartnersSection';
+import { LatestNewsSection } from '@site/components/home/LatestNewsSection';
 import { ServicesSection } from '@site/components/home/ServicesSection';
 import { site } from '@site/data/site';
 import { getDictionary, isLocale, pick } from '@site/i18n';
 import { buildMetadata } from '@site/lib/seo';
 
 /**
- * Home (/vi, /en) - static, MOCK data only (no CMS, no news):
- * Banner slider -> Publishing services -> Featured games -> Partners.
+ * Home (/vi, /en): mock data + the 3 latest news posts from /admin.
+ * Banner slider -> Publishing services -> Featured games -> News & events.
+ * Partners section is hidden for now (user decision); PartnersSection is kept
+ * in src/site/components/home for when real partner logos arrive.
  * Organization + WebSite JSON-LD are emitted sitewide by the root layout.
  */
 export async function generateMetadata({ params }: PageProps<'/[locale]'>): Promise<Metadata> {
@@ -32,7 +34,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
       <HomeBanner locale={locale} />
       <ServicesSection locale={locale} />
       <FeaturedGamesSection locale={locale} />
-      <PartnersSection locale={locale} />
+      <LatestNewsSection locale={locale} />
     </main>
   );
 }

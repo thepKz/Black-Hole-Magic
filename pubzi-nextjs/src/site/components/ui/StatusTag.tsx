@@ -27,14 +27,14 @@ export function StatusTag({ status, label, size = 'sm', className }: StatusTagPr
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-sm font-semibold tracking-[0.04em] whitespace-nowrap',
-        size === 'sm' ? 'px-2 py-[3px] text-[11px]' : 'px-2.5 py-1 text-xs',
+        'inline-flex items-center gap-[5px] rounded-sm leading-tight font-semibold tracking-[0.06em] whitespace-nowrap',
+        size === 'sm' ? 'px-2.5 py-[3px] text-[11px]' : 'px-2.5 py-1 text-xs',
         styles[status],
         className,
       )}
     >
       <span
-        className={cn('size-1.5 rounded-full bg-current', status === 'hot' && 'motion-safe:animate-pulse')}
+        className={cn('size-1.5 rounded-full bg-current', status === 'hot' && 'live-dot')}
         aria-hidden="true"
       />
       {label}

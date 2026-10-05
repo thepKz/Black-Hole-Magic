@@ -24,13 +24,16 @@ export type ChipLinkProps = ChipBase & {
 
 export type ChipProps = ChipButtonProps | ChipLinkProps;
 
+/**
+ * Design v2 genre chip: 13px, 8px radius, divider border; selected = accent
+ * border + accent 14% wash + accent-700 text. Hover wash / press via `.fx`.
+ */
 export function chipClasses(selected: boolean | undefined, className?: string) {
   return cn(
-    'inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-3 text-[13px] whitespace-nowrap no-underline',
-    'transition-[background-color,border-color,color] duration-150',
+    'fx inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-3 text-[13px] leading-none whitespace-nowrap no-underline select-none',
     selected
-      ? 'border-accent bg-accent-50 font-medium text-accent-700 hover:text-accent-700'
-      : 'border-divider bg-surface text-ink/75 hover:border-neutral-400 hover:bg-neutral-50 hover:text-ink',
+      ? 'border-accent bg-accent/14 font-medium text-accent-700 hover:text-accent-700'
+      : 'border-divider bg-transparent text-ink hover:border-neutral-400 hover:text-ink',
     className,
   );
 }
@@ -42,7 +45,7 @@ export function Chip(props: ChipProps) {
     <>
       <span>{label}</span>
       {typeof count === 'number' ? (
-        <span className={cn('tabular-nums', selected ? 'text-accent-600' : 'text-subtle')}>{count}</span>
+        <span className={cn('tabular-nums', selected ? 'text-accent-700/70' : 'text-subtle')}>{count}</span>
       ) : null}
     </>
   );

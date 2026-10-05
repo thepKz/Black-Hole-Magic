@@ -13,7 +13,12 @@
  *   radius   rounded-sm 6, rounded-md 8, rounded-lg 10, rounded-xl 14
  *   width    max-w-site 1200, max-w-article 760
  *   screens  xs 375, sm 640, md 768, lg 1024, xl 1280, 2xl 1440, 3xl 1920
- *   motion   ease-out-soft
+ *   motion   ease-standard / ease-emphasized / ease-exit (ease-out-soft = standard),
+ *            durations as vars: duration-(--dur-1|2|3|4) = 120 / 200 / 320 / 700ms
+ *
+ * Motion system (see "Motion" section below): only transform / opacity animate.
+ * Shadows & glows live on pseudo-elements whose opacity fades. Hover lift is
+ * gated by (hover: hover); everything is neutralised by prefers-reduced-motion.
  */
 @import "tailwindcss" source(none);
 
@@ -90,8 +95,11 @@
   --breakpoint-2xl: 90rem;
   --breakpoint-3xl: 120rem;
 
-  /* ---- Motion ---- */
-  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* ---- Motion (easing utilities: ease-standard, ease-emphasized, ease-exit) ---- */
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1); /* legacy alias of ease-standard */
 }
 
 /* Fonts come from next/font (CSS variable --font-inter on <html>). */
@@ -101,8 +109,20 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-/* Runtime layout variables (not utilities). */
+/* Runtime layout + motion variables (not utilities). */
 :root {
+  /* Motion durations: micro (press, colour snap) / UI (hover, tooltip) / panel (drawer) / slow (slides, reveal) */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 700ms;
+  /* Card hover: lift distance + duration (override per card with [--lift:-6px]). */
+  --lift: -4px;
+  --dur-card: 220ms;
+  /* Reveal: travel distance + stagger step (per item: style={{'--i': n}}). */
+  --reveal-y: 16px;
+  --reveal-step: 60ms;
+
   --header-h: 60px;
   --gutter: 16px;
   --section-y: 48px;
@@ -166,7 +186,6 @@
   a {
     color: var(--color-link);
     text-decoration: none;
-    transition: color 0.15s ease;
   }
   a:hover {
     color: var(--color-accent-700);
@@ -193,18 +212,23 @@
     display: none !important;
   }
 
+  /* Plain dim (no backdrop blur: a full-screen filter is costly to fade). */
   dialog::backdrop {
     background: rgb(28 22 51 / 0.45);
-    backdrop-filter: blur(2px);
   }
 
+  /* Global reduced-motion guard: transitions/animations finish instantly
+     (end states still apply), scroll-linked effects are disabled separately. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
-    *::after {
+    *::after,
+    ::backdrop {
       animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
       scroll-behavior: auto !important;
     }
   }
@@ -262,29 +286,6 @@
     display: none;
   }
 
-  /* Card hover: lift + glow (design `.card`). */
-  .card-lift {
-    transition:
-      transform 0.22s var(--ease-out-soft),
-      box-shadow 0.22s var(--ease-out-soft);
-  }
-  @media (hover: hover) {
-    .card-lift:hover,
-    .card-lift:focus-within {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-glow);
-    }
-    .card-lift-soft:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-    }
-  }
-  .card-lift-soft {
-    transition:
-      transform 0.22s var(--ease-out-soft),
-      box-shadow 0.22s var(--ease-out-soft);
-  }
-
   /* Small accent bar under section titles (40x3). */
   .heading-bar {
     display: block;
@@ -294,7 +295,141 @@
     background: var(--color-accent);
   }
 
-  /* CSS-only tooltip: wrapper `.tip` + child `.tip-label` (aria-hidden; give the control an aria-label). */
+  /* Design `.card-kicker`: small uppercase line above titles. */
+  .kicker {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent-600);
+  }
+}
+
+/* ========================================================================== */
+/* Motion                                                                     */
+/* Rules: animate transform / opacity only. Shadows & glows sit on a pseudo-  */
+/* element whose opacity fades. Hover effects need (hover: hover). Every      */
+/* effect is neutralised by prefers-reduced-motion (guard in @layer base).    */
+/* ========================================================================== */
+@layer components {
+  /* ---- Cards: lift + glow (design `.card`, style-hover) -------------------
+     .card-lift       translateY(--lift, -4px) + accent glow ring (news, games)
+     .card-lift-soft  translateY(-3px) + shadow-md (service / partner tiles)
+     Lift distance per card: add [--lift:-6px] (game card).
+     The glow is ::after (opacity only); the card's own shadow-sm stays put.
+     Keyboard: the glow also shows when anything inside has :focus-visible.
+     Needs a positioned card (the class sets `relative`; utilities can override). */
+  .card-lift,
+  .card-lift-soft {
+    position: relative;
+    transition: transform var(--dur-card) var(--ease-standard);
+  }
+  .card-lift-soft {
+    --lift: -3px;
+  }
+  .card-lift::after,
+  .card-lift-soft::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: var(--shadow-glow);
+    opacity: 0;
+    transition: opacity var(--dur-card) var(--ease-standard);
+  }
+  .card-lift-soft::after {
+    box-shadow: var(--shadow-md);
+  }
+  @media (hover: hover) {
+    .card-lift:hover,
+    .card-lift-soft:hover {
+      transform: translateY(var(--lift));
+    }
+    .card-lift:hover::after,
+    .card-lift-soft:hover::after {
+      opacity: 1;
+    }
+  }
+  .card-lift:is(:focus-visible, :has(:focus-visible))::after,
+  .card-lift-soft:is(:focus-visible, :has(:focus-visible))::after {
+    opacity: 1;
+  }
+  /* Press feedback (not when a button inside is pressed): mouse = settle
+     half-way back from the lift; touch = a slight sink. */
+  .card-lift:active:not(:has(.fx:active)),
+  .card-lift-soft:active:not(:has(.fx:active)) {
+    transform: scale(0.99);
+    transition-duration: var(--dur-1);
+  }
+  @media (hover: hover) {
+    .card-lift:active:not(:has(.fx:active)),
+    .card-lift-soft:active:not(:has(.fx:active)) {
+      transform: translateY(calc(var(--lift) / 2));
+    }
+  }
+
+  /* Cover image zoom inside a `.group` card (transform only). */
+  .media-zoom {
+    transition: transform var(--dur-4) var(--ease-standard);
+  }
+  @media (hover: hover) {
+    .group:hover .media-zoom {
+      transform: scale(1.04);
+    }
+  }
+
+  /* ---- Pressable surfaces (Button, Chip, SegmentedControl, icon buttons) --
+     `.fx` = hover wash on ::before (opacity only) + press nudge (transform).
+     Configure per element (Tailwind: [--fx-bg:...]):
+       --fx-bg     wash colour (default ink 7%)
+       --fx-press  wash colour while pressed (default ink 12%)
+       --fx-inset  0 = inside the border (default), -1px = cover the border too
+     The element is isolated and the wash sits at z -1, under the content.
+     Text/border colours change instantly (no colour transitions). */
+  .fx {
+    position: relative;
+    isolation: isolate;
+    transition: transform var(--dur-1) var(--ease-standard);
+  }
+  .fx::before {
+    content: "";
+    position: absolute;
+    inset: var(--fx-inset, 0);
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--fx-bg, rgb(28 22 51 / 0.07));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-2) var(--ease-standard);
+  }
+  @media (hover: hover) {
+    .fx:hover::before {
+      opacity: 1;
+    }
+  }
+  .fx:active::before {
+    opacity: 1;
+    background: var(--fx-press, rgb(28 22 51 / 0.12));
+    transition-duration: var(--dur-1);
+  }
+  .fx:active {
+    transform: translateY(1px) scale(0.985);
+  }
+  .fx:is(:disabled, [aria-disabled="true"])::before,
+  .fx:is([aria-pressed="true"], [aria-current="page"], [aria-current="true"])::before {
+    content: none;
+  }
+  .fx:is(:disabled, [aria-disabled="true"]):active {
+    transform: none;
+  }
+
+  /* ---- Tooltip: wrapper `.tip` + child `.tip-label` -----------------------
+     (aria-hidden; give the control its own aria-label). Enters after a short
+     hover-intent delay via @starting-style, exits faster. Idle labels are
+     display:none (no layer, no hit-testing). */
   .tip {
     position: relative;
   }
@@ -303,6 +438,7 @@
     bottom: calc(100% + 8px);
     left: 50%;
     z-index: 30;
+    display: none;
     translate: -50% 4px;
     padding: 5px 9px;
     border-radius: 6px;
@@ -315,8 +451,9 @@
     pointer-events: none;
     opacity: 0;
     transition:
-      opacity 0.15s ease,
-      translate 0.15s ease;
+      opacity var(--dur-1) var(--ease-exit),
+      translate var(--dur-1) var(--ease-exit),
+      display var(--dur-1) allow-discrete;
   }
   .tip-label::after {
     content: "";
@@ -328,9 +465,219 @@
     border-top-color: var(--color-ink);
   }
   .tip:hover > .tip-label,
-  .tip:focus-within > .tip-label {
+  .tip:has(:focus-visible) > .tip-label {
+    display: block;
     opacity: 1;
     translate: -50% 0;
+    transition:
+      opacity var(--dur-2) var(--ease-standard) 80ms,
+      translate var(--dur-2) var(--ease-standard) 80ms,
+      display var(--dur-2) allow-discrete;
+  }
+  @starting-style {
+    .tip:hover > .tip-label,
+    .tip:has(:focus-visible) > .tip-label {
+      opacity: 0;
+      translate: -50% 4px;
+    }
+  }
+
+  /* ---- Skeleton shimmer: a light band slides across (transform only) ---- */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: rgb(230 227 238 / 0.7); /* neutral-200 / 70% */
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    translate: -100% 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.65), transparent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton::after {
+      animation: skeleton-shimmer 1.4s var(--ease-standard) infinite;
+    }
+  }
+
+  /* ---- Live dot (HOT badge): halo scales + fades on ::after -------------- */
+  .live-dot {
+    position: relative;
+  }
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .live-dot::after {
+      animation: live-ping 2.2s var(--ease-standard) infinite;
+    }
+  }
+
+  /* ---- Header: soft shadow fades in once the page scrolls ----------------
+     <header class="site-header">. Scroll-driven where supported; otherwise
+     <MotionObserver> sets html[data-scrolled] from one passive listener. */
+  .site-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    box-shadow: 0 10px 28px -16px rgb(28 22 51 / 0.28);
+    opacity: 0;
+    transition: opacity var(--dur-2) var(--ease-standard);
+  }
+  html[data-scrolled] .site-header::after {
+    opacity: 1;
+  }
+  @supports (animation-timeline: scroll()) {
+    .site-header::after {
+      transition: none;
+      animation: fade-in linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 96px;
+    }
+  }
+
+  /* ---- Mobile drawer: <dialog class="drawer"> slides in from the right ---
+     Enter 320ms emphasized, exit 200ms ease-exit; backdrop fades.
+     Items `.drawer-item` (style --i) rise in with a small stagger. */
+  .drawer {
+    translate: 100% 0;
+    transition:
+      translate var(--dur-2) var(--ease-exit),
+      display var(--dur-2) allow-discrete,
+      overlay var(--dur-2) allow-discrete;
+  }
+  .drawer[open] {
+    translate: 0 0;
+    transition:
+      translate var(--dur-3) var(--ease-emphasized),
+      display var(--dur-3) allow-discrete,
+      overlay var(--dur-3) allow-discrete;
+  }
+  @starting-style {
+    .drawer[open] {
+      translate: 100% 0;
+    }
+  }
+  .drawer::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease-exit),
+      display var(--dur-2) allow-discrete,
+      overlay var(--dur-2) allow-discrete;
+  }
+  .drawer[open]::backdrop {
+    opacity: 1;
+    transition:
+      opacity var(--dur-3) var(--ease-standard),
+      display var(--dur-3) allow-discrete,
+      overlay var(--dur-3) allow-discrete;
+  }
+  @starting-style {
+    .drawer[open]::backdrop {
+      opacity: 0;
+    }
+  }
+  .drawer-item {
+    transition:
+      opacity var(--dur-3) var(--ease-standard),
+      translate var(--dur-3) var(--ease-emphasized);
+    transition-delay: calc(90ms + min(var(--i, 0), 8) * 30ms);
+  }
+  @starting-style {
+    .drawer[open] .drawer-item {
+      opacity: 0;
+      translate: 12px 0;
+    }
+  }
+
+  /* ---- Segmented indicator: a pill sliding between equal-width options ---
+     Track `.seg-track` with --seg-n (option count) and --seg-i (active index);
+     indicator `.seg-indicator` (aria-hidden) inside it, colour via utilities. */
+  .seg-track {
+    position: relative;
+    isolation: isolate;
+  }
+  .seg-indicator {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: -1;
+    width: calc(100% / var(--seg-n, 2));
+    translate: calc(var(--seg-i, 0) * 100%) 0;
+    transition: translate var(--dur-3) var(--ease-emphasized);
+  }
+}
+
+/* ---- Reveal on scroll ------------------------------------------------------
+   Mark any element with `data-reveal` ("" = rise, "fade", "scale"); stagger
+   siblings with style={{ '--i': n }} (capped at 8). See components/motion.
+   - No JS / reduced motion / print: content is simply visible.
+   - Time-based (not scroll-linked, so nothing ever sits half-faded at the
+     fold): <MotionObserver> (ONE IntersectionObserver, mounted in the root
+     layout) marks only elements still below the fold data-reveal-state=
+     "pending" and flips each to "shown" once, then unobserves it. Anything
+     on the first screen at load is never touched and paints at full opacity.
+   Only opacity / translate / scale change -> no layout shift. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal-state] {
+    transition:
+      opacity var(--dur-4) var(--ease-standard),
+      translate var(--dur-4) var(--ease-emphasized),
+      scale var(--dur-4) var(--ease-emphasized);
+    transition-delay: calc(min(var(--i, 0), 8) * var(--reveal-step));
+  }
+  [data-reveal-state="pending"] {
+    opacity: 0;
+    translate: 0 var(--reveal-y);
+  }
+  [data-reveal="fade"][data-reveal-state="pending"] {
+    translate: none;
+  }
+  [data-reveal="scale"][data-reveal-state="pending"] {
+    translate: none;
+    scale: 0.97;
+  }
+}
+@media print {
+  [data-reveal] {
+    animation: none !important;
+    opacity: 1 !important;
+    translate: none !important;
+    scale: none !important;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes skeleton-shimmer {
+  to {
+    translate: 100% 0;
+  }
+}
+@keyframes live-ping {
+  0% {
+    opacity: 0.5;
+    scale: 1;
+  }
+  75%,
+  100% {
+    opacity: 0;
+    scale: 2.4;
   }
 }
 

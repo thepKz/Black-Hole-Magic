@@ -1,4 +1,14 @@
-@import "tailwindcss";
+/*
+ * Legacy /v2 Tailwind build: scan ONLY legacy source. Without source(none)
+ * Tailwind auto-scans the whole project, including Turbopack cache files in
+ * .next/dev, and turns binary garbage into invalid classes such as
+ * .[--fx-bg:var(--FFFD...)] that break CSS parsing.
+ */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../../components";
+@source "../../hooks";
+@source "../../lib";
 
 /* Import Bootstrap and other CSS from public folder via <link> tags in layout.tsx instead */
 

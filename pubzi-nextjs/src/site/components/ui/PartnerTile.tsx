@@ -31,7 +31,7 @@ export function PartnerTile({ partner, locale, newTabLabel, className }: Partner
       alt={alt}
       loading="lazy"
       decoding="async"
-      className="max-h-12 w-auto max-w-full object-contain opacity-70 grayscale transition-[filter,opacity] duration-300 group-hover:opacity-100 group-hover:grayscale-0 group-focus-visible:opacity-100 group-focus-visible:grayscale-0"
+      className="max-h-12 w-auto max-w-full object-contain opacity-70 grayscale transition-[filter,opacity] duration-(--dur-3) ease-standard group-hover:opacity-100 group-hover:grayscale-0 group-focus-visible:opacity-100 group-focus-visible:grayscale-0"
     />
   );
 

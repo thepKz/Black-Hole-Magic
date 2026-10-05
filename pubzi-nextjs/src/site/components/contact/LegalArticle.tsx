@@ -44,7 +44,7 @@ function TocList({ sections, className }: { sections: LegalSection[]; className?
         <li key={s.id}>
           <a
             href={`#${s.id}`}
-            className="block rounded-md px-3 py-1.5 text-[13px] leading-snug text-muted no-underline transition-colors hover:bg-accent-50 hover:text-accent-700"
+            className="fx block rounded-md px-3 py-1.5 text-[13px] leading-snug text-muted no-underline [--fx-bg:var(--color-accent-50)] hover:text-accent-700"
           >
             {s.heading}
           </a>
@@ -91,7 +91,7 @@ export function LegalArticle({ page, locale }: { page: LegalPage; locale: Locale
           {/* Desktop TOC */}
           <div className="hidden lg:block">
             <nav aria-labelledby="toc-title-desktop" className="sticky top-[calc(var(--header-h)+24px)] flex flex-col gap-2">
-              <p id="toc-title-desktop" className="m-0 px-3 text-[11px] font-medium tracking-[0.12em] text-accent-600 uppercase">
+              <p id="toc-title-desktop" className="kicker px-3">
                 {t.tableOfContents}
               </p>
               <TocList sections={sections} className="m-0 flex list-none flex-col gap-0.5 p-0" />
@@ -113,7 +113,7 @@ export function LegalArticle({ page, locale }: { page: LegalPage; locale: Locale
             <details className="group mb-8 rounded-xl border border-divider bg-surface lg:hidden">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
                 {t.tableOfContents}
-                <CaretDownIcon size={16} aria-hidden="true" className="text-subtle transition-transform group-open:rotate-180 motion-reduce:transition-none" />
+                <CaretDownIcon size={16} aria-hidden="true" className="text-subtle transition-transform duration-(--dur-2) ease-standard group-open:rotate-180" />
               </summary>
               <nav aria-label={t.tableOfContents} className="border-t border-divider px-1 py-2">
                 <TocList sections={sections} className="m-0 flex list-none flex-col gap-0.5 p-0" />
@@ -135,7 +135,7 @@ export function LegalArticle({ page, locale }: { page: LegalPage; locale: Locale
                 className="group inline-flex items-center gap-2 text-sm font-medium text-link no-underline hover:underline"
               >
                 {pick(other.title, locale)}
-                <ArrowRightIcon size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+                <ArrowRightIcon size={16} aria-hidden="true" className="transition-transform duration-(--dur-2) ease-standard group-hover:translate-x-0.5" />
               </Link>
               <Link href={href(locale, '/contact')} className="text-sm text-muted no-underline hover:text-accent-700">
                 {t.contact}

@@ -1,12 +1,10 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 
 import type { Locale } from '@site/i18n';
 import { cn } from '@site/lib/cn';
-import { track } from '@site/components/analytics/track';
-import { Button } from '../ui/Button';
 import { LangSwitcher, type LangSwitcherProps } from './LangSwitcher';
 import { NavLinks, type NavItem } from './NavLinks';
 
@@ -14,8 +12,6 @@ export interface MobileMenuProps {
   locale: Locale;
   items: NavItem[];
   homeHref: string;
-  /** Trang ID login; `disabled` while the URL is a '#' placeholder. */
-  login: { href: string; label: string; disabled?: boolean; trackTarget?: string };
   labels: {
     open: string;
     close: string;
@@ -32,7 +28,7 @@ export interface MobileMenuProps {
  * Hamburger + right drawer (< 1024px). Uses a modal <dialog>: focus is trapped,
  * Esc closes, background is inert. Closes on navigation and backdrop click.
  */
-export function MobileMenu({ locale, items, homeHref, login, labels, className }: MobileMenuProps) {
+export function MobileMenu({ locale, items, homeHref, labels, className }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const pathname = usePathname();
@@ -77,7 +73,7 @@ export function MobileMenu({ locale, items, homeHref, login, labels, className }
         aria-controls={dialogId}
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
-        className="grid size-10 place-items-center rounded-md text-ink transition-colors hover:bg-ink/7"
+        className="fx grid size-10 place-items-center rounded-md text-ink"
       >
         <svg className="size-6" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="18" strokeLinecap="round" aria-hidden="true">
           <path d="M40 72h176M40 128h176M40 184h176" />
@@ -95,7 +91,8 @@ export function MobileMenu({ locale, items, homeHref, login, labels, className }
         }}
         className={cn(
           'fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-[min(360px,88vw)] max-w-none bg-surface p-0 text-ink shadow-lg',
-          'translate-x-full transition-[translate,display,overlay] transition-discrete duration-300 ease-out-soft open:translate-x-0 starting:open:translate-x-full',
+          // `.drawer` (site.css): slide in 320ms emphasized / out 200ms, backdrop fade, item stagger.
+          'drawer',
         )}
       >
         <div className="flex h-full flex-col">
@@ -105,7 +102,7 @@ export function MobileMenu({ locale, items, homeHref, login, labels, className }
               type="button"
               aria-label={labels.close}
               onClick={close}
-              className="grid size-10 place-items-center rounded-md text-ink transition-colors hover:bg-ink/7"
+              className="fx grid size-10 place-items-center rounded-md text-ink"
               autoFocus
             >
               <svg className="size-5" viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="20" strokeLinecap="round" aria-hidden="true">
@@ -118,21 +115,11 @@ export function MobileMenu({ locale, items, homeHref, login, labels, className }
             <NavLinks items={items} homeHref={homeHref} newTabLabel={labels.newTab} dotLabel={labels.dot} variant="drawer" onNavigate={close} />
           </nav>
 
-          <div className="flex shrink-0 flex-col gap-4 border-t border-divider px-4 pt-4 pb-[max(16px,env(safe-area-inset-bottom))]">
-            <LangSwitcher locale={locale} labels={labels.lang} variant="buttons" onSwitch={close} />
-            <Button
-              href={login.href}
-              variant="primary"
-              size="lg"
-              block
-              newTabLabel={labels.newTab}
-              disabled={login.disabled}
-              onClick={() => {
-                if (login.trackTarget) track('outbound_click', { target: login.trackTarget, url: login.href });
-              }}
-            >
-              {login.label}
-            </Button>
+          <div
+            className="drawer-item flex shrink-0 flex-col gap-4 border-t border-divider px-4 pt-4 pb-[max(16px,env(safe-area-inset-bottom))]"
+            style={{ '--i': items.length } as CSSProperties}
+          >
+            <LangSwitcher locale={locale} labels={labels.lang} size="lg" onSwitch={close} />
             <p className="m-0 text-center text-xs leading-snug text-subtle">{labels.healthWarning}</p>
           </div>
         </div>

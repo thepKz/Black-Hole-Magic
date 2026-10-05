@@ -12,54 +12,7 @@
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "supportedTimezones".
  */
-export type SupportedTimezones =
-  | 'Pacific/Midway'
-  | 'Pacific/Niue'
-  | 'Pacific/Honolulu'
-  | 'Pacific/Rarotonga'
-  | 'America/Anchorage'
-  | 'Pacific/Gambier'
-  | 'America/Los_Angeles'
-  | 'America/Tijuana'
-  | 'America/Denver'
-  | 'America/Phoenix'
-  | 'America/Chicago'
-  | 'America/Guatemala'
-  | 'America/New_York'
-  | 'America/Bogota'
-  | 'America/Caracas'
-  | 'America/Santiago'
-  | 'America/Buenos_Aires'
-  | 'America/Sao_Paulo'
-  | 'Atlantic/South_Georgia'
-  | 'Atlantic/Azores'
-  | 'Atlantic/Cape_Verde'
-  | 'Europe/London'
-  | 'Europe/Berlin'
-  | 'Africa/Lagos'
-  | 'Europe/Athens'
-  | 'Africa/Cairo'
-  | 'Europe/Moscow'
-  | 'Asia/Riyadh'
-  | 'Asia/Dubai'
-  | 'Asia/Baku'
-  | 'Asia/Karachi'
-  | 'Asia/Tashkent'
-  | 'Asia/Calcutta'
-  | 'Asia/Dhaka'
-  | 'Asia/Almaty'
-  | 'Asia/Jakarta'
-  | 'Asia/Bangkok'
-  | 'Asia/Shanghai'
-  | 'Asia/Singapore'
-  | 'Asia/Tokyo'
-  | 'Asia/Seoul'
-  | 'Australia/Brisbane'
-  | 'Australia/Sydney'
-  | 'Pacific/Guam'
-  | 'Pacific/Noumea'
-  | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+export type SupportedTimezones = 'Asia/Ho_Chi_Minh';
 
 export interface Config {
   auth: {
@@ -70,21 +23,31 @@ export interface Config {
     news: News;
     'news-categories': NewsCategory;
     media: Media;
+    videos: Video;
+    'contact-requests': ContactRequest;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'media' | 'videos';
+    };
+  };
   collectionsSelect: {
     news: NewsSelect<false> | NewsSelect<true>;
     'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
+    'contact-requests': ContactRequestsSelect<false> | ContactRequestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -130,7 +93,7 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Write, schedule and publish news. Articles appear on the site only once published. Note: "Create new" autosaves a draft immediately - delete empty (untitled) drafts you opened by mistake.
+ * Write, review, schedule and publish news. Articles appear on the site only once published.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news".
@@ -138,16 +101,16 @@ export interface UserAuthOperations {
 export interface News {
   id: number;
   /**
-   * Aim for 40–90 characters with the main keyword. The SEO title (40–70 chars incl. " | Black Hole Game") is tuned in the SEO tab.
+   * Aim for 40–90 characters with the main keyword. The SEO title is tuned in the SEO tab.
    */
   title: string;
   searchText?: string | null;
   /**
-   * Shown in news lists and used as the default SEO description (70–160 chars, ideally ~150; clipped at 160 for SEO).
+   * Required to publish. Also the default SEO description (Google shows ~160 characters).
    */
   excerpt?: string | null;
   /**
-   * Set the focal point in the media library so crops look right. No cover: the site auto-generates an OG image.
+   * Required to publish. 16:9, at least 1200×675, with alt text. Set the focal point so crops look right.
    */
   cover?: (number | null) | Media;
   content?: {
@@ -166,7 +129,7 @@ export interface News {
     [k: string]: unknown;
   } | null;
   /**
-   * Optional. Press Enter after each tag. Used for article:tag and JSON-LD keywords.
+   * Optional, up to 10. Used as article keywords (article:tag, JSON-LD).
    */
   tags?: string[] | null;
   /**
@@ -174,27 +137,48 @@ export interface News {
    */
   relatedPosts?: (number | News)[] | null;
   /**
+   * Only when the story is based on another outlet.
+   */
+  source?: {
+    name?: string | null;
+    url?: string | null;
+  };
+  /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
-  /**
-   * Generated from the title (diacritics stripped) until published. Shared by VI/EN. Changing a published slug breaks old links.
-   */
   slug: string;
+  /**
+   * Authors set "Awaiting review" when done. Editors approve or return "Needs changes". Becomes "Approved" on publish.
+   */
+  reviewStatus?: ('draft' | 'pending' | 'changes' | 'approved') | null;
+  /**
+   * Internal, never shown on the site.
+   */
+  reviewNote?: string | null;
   category: number | NewsCategory;
   /**
-   * Leave empty: filled automatically on first publish (scheduled publishes included). Set by hand only to back-date. To schedule: arrow next to "Publish" → "Schedule".
+   * Empty: filled on first publish (scheduled too). Set by hand only to back-date. To schedule: arrow next to "Publish".
    */
   publishedAt?: string | null;
   author?: (number | null) | User;
+  coAuthors?: (number | User)[] | null;
   /**
    * Pinned at the top of the News page.
    */
   featured?: boolean | null;
   /**
+   * Marks the article as breaking news.
+   */
+  breaking?: boolean | null;
+  /**
    * Computed on save.
    */
   readingTime?: number | null;
+  /**
+   * Set on save.
+   */
+  lastEditedBy?: (number | null) | User;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -205,20 +189,31 @@ export interface News {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Drag & drop or paste several images at once. JPG, PNG, WebP, AVIF, GIF up to 15 MB each; images are converted to WebP and capped at 2560 px. Alt text is prefilled from the file name - please refine it.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
   /**
-   * Required. Short description for screen readers and SEO.
+   * Short description for screen readers and Google. Left empty, it is filled from the file name.
    */
-  alt: string;
+  alt?: string | null;
+  /**
+   * On when the alt was filled from the file name; cleared once you edit it.
+   */
+  altAuto?: boolean | null;
+  /**
+   * Shown under the image in articles (can be overridden per insert).
+   */
   caption?: string | null;
   credit?: string | null;
+  folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -267,6 +262,74 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: number;
+  name: string;
+  folder?: (number | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: number | FolderInterface;
+        }
+      | {
+          relationTo?: 'media';
+          value: number | Media;
+        }
+      | {
+          relationTo?: 'videos';
+          value: number | Video;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: ('media' | 'videos')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Short clips and trailers for articles. MP4, WebM, MOV up to 300 MB; prefer MP4 (H.264) under 50 MB. Long videos: upload to YouTube and paste the link.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
+  /**
+   * Used for search and as the accessible title. Left empty, it is taken from the file name.
+   */
+  title?: string | null;
+  /**
+   * Shown before playback. Use the same aspect ratio as the video (usually 16:9).
+   */
+  poster?: (number | null) | Media;
+  caption?: string | null;
+  credit?: string | null;
+  duration?: number | null;
+  /**
+   * Read from the MP4/MOV file on upload.
+   */
+  durationLabel?: string | null;
+  folder?: (number | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Groups shown as filters on the News page. Only admins add / delete (the slug is part of the URL); editors may rename.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news-categories".
  */
 export interface NewsCategory {
@@ -277,11 +340,16 @@ export interface NewsCategory {
    */
   slug?: string | null;
   description?: string | null;
+  /**
+   * Lower numbers come first.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * CMS accounts. Only admins create accounts and change roles; there is no public sign-up.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -290,7 +358,10 @@ export interface User {
   name: string;
   avatar?: (number | null) | Media;
   bio?: string | null;
-  roles: ('admin' | 'editor')[];
+  /**
+   * Author: writes own articles and submits them. Editor: reviews, publishes, schedules any article and handles contact requests. Admin: everything incl. accounts and categories.
+   */
+  roles: ('admin' | 'editor' | 'author')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -310,6 +381,33 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Requests sent from the Contact page. Submitted content is read-only; update the Status and the internal Note. Use the quick filters below or "Filters".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-requests".
+ */
+export interface ContactRequest {
+  id: number;
+  name: string;
+  email: string;
+  type: 'biz' | 'support' | 'press' | 'other';
+  subject: string;
+  message: string;
+  status: 'new' | 'processing' | 'done';
+  /**
+   * Visible to CMS users only.
+   */
+  note?: string | null;
+  locale?: ('vi' | 'en') | null;
+  /**
+   * Salted SHA-256, used for rate limiting. The raw IP is never stored.
+   */
+  ipHash?: string | null;
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -440,8 +538,20 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null)
+    | ({
+        relationTo: 'contact-requests';
+        value: number | ContactRequest;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: number | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -497,13 +607,24 @@ export interface NewsSelect<T extends boolean = true> {
   content?: T;
   tags?: T;
   relatedPosts?: T;
+  source?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+      };
   generateSlug?: T;
   slug?: T;
+  reviewStatus?: T;
+  reviewNote?: T;
   category?: T;
   publishedAt?: T;
   author?: T;
+  coAuthors?: T;
   featured?: T;
+  breaking?: T;
   readingTime?: T;
+  lastEditedBy?: T;
   meta?:
     | T
     | {
@@ -513,6 +634,7 @@ export interface NewsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -533,8 +655,10 @@ export interface NewsCategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  altAuto?: T;
   caption?: T;
   credit?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -590,6 +714,48 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
+  title?: T;
+  poster?: T;
+  caption?: T;
+  credit?: T;
+  duration?: T;
+  durationLabel?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-requests_select".
+ */
+export interface ContactRequestsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  type?: T;
+  subject?: T;
+  message?: T;
+  status?: T;
+  note?: T;
+  locale?: T;
+  ipHash?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -659,6 +825,18 @@ export interface PayloadJobsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -721,19 +899,156 @@ export interface TaskSchedulePublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "VideoEmbedBlock".
+ * via the `definition` "GalleryBlock".
  */
-export interface VideoEmbedBlock {
+export interface GalleryBlock {
   /**
-   * Paste a YouTube (watch, youtu.be, shorts), Vimeo or .mp4/.webm link.
+   * Pick or drop several images at once (2-40). Drag to reorder.
    */
-  url: string;
-  aspectRatio?: ('16:9' | '9:16' | '4:3' | '1:1') | null;
-  title?: string | null;
+  images: (number | Media)[];
+  layout?: ('grid' | 'slider') | null;
+  columns?: ('2' | '3' | '4') | null;
+  ratio?: ('auto' | '16:9' | '4:3' | '1:1') | null;
+  showCaptions?: boolean | null;
   caption?: string | null;
   id?: string | null;
   blockName?: string | null;
+  blockType: 'gallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoEmbedBlock".
+ */
+export interface VideoEmbedBlock {
+  source?: ('url' | 'upload') | null;
+  /**
+   * YouTube (incl. Shorts), Vimeo, Facebook video/reel, TikTok and .mp4/.webm files. The link is cleaned up on save.
+   */
+  url?: string | null;
+  /**
+   * Pick from the video library or drop an .mp4, .webm, .mov file (max 300 MB). Prefer 1080p.
+   */
+  file?: (number | null) | Video;
+  /**
+   * Optional. Shown before playback. Empty: YouTube uses its thumbnail, uploads use the poster from the video library.
+   */
+  poster?: (number | null) | Media;
+  /**
+   * Auto: Shorts, TikTok, Reels vertical; others 16:9.
+   */
+  aspectRatio?: ('auto' | '16:9' | '9:16' | '4:3' | '1:1') | null;
+  autoplay?: boolean | null;
+  title?: string | null;
+  caption?: string | null;
+  credit?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'videoEmbed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SocialEmbedBlock".
+ */
+export interface SocialEmbedBlock {
+  /**
+   * Paste the link of a single public post on Facebook, X (Twitter), TikTok or Instagram.
+   */
+  url: string;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'socialEmbed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "QuoteBlock".
+ */
+export interface QuoteBlock {
+  /**
+   * No quotation marks needed.
+   */
+  text: string;
+  author?: string | null;
+  role?: string | null;
+  /**
+   * Optional.
+   */
+  sourceUrl?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'quote';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CalloutBlock".
+ */
+export interface CalloutBlock {
+  variant?: ('note' | 'important' | 'warning') | null;
+  title?: string | null;
+  /**
+   * Keep it short, 1-5 lines.
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'callout';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedNewsBlock".
+ */
+export interface RelatedNewsBlock {
+  title?: string | null;
+  /**
+   * Pick 1-3 published articles.
+   */
+  posts: (number | News)[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relatedNews';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaBlock".
+ */
+export interface CtaBlock {
+  label: string;
+  url: string;
+  /**
+   * Optional. Shown above the button.
+   */
+  note?: string | null;
+  variant?: ('primary' | 'secondary') | null;
+  newTab?: boolean | null;
+  nofollow?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CodeBlock".
+ */
+export interface CodeBlock {
+  language?: ('plaintext' | 'bash' | 'javascript' | 'typescript' | 'json' | 'html' | 'css' | 'sql' | 'python') | null;
+  code?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

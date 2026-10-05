@@ -4,13 +4,13 @@ import { notFound, redirect } from 'next/navigation';
 
 import { NewsCategoryTabs } from '@site/components/news/NewsCategoryTabs';
 import { NewsFeatured, NewsGrid } from '@site/components/news/NewsListing';
+import { NewsResultsRegion } from '@site/components/news/NewsResultsRegion';
 import { newsStrings } from '@site/components/news/strings';
 import { Button } from '@site/components/ui/Button';
 import { Container } from '@site/components/ui/Container';
 import { EmptyState } from '@site/components/ui/EmptyState';
 import { pageHref, Pagination, type SearchParamsRecord } from '@site/components/ui/Pagination';
 import { SearchInput } from '@site/components/ui/SearchInput';
-import { SectionHeading } from '@site/components/ui/SectionHeading';
 import { absoluteUrl, format, getDictionary, href, isLocale, type Locale } from '@site/i18n';
 import { getFeaturedNews, getNewsCategories, getNewsList, NEWS_PER_PAGE } from '@site/lib/news';
 import { breadcrumbList, buildMetadata, JsonLd } from '@site/lib/seo';
@@ -139,83 +139,104 @@ export default async function NewsPage({ params, searchParams }: PageProps<'/[lo
   ];
 
   const hasAnyPost = result.totalItems > 0;
+  // Identity of the rendered result set (NewsResultsRegion: pending + keyed fade-in).
+  const stateKey = `${cat}|${q}|${result.page}`;
 
   return (
     <main id="main" tabIndex={-1} className="section-b pt-10 outline-none md:pt-12">
       <Container>
-        <SectionHeading as="h1" kicker={t.newsKicker} title={t.newsHub} description={t.newsSubtitle} className="mb-6 md:mb-7" />
+        {/* Design v2: kicker + 40px H1 (same header as /games). */}
+        <header className="mb-6">
+          <p className="kicker">{t.newsKicker}</p>
+          <h1 className="m-0 mt-1 text-[30px] tracking-[-0.02em] text-ink md:text-[36px] lg:text-[40px]">{t.newsHub}</h1>
+        </header>
 
-        <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center md:mb-8">
-          <SearchInput
-            label={t.searchNews}
-            placeholder={t.searchNews}
-            clearLabel={t.clearSearch}
-            navigation="router"
-            resetParams={['page']}
-            trackContext="news"
-          />
-          {categories.length ? (
-            <NewsCategoryTabs options={tabOptions} value={category?.slug ?? (cat ? cat : 'all')} label={s.categories} />
-          ) : null}
-          <a
-            href={href(locale, '/news/rss.xml')}
-            className="ml-auto hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-subtle no-underline transition-colors hover:bg-neutral-100 hover:text-accent-700 lg:inline-flex"
-            type="application/rss+xml"
+        <NewsResultsRegion stateKey={stateKey}>
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center md:mb-8">
+            <SearchInput
+              label={t.searchNews}
+              placeholder={t.searchNews}
+              clearLabel={t.clearSearch}
+              navigation="router"
+              resetParams={['page']}
+              trackContext="news"
+            />
+            {categories.length ? (
+              <NewsCategoryTabs options={tabOptions} value={category?.slug ?? (cat ? cat : 'all')} label={s.categories} />
+            ) : null}
+            <a
+              href={href(locale, '/news/rss.xml')}
+              className="fx ml-auto hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-subtle no-underline hover:text-accent-700 lg:inline-flex"
+              type="application/rss+xml"
+            >
+              <RssSimpleIcon className="size-4" aria-hidden="true" weight="bold" />
+              {t.rssFeed}
+            </a>
+          </div>
+
+          {/* Keyed by the result set: after a tab / page click the new list fades in;
+              while the next one loads, the current one dims (NewsResultsRegion). */}
+          <div
+            key={stateKey}
+            data-news-results
+            className="transition-[opacity,translate] duration-(--dur-3) ease-standard group-data-[pending]/news:opacity-55 group-data-[pending]/news:duration-(--dur-2) in-data-[navigated]:starting:translate-y-1.5 in-data-[navigated]:starting:opacity-0"
           >
-            <RssSimpleIcon className="size-4" aria-hidden="true" weight="bold" />
-            {t.rssFeed}
-          </a>
-        </div>
-
-        {filtered && hasAnyPost ? (
-          <p className="mb-5 text-sm text-muted" aria-live="polite">
-            {q ? <span className="font-medium text-ink">{format(t.resultsFor, { q })}</span> : null}
-            {q ? <span aria-hidden="true"> · </span> : null}
-            {format(t.resultsCount, { count: result.totalItems })}
-          </p>
-        ) : null}
-
-        {!hasAnyPost ? (
-          filtered ? (
-            <EmptyState
-              title={t.emptyTitle}
-              description={t.emptyDesc}
-              action={
-                <Button href={basePath} variant="secondary" scroll={false}>
-                  {t.clearFilters}
-                </Button>
-              }
-            />
-          ) : (
-            <EmptyState title={t.newsEmptyTitle} description={t.newsEmptyDesc} />
-          )
-        ) : (
-          <>
-            {showFeatured ? (
-              <section aria-label={t.featuredPost} className="mb-10 md:mb-12">
-                <NewsFeatured items={featured} locale={locale} />
-              </section>
+            {filtered && hasAnyPost ? (
+              <p className="mb-5 text-sm text-muted" aria-live="polite">
+                {q ? <span className="font-medium text-ink">{format(t.resultsFor, { q })}</span> : null}
+                {q ? <span aria-hidden="true"> · </span> : null}
+                {format(t.resultsCount, { count: result.totalItems })}
+              </p>
             ) : null}
 
-            {gridItems.length ? (
-              <section aria-label={showFeatured ? s.latestPosts : t.newsHub}>
+            {!hasAnyPost ? (
+              filtered ? (
+                <EmptyState
+                  title={t.emptyTitle}
+                  description={t.emptyDesc}
+                  action={
+                    <Button href={basePath} variant="secondary" scroll={false}>
+                      {t.clearFilters}
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState title={t.newsEmptyTitle} description={t.newsEmptyDesc} />
+              )
+            ) : (
+              <>
                 {showFeatured ? (
-                  <h2 className="mb-5 text-xl text-ink md:text-[22px]">{s.latestPosts}</h2>
+                  <section aria-label={t.featuredPost} className="mb-10 md:mb-14">
+                    <NewsFeatured items={featured} locale={locale} />
+                  </section>
                 ) : null}
-                <NewsGrid items={gridItems} locale={locale} preloadFirst={!showFeatured} />
-              </section>
-            ) : null}
 
-            <Pagination
-              page={result.page}
-              totalPages={result.totalPages}
-              pathname={basePath}
-              searchParams={sp}
-              locale={locale}
-              className="mt-12"
-            />
-          </>
-        )}
+                {gridItems.length ? (
+                  <section aria-label={showFeatured ? s.latestPosts : t.newsHub}>
+                    {showFeatured ? (
+                      <div className="mb-5 flex items-center gap-3">
+                        <h2 className="m-0 shrink-0 text-xl text-ink md:text-[22px]">{s.latestPosts}</h2>
+                        <span aria-hidden="true" className="h-px flex-1 bg-divider" />
+                      </div>
+                    ) : null}
+                    <NewsGrid items={gridItems} locale={locale} preloadFirst={!showFeatured} />
+                  </section>
+                ) : null}
+
+                <div data-news-nav>
+                  <Pagination
+                    page={result.page}
+                    totalPages={result.totalPages}
+                    pathname={basePath}
+                    searchParams={sp}
+                    locale={locale}
+                    className="mt-12"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </NewsResultsRegion>
       </Container>
       <JsonLd data={breadcrumbList(locale, crumbs)} />
     </main>

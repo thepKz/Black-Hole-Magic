@@ -5,7 +5,14 @@
  */
 import type { Localized, SiteInfo } from '../lib/types';
 
-const env = (value: string | undefined) => (value && value.trim() ? value.trim() : '#');
+/**
+ * Top-up portal ("Nạp" in the header). Fixed production URL - deliberately not
+ * env-dependent so the link can never silently disappear or point to '#'.
+ */
+export const topupUrl = 'https://pay.blackholegame.vn/';
+
+/** Official fanpage (footer + contact page). */
+export const fanpageUrl = 'https://facebook.com/blackholegame';
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
@@ -42,16 +49,20 @@ export const site: SiteInfo = {
       region: 'Hưng Yên',
       country: 'VN',
     },
+    hqCity: { vi: 'Hưng Yên', en: 'Hung Yen' },
     mapQuery: '777 Nguyễn Thiện Thuật, Mỹ Hào, Hưng Yên',
     taxId: '0901214374',
-    phone: '0779 467 868',
-    phoneE164: '+84779467868',
+    phone: '1900 0000',
+    // Vietnamese 1900 hotlines are dialled as-is (no country code): tel:19000000.
+    phoneE164: '19000000',
   },
+  // Public mailboxes. Press / other requests go to the partnership mailbox
+  // (shown once) until the company provides dedicated addresses.
   emails: {
-    biz: 'contact@blackholegame.com',
-    support: 'contact@blackholegame.com',
-    press: 'contact@blackholegame.com',
-    other: 'contact@blackholegame.com',
+    biz: 'biz@blackhole.vn',
+    support: 'hotro@blackhole.vn',
+    press: 'biz@blackhole.vn',
+    other: 'biz@blackhole.vn',
   },
   legalLines: {
     vi: [
@@ -70,16 +81,14 @@ export const site: SiteInfo = {
     vi: 'Chơi game quá 180 phút mỗi ngày sẽ ảnh hưởng xấu đến sức khỏe.',
     en: 'Playing games for more than 180 minutes a day can harm your health.',
   },
-  // TODO(company): real social URLs. '#' = placeholder; exclude '#' from JSON-LD sameAs.
+  fanpage: { url: fanpageUrl, label: 'facebook.com/blackholegame' },
+  // TODO(company): real YouTube / TikTok URLs. '#' = placeholder (hidden, excluded from JSON-LD sameAs).
   socials: [
-    { platform: 'facebook', label: 'Facebook', url: '#' },
+    { platform: 'facebook', label: 'Facebook', url: fanpageUrl },
     { platform: 'youtube', label: 'YouTube', url: '#' },
     { platform: 'tiktok', label: 'TikTok', url: '#' },
   ],
-  id: {
-    loginUrl: env(process.env.NEXT_PUBLIC_ID_LOGIN_URL),
-    topupUrl: env(process.env.NEXT_PUBLIC_ID_TOPUP_URL),
-  },
+  topupUrl,
   foundingYear: 2025,
 };
 
@@ -91,10 +100,17 @@ export const contactTypes: { value: keyof SiteInfo['emails']; label: Localized }
   { value: 'other', label: { vi: 'Khác', en: 'Other' } },
 ];
 
-/** Main navigation (paths are locale-less; build with `href(locale, path)`). */
-export const mainNav: { key: 'home' | 'games' | 'news' | 'contact'; path: string }[] = [
+/**
+ * Main navigation, in design order: Trang chủ · Game · Nạp ↗ · Tin tức · Liên hệ.
+ * Internal paths are locale-less (build with `href(locale, path)`); `external`
+ * items open in a new tab with an ↗ icon. There is intentionally no account
+ * (login / register) entry and no link to the CMS.
+ */
+export type MainNavKey = 'home' | 'games' | 'topup' | 'news' | 'contact';
+export const mainNav: { key: MainNavKey; path: string; external?: boolean }[] = [
   { key: 'home', path: '/' },
   { key: 'games', path: '/games' },
+  { key: 'topup', path: topupUrl, external: true },
   { key: 'news', path: '/news' },
   { key: 'contact', path: '/contact' },
 ];

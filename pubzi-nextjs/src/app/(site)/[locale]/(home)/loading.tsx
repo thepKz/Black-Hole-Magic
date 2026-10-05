@@ -2,9 +2,10 @@ import { Container } from '@site/components/ui/Container';
 import { GameCardSkeleton, Skeleton } from '@site/components/ui/Skeleton';
 
 /**
- * Home skeleton (banner + services + featured games), shown while a /{l}
- * segment streams. Loading UI receives no params, so it carries no localized
- * text: the page is marked aria-busy and every block is aria-hidden.
+ * Home skeleton (boxed banner + services + featured games), shown while a /{l}
+ * segment streams. Same boxes as the real page, so nothing shifts when it swaps in.
+ * Loading UI receives no params, so it carries no localized text: the page is
+ * marked aria-busy and every block is aria-hidden.
  * Lives in the (home) route group on purpose: a loading.tsx at [locale]/ would
  * wrap every child route, make it stream, and turn notFound()/redirect() into
  * soft 200s (see node_modules/next/dist/docs/01-app/02-guides/streaming.md,
@@ -13,12 +14,14 @@ import { GameCardSkeleton, Skeleton } from '@site/components/ui/Skeleton';
 export default function Loading() {
   return (
     <main id="main" tabIndex={-1} aria-busy="true" className="outline-none">
-      <Skeleton className="aspect-video max-h-[calc(100svh-var(--header-h))] w-full rounded-none md:aspect-[8/3]" />
+      <div aria-hidden="true" className="container-site pt-4 md:pt-6">
+        <Skeleton className="aspect-video max-h-[calc(100svh-var(--header-h))] w-full rounded-[10px] md:aspect-[9/4] md:rounded-[14px]" />
+      </div>
 
       <section aria-hidden="true" className="section-y">
         <Container>
           <SkeletonHeading />
-          <div className="grid gap-4 md:grid-cols-2 md:gap-5">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,460px),1fr))] gap-4">
             {Array.from({ length: 4 }, (_, i) => (
               <div
                 key={i}
@@ -39,7 +42,7 @@ export default function Loading() {
       <section aria-hidden="true" className="section-b">
         <Container>
           <SkeletonHeading />
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+          <div className="-mx-[var(--gutter)] grid auto-cols-[78%] grid-flow-col gap-4 overflow-hidden px-[var(--gutter)] py-2 sm:mx-0 sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
             {Array.from({ length: 4 }, (_, i) => (
               <GameCardSkeleton key={i} />
             ))}
@@ -50,10 +53,10 @@ export default function Loading() {
   );
 }
 
+/** Title + 40x3 bar (home headings carry no kicker, per design v2). */
 function SkeletonHeading() {
   return (
     <div className="mb-6 flex flex-col gap-2.5 md:mb-7">
-      <Skeleton className="h-3 w-24" />
       <Skeleton className="h-8 w-64 max-w-full md:h-9" />
       <Skeleton className="h-[3px] w-10 rounded-full" />
     </div>

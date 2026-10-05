@@ -5,16 +5,19 @@ import { SegmentedControl, type SegmentOption } from '@site/components/ui/Segmen
 
 /**
  * Category filter of /news: link-mode SegmentedControl (crawlable `?cat=` links,
- * server-rendered results) + `filter_change` analytics.
+ * server-rendered results) + `filter_change` analytics. `data-news-nav` lets
+ * <NewsResultsRegion> show pending feedback while the next list loads.
  */
 export function NewsCategoryTabs({ options, value, label }: { options: SegmentOption[]; value: string; label: string }) {
   return (
-    <SegmentedControl
-      options={options}
-      value={value}
-      label={label}
-      className="min-w-0"
-      onNavigate={(v) => track('filter_change', { context: 'news', filter: 'category', value: v })}
-    />
+    <div data-news-nav className="min-w-0">
+      <SegmentedControl
+        options={options}
+        value={value}
+        label={label}
+        className="min-w-0"
+        onNavigate={(v) => track('filter_change', { context: 'news', filter: 'category', value: v })}
+      />
+    </div>
   );
 }

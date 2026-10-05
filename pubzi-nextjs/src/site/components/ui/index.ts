@@ -7,7 +7,6 @@ export * from './EmptyState';
 export * from './Field';
 export * from './format';
 export * from './GameCard';
-export * from './GameCardActions';
 export * from './Input';
 export * from './NewsCard';
 export * from './Pagination';

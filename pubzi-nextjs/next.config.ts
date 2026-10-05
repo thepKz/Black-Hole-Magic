@@ -29,6 +29,9 @@ function siteMediaPattern(): NonNullable<NonNullable<NextConfig['images']>['remo
 }
 
 const nextConfig: NextConfig = {
+  // Lets a production build be verified into a separate folder while the dev
+  // server keeps using .next (e.g. NEXT_DIST_DIR=.next-verify npm run build).
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   images: {
     // Optimisation ON (WebP + srcset). AVIF dropped: its encoder is the most
     // CPU-hungry and concurrent cold AVIF requests were seen hanging the
