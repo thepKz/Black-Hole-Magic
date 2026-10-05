@@ -1,0 +1,23 @@
+# Local development database for the Payload CMS (new publisher site).
+# Host port 5440 avoids clashing with a local PostgreSQL (5432) and other projects (5433-5438).
+services:
+  postgres:
+    image: postgres:17
+    container_name: blackhole-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: blackhole
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5440:5432"
+    volumes:
+      - blackhole-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d blackhole"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  blackhole-pgdata:

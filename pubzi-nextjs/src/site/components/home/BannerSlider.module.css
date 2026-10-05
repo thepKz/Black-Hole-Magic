@@ -1,0 +1,18 @@
+/* Autoplay progress fill inside the active dot (28px pill).
+   Duration + play-state are driven inline from BannerSlider so the fill
+   stays in sync with the JS timer (pauses on hover / focus / hidden tab). */
+.progress {
+  transform-origin: left center;
+  animation-name: banner-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes banner-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

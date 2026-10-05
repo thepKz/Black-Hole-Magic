@@ -17,7 +17,7 @@ export default function Header7() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
   const { locale, messages, localizedPath, switchLocalePath } = useI18n()
-  const cleanPathname = pathname.replace(/^\/(vi|en)(?=\/|$)/, '') || '/'
+  const cleanPathname = pathname.replace(/^(?:\/v2)?(?:\/(?:vi|en))?(?=\/|$)/, '') || '/'
 
   const isActive = (href: string) =>
     href === '/' ? cleanPathname === '/' : cleanPathname.startsWith(href)

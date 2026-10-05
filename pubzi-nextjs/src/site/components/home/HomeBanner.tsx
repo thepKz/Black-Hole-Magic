@@ -1,0 +1,52 @@
+import { banners } from '@site/data/banners';
+import { format, getDictionary, href, pick, type Locale } from '@site/i18n';
+import type { SiteImage } from '@site/lib/types';
+import { BannerSlider, type BannerSlide, type BannerSlideImage } from './BannerSlider';
+
+const isAbsolute = (url: string) => /^(https?:)?\/\//i.test(url);
+
+const toSlideImage = (img: SiteImage): BannerSlideImage => ({
+  src: img.src,
+  width: img.width,
+  height: img.height,
+  focal: img.focal,
+});
+
+/**
+ * Server wrapper: localizes the typed mock banners (src/site/data/banners.ts)
+ * and labels, then hands plain props to the client <BannerSlider>.
+ * Dictionaries never reach the client bundle.
+ */
+export function HomeBanner({ locale }: { locale: Locale }) {
+  const t = getDictionary(locale);
+  const total = banners.length;
+
+  const slides: BannerSlide[] = banners.map((b) => ({
+    id: b.id,
+    href: b.href ? href(locale, b.href) : null,
+    external: b.href ? isAbsolute(b.href) : false,
+    alt: pick(b.image.alt, locale) || (b.title ? pick(b.title, locale) : ''),
+    title: b.title ? pick(b.title, locale) : undefined,
+    subtitle: b.subtitle ? pick(b.subtitle, locale) : undefined,
+    ctaLabel: b.ctaLabel ? pick(b.ctaLabel, locale) : undefined,
+    gameSlug: b.gameSlug,
+    image: toSlideImage(b.image),
+    mobileImage: b.mobileImage ? toSlideImage(b.mobileImage) : undefined,
+  }));
+
+  return (
+    <BannerSlider
+      slides={slides}
+      labels={{
+        region: t.bannerRegion,
+        prev: t.bannerPrev,
+        next: t.bannerNext,
+        pause: t.bannerPause,
+        play: t.bannerPlay,
+        newTab: t.newTab,
+        goTo: banners.map((_, i) => format(t.bannerGoTo, { n: i + 1 })),
+        slideOf: banners.map((_, i) => format(t.bannerSlideOf, { n: i + 1, total })),
+      }}
+    />
+  );
+}

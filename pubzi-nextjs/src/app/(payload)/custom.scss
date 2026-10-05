@@ -1,0 +1,23 @@
+/* Admin (Payload) style overrides go here. */
+
+/*
+ * Lexical editor: Payload's default content font is a serif stack starting
+ * with Georgia, which has no glyphs for stacked Vietnamese diacritics on
+ * Windows ("đầu" renders with detached accents). Use a sans stack that covers
+ * Vietnamese everywhere.
+ */
+.rich-text-lexical .editor,
+.rich-text-lexical [data-lexical-editor],
+.rich-text-lexical .editor-placeholder {
+  font-family: var(
+    --font-body,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    'Noto Sans',
+    sans-serif
+  );
+}

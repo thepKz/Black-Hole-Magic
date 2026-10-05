@@ -3,6 +3,8 @@ import { defaultLocale, isLocale, type Locale } from '@/i18n/config';
 
 const PUBLIC_FILE = /\.(.*)$/;
 const localeCookieName = 'NEXT_LOCALE';
+// Legacy site, served as /v2/{locale}/…; the new publisher site owns /{locale}/…
+const legacySegment = 'v2';
 
 function getPreferredLocale(request: NextRequest): Locale {
   const cookieLocale = request.cookies.get(localeCookieName)?.value;
@@ -29,6 +31,7 @@ export function proxy(request: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
+    pathname.startsWith('/admin') ||
     pathname.startsWith('/assets') ||
     pathname.startsWith('/favicon') ||
     PUBLIC_FILE.test(pathname)
@@ -36,8 +39,16 @@ export function proxy(request: NextRequest) {
     return;
   }
 
-  const firstSegment = pathname.split('/').filter(Boolean)[0];
-  if (isLocale(firstSegment)) return;
+  const segments = pathname.split('/').filter(Boolean);
+
+  if (segments[0] === legacySegment) {
+    if (isLocale(segments[1])) return;
+    const rest = segments.slice(1).join('/');
+    request.nextUrl.pathname = `/${legacySegment}/${getPreferredLocale(request)}${rest ? `/${rest}` : ''}`;
+    return NextResponse.redirect(request.nextUrl);
+  }
+
+  if (isLocale(segments[0])) return;
 
   const locale = getPreferredLocale(request);
   request.nextUrl.pathname = pathname === '/' ? `/${locale}` : `/${locale}${pathname}`;
@@ -45,5 +56,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next|api|assets|.*\\..*).*)'],
+  matcher: ['/((?!_next|api|admin|assets|.*\\..*).*)'],
 };

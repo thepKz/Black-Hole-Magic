@@ -591,7 +591,7 @@ export default function Footer7() {
       <div className="bhf-inner">
         <div className="bhf-grid">
           <div className="bhf-col bhf-brand" data-bhf-pull>
-            <Link href="/" className="bhf-lens">
+            <Link href="/v2" className="bhf-lens">
               <Image src="/assets/img/logo/white-logo-2.png" alt="Black Hole Logo" width={150} height={150} />
             </Link>
             <p className="bhf-desc">
@@ -607,28 +607,28 @@ export default function Footer7() {
           <nav className="bhf-col" data-bhf-pull aria-label="Hệ sinh thái">
             <h5 className="bhf-h">Hệ sinh thái</h5>
             <ul className="bhf-links">
-              <li><Link href="/game" className="bhf-link">Phát hành mobile game</Link></li>
-              <li><Link href="/service" className="bhf-link">Đồng phát hành</Link></li>
-              <li><Link href="/service" className="bhf-link">Việt hóa game</Link></li>
-              <li><Link href="/service" className="bhf-link">Blackhole Pay</Link></li>
+              <li><Link href="/v2/game" className="bhf-link">Phát hành mobile game</Link></li>
+              <li><Link href="/v2/service" className="bhf-link">Đồng phát hành</Link></li>
+              <li><Link href="/v2/service" className="bhf-link">Việt hóa game</Link></li>
+              <li><Link href="/v2/service" className="bhf-link">Blackhole Pay</Link></li>
             </ul>
           </nav>
           <nav className="bhf-col" data-bhf-pull aria-label="Công ty">
             <h5 className="bhf-h">Black Hole</h5>
             <ul className="bhf-links">
-              <li><Link href="/about" className="bhf-link">Về chúng tôi</Link></li>
-              <li><Link href="/service" className="bhf-link">Pháp lý chuyên sâu</Link></li>
-              <li><Link href="/news" className="bhf-link">Tin tức phát hành</Link></li>
-              <li><Link href="/contact" className="bhf-link">Liên hệ hợp tác</Link></li>
+              <li><Link href="/v2/about" className="bhf-link">Về chúng tôi</Link></li>
+              <li><Link href="/v2/service" className="bhf-link">Pháp lý chuyên sâu</Link></li>
+              <li><Link href="/v2/news" className="bhf-link">Tin tức phát hành</Link></li>
+              <li><Link href="/v2/contact" className="bhf-link">Liên hệ hợp tác</Link></li>
             </ul>
           </nav>
           <nav className="bhf-col" data-bhf-pull aria-label="Tài nguyên">
             <h5 className="bhf-h">Tài nguyên</h5>
             <ul className="bhf-links">
-              <li><Link href="/game" className="bhf-link">Danh mục game</Link></li>
-              <li><Link href="/faq" className="bhf-link">Câu hỏi thường gặp</Link></li>
-              <li><Link href="/contact" className="bhf-link">Trung tâm hỗ trợ</Link></li>
-              <li><Link href="/contact" className="bhf-link">Pháp lý &amp; bảo mật</Link></li>
+              <li><Link href="/v2/game" className="bhf-link">Danh mục game</Link></li>
+              <li><Link href="/v2/faq" className="bhf-link">Câu hỏi thường gặp</Link></li>
+              <li><Link href="/v2/contact" className="bhf-link">Trung tâm hỗ trợ</Link></li>
+              <li><Link href="/v2/contact" className="bhf-link">Pháp lý &amp; bảo mật</Link></li>
             </ul>
           </nav>
         </div>
