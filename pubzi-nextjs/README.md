@@ -23,6 +23,8 @@ npm run dev               # http://localhost:3000, admin: /admin
 
 ## Tài liệu
 
+- **[docs/HANDOFF.md](docs/HANDOFF.md)** — bàn giao toàn bộ dự án: cấu trúc, chạy ở máy, danh sách
+  biến môi trường đầy đủ, deploy, checklist chuyển repo, việc còn dở. Người mới đọc file này trước.
 - **[docs/DEPLOY-ADMIN.md](docs/DEPLOY-ADMIN.md)** — đưa `/admin` lên Vercel: Neon Postgres, Vercel Blob,
   biến môi trường, migration, tài khoản admin đầu tiên (`npm run bootstrap:admin`), cron đăng bài
   hẹn giờ, kiểm tra `/api/health`, xử lý sự cố.
