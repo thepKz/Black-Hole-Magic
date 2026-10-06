@@ -60,9 +60,13 @@ export const CtaBlock: Block = {
         {
           name: 'newTab',
           type: 'checkbox',
-          defaultValue: true,
+          // Off by default: site links (/vi/game...) should stay in the same tab.
+          defaultValue: false,
           label: { vi: 'Mở tab mới', en: 'Open in new tab' },
-          admin: { width: '33%' },
+          admin: {
+            width: '33%',
+            description: { vi: 'Nên bật cho link ra trang ngoài.', en: 'Recommended for external links.' },
+          },
         },
         {
           name: 'nofollow',

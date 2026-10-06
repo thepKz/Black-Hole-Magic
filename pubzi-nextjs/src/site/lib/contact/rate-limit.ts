@@ -2,16 +2,17 @@ import 'server-only';
 
 import { createHash } from 'node:crypto';
 
-import config from '@payload-config';
-import { getPayload } from 'payload';
+import { getContactSink } from './submit';
 
 /**
  * Contact form rate limit: at most LIMIT requests per hashed IP per WINDOW.
- *
- * Source of truth = the `contact-requests` collection itself (count of recent
- * docs with the same `ipHash`), so it survives restarts and is shared by every
- * server instance. A small in-memory counter in front of it absorbs bursts of
- * parallel submissions that the DB count cannot see yet.
+ * CMS-independent:
+ * - A small in-memory counter absorbs bursts (always on).
+ * - When the active ContactSink stores requests (payload), its countRecent()
+ *   is the durable source of truth shared by every server instance.
+ * - Sinks that can't count (http webhook, log) rely on the memory counter only,
+ *   which is PER INSTANCE on serverless.
+ *   TODO: shared counter (Upstash Redis / Vercel KV) when CONTACT_SINK=http in production.
  */
 export const RATE_WINDOW_MS = 10 * 60 * 1000;
 export const RATE_LIMIT = 5;
@@ -47,20 +48,12 @@ function memoryHit(key: string, now: number): boolean {
 
 /**
  * Records an attempt and returns false when `ipHash` is over the limit.
- * Throws when the database is unreachable (the action then reports errServer).
+ * Throws when the sink's store is unreachable (the action then reports errServer).
  */
 export async function allowContactSubmission(ipHash: string, now = Date.now()): Promise<boolean> {
   if (!memoryHit(ipHash, now)) return false;
-  const payload = await getPayload({ config });
-  const { totalDocs } = await payload.count({
-    collection: 'contact-requests',
-    overrideAccess: true,
-    where: {
-      and: [
-        { ipHash: { equals: ipHash } },
-        { createdAt: { greater_than: new Date(now - RATE_WINDOW_MS).toISOString() } },
-      ],
-    },
-  });
-  return totalDocs < RATE_LIMIT;
+  const sink = await getContactSink();
+  if (!sink?.countRecent) return true;
+  const recent = await sink.countRecent(ipHash, new Date(now - RATE_WINDOW_MS).toISOString());
+  return recent < RATE_LIMIT;
 }

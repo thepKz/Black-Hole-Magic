@@ -1,4 +1,6 @@
-import { open } from 'fs/promises';
+import { open, readdir, readFile, stat, unlink } from 'fs/promises';
+import os from 'os';
+import path from 'path';
 
 import { APIError } from 'payload';
 import type { AllowList, CollectionBeforeOperationHook, PayloadRequest } from 'payload';
@@ -29,6 +31,22 @@ const formatMB = (bytes: number) =>
   `${(bytes / MB).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} MB`;
 
 /**
+ * Largest of: the size the client claimed, the bytes in memory and the temp file
+ * on disk. Client uploads (Vercel Blob) only carry the size the browser CLAIMS
+ * (`file.size`), while Payload has already streamed the real object to a temp
+ * file - never trust the claim alone.
+ */
+export async function realFileSize(file: NonNullable<PayloadRequest['file']>): Promise<number> {
+  let size = typeof file.size === 'number' ? file.size : 0;
+  if (file.data && file.data.length > size) size = file.data.length;
+  if (file.tempFilePath) {
+    const st = await stat(file.tempFilePath).catch(() => null);
+    if (st && st.size > size) size = st.size;
+  }
+  return size;
+}
+
+/**
  * `beforeOperation` guard: friendly Vietnamese errors for a wrong file type or an
  * oversized file, before Payload's own (English) checks run. Payload's
  * checkFileRestrictions still validates the real file signature afterwards.
@@ -41,10 +59,13 @@ export function uploadGuard(opts: {
   /** Extra hint when the file belongs to the other library. */
   wrongKindHint?: (mime: string) => string | null;
 }): CollectionBeforeOperationHook {
-  return ({ args, operation, req }) => {
+  return async ({ args, operation, req }) => {
     if (operation !== 'create' && operation !== 'update') return args;
+    void sweepUploadTempDir();
     const file = req.file;
     if (!file) return args;
+    // Guests: let the access check answer (403) instead of revealing upload rules.
+    if (!req.user && req.payloadAPI !== 'local') return args;
 
     const mime = (file.mimetype || '').split(';')[0].trim().toLowerCase();
     if (mime && !opts.mimeTypes.includes(mime)) {
@@ -56,9 +77,10 @@ export function uploadGuard(opts: {
         true,
       );
     }
-    if (typeof file.size === 'number' && file.size > opts.maxBytes) {
+    const size = await realFileSize(file);
+    if (size > opts.maxBytes) {
       throw new APIError(
-        `Tệp "${file.name}" nặng ${formatMB(file.size)}, vượt giới hạn ${formatMB(opts.maxBytes)}. Hãy nén hoặc giảm kích thước rồi tải lại.`,
+        `Tệp "${file.name}" nặng ${formatMB(size)}, vượt giới hạn ${formatMB(opts.maxBytes)}. Hãy nén hoặc giảm kích thước rồi tải lại.`,
         413,
         undefined,
         true,
@@ -76,10 +98,13 @@ const CAMERA_NAME =
   /^(img|image|dsc|dscf|dscn|dcim|pxl|mvimg|vid|video|photo|pic|picture|screenshot|screen shot|ảnh chụp màn hình|anh chup man hinh|untitled|download|file)?[\s\d()x]*$/i;
 
 /**
- * "tlbb-ra-mat-server-moi_1200x675-2.webp" -> "Tlbb ra mat server moi".
+ * "tlbb-ra-mat-server-moi_1200x675.webp" -> "Tlbb ra mat server moi".
  * Returns null when the name carries no meaning (IMG_1234.JPG, 1696222.png ...).
+ * `storedName`: the name came from the library (not the uploaded file), so a
+ * trailing "-1" / "-2" is Payload's duplicate suffix and is dropped. Uploaded
+ * names keep it: "gallery-1.jpg" and "gallery-2.jpg" must not get the same alt.
  */
-export function humanizeFilename(name: string | null | undefined): string | null {
+export function humanizeFilename(name: string | null | undefined, { storedName = false } = {}): string | null {
   if (!name) return null;
   let base = name;
   try {
@@ -90,7 +115,7 @@ export function humanizeFilename(name: string | null | undefined): string | null
   base = base
     .replace(/\.[a-z0-9]{2,5}$/i, '') // extension
     .replace(/[-_ ]\d{2,5}x\d{2,5}$/i, '') // size suffix
-    .replace(/[-_ ]\d{1,2}$/, '') // Payload duplicate suffix "-1"
+    .replace(storedName ? /-\d{1,2}$/ : /(?!)/, '') // Payload duplicate suffix "-1" (stored names only)
     .replace(/[_\-+.]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -105,6 +130,72 @@ export const incomingFilename = (req: PayloadRequest, data?: { filename?: unknow
   (typeof data?.filename === 'string' ? data.filename : null) ??
   (typeof originalDoc?.filename === 'string' ? originalDoc.filename : null);
 
+/** Readable text from the incoming / stored file name (see humanizeFilename). */
+export const humanizeIncoming = (req: PayloadRequest, data?: { filename?: unknown } | null, originalDoc?: { filename?: unknown } | null) =>
+  humanizeFilename(incomingFilename(req, data, originalDoc), { storedName: !req.file?.name });
+
+// ---------------------------------------------------------------------------
+// Temp files
+// ---------------------------------------------------------------------------
+
+/** Must match payload.config `upload.tempFileDir`. */
+export const UPLOAD_TEMP_DIR = path.join(os.tmpdir(), 'payload-uploads');
+
+/**
+ * Images: read the multipart temp file into memory and delete it BEFORE
+ * Payload processes the upload (media `beforeOperation`, after uploadGuard).
+ *
+ * With `useTempFiles`, Payload opens the temp file with sharp and then writes
+ * the converted WebP back INTO that same temp file while libvips may still hold
+ * it open. On Windows that write fails (`UNKNOWN: open ...payload-uploads/tmp-*`)
+ * and every JPEG upload ended in "Không tải lên được tệp". Images are capped at
+ * 15 MB, so a buffer is cheap; videos (up to 300 MB) keep the temp file.
+ */
+export const imageTempFileToBuffer: CollectionBeforeOperationHook = async ({ args, operation, req }) => {
+  if (operation !== 'create' && operation !== 'update') return args;
+  const file = req.file;
+  if (!file?.tempFilePath || (file.data && file.data.length > 0)) return args;
+  if (!req.user && req.payloadAPI !== 'local') return args; // access will reject it
+  const tempPath = file.tempFilePath;
+  const data = await readFile(tempPath);
+  req.file = { ...file, data, size: data.length, tempFilePath: undefined };
+  await unlink(tempPath).catch(() => {});
+  return args;
+};
+
+let lastSweep = 0;
+
+/**
+ * Deletes multipart temp files older than 1 hour. Payload parses multipart
+ * bodies (useTempFiles) before auth/access and never deletes the temp file
+ * when the target is not an upload collection, so junk accumulates. Called
+ * opportunistically from uploadGuard, at most once every 10 minutes; never throws.
+ */
+export async function sweepUploadTempDir(maxAgeMs = 60 * 60 * 1000, now = Date.now()): Promise<number> {
+  if (now - lastSweep < 10 * 60 * 1000) return 0;
+  lastSweep = now;
+  let removed = 0;
+  try {
+    const names = await readdir(UPLOAD_TEMP_DIR);
+    for (const name of names) {
+      if (!name.startsWith('tmp-') && !name.startsWith('payload-client-upload-')) continue;
+      const full = path.join(UPLOAD_TEMP_DIR, name);
+      try {
+        const st = await stat(full);
+        if (st.isFile() && now - st.mtimeMs > maxAgeMs) {
+          await unlink(full);
+          removed += 1;
+        }
+      } catch {
+        /* busy or gone */
+      }
+    }
+  } catch {
+    /* dir missing */
+  }
+  return removed;
+}
+
 // ---------------------------------------------------------------------------
 // Paste-URL allow list
 // ---------------------------------------------------------------------------
@@ -112,20 +203,23 @@ export const incomingFilename = (req: PayloadRequest, data?: { filename?: unknow
 /**
  * "Dán URL" in the upload field first tries a browser fetch (fails on most sites
  * because of CORS), then the server `/paste-url` endpoint - but only for hosts on
- * this list (exact hostname match, https only). Allow-listed hosts skip Payload's
- * SSRF filter, so only public CDNs belong here. Extra hosts: comma-separated env
- * MEDIA_PASTE_HOSTS (e.g. the game CDN).
+ * this list (EXACT hostname match - Payload has no wildcards - https only).
+ * Allow-listed hosts skip Payload's SSRF filter and the endpoint streams the
+ * remote file through our server, so only OFFICIAL CDNs belong here - never
+ * hosts where anyone can upload (Discord, Imgur, Google user content...).
+ * Extra hosts: comma-separated env MEDIA_PASTE_HOSTS, e.g.
+ *   MEDIA_PASTE_HOSTS=cdn.blackholegame.vn,static.kiemthe.vn
+ * Other sources (Facebook, TikTok...): save the image, then drag it in.
+ * PASTE_HOST_HINT is shown to editors when a link is refused.
  */
+export const PASTE_HOST_HINT = 'YouTube, Steam, App Store, Google Play, Wikimedia, Unsplash, X/Twitter và CDN của công ty';
+
 const PASTE_HOSTS = [
-  'i.imgur.com',
   'images.unsplash.com',
   'upload.wikimedia.org',
   'i.ytimg.com',
   'img.youtube.com',
   'pbs.twimg.com',
-  'lh3.googleusercontent.com',
-  'cdn.discordapp.com',
-  'media.discordapp.net',
   'cdn.cloudflare.steamstatic.com',
   'shared.akamai.steamstatic.com',
   'shared.cloudflare.steamstatic.com',

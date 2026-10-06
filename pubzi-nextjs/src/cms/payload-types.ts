@@ -144,19 +144,22 @@ export interface News {
     url?: string | null;
   };
   /**
+   * Required, even for drafts.
+   */
+  category: number | NewsCategory;
+  /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
   /**
-   * Authors set "Awaiting review" when done. Editors approve or return "Needs changes". Becomes "Approved" on publish.
+   * When done, authors click "Submit for review" (top bar). Editors publish or click "Return (needs changes)" with a note. Becomes "Approved" on publish.
    */
   reviewStatus?: ('draft' | 'pending' | 'changes' | 'approved') | null;
   /**
    * Internal, never shown on the site.
    */
   reviewNote?: string | null;
-  category: number | NewsCategory;
   /**
    * Empty: filled on first publish (scheduled too). Set by hand only to back-date. To schedule: arrow next to "Publish".
    */
@@ -205,7 +208,7 @@ export interface Media {
    */
   alt?: string | null;
   /**
-   * On when the alt was filled from the file name; cleared once you edit it.
+   * On when the alt was filled from the file name. Articles using the image cannot be published until it is reviewed: edit the alt, or untick this if it is already right.
    */
   altAuto?: boolean | null;
   /**
@@ -213,6 +216,9 @@ export interface Media {
    */
   caption?: string | null;
   credit?: string | null;
+  createdBy?: (number | null) | User;
+  prefix?: string | null;
+  _objectKey?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -259,6 +265,41 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * CMS accounts. Only admins create accounts and change roles; there is no public sign-up. Forgotten password: an admin opens the account and sets a temporary password; accounts locked after failed logins unlock after 5 minutes.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name: string;
+  avatar?: (number | null) | Media;
+  bio?: string | null;
+  /**
+   * Author: writes own articles and submits them. Editor: reviews, publishes, schedules any article and handles contact requests. Admin: everything incl. accounts and categories.
+   */
+  roles: ('admin' | 'editor' | 'author')[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -313,6 +354,9 @@ export interface Video {
    * Read from the MP4/MOV file on upload.
    */
   durationLabel?: string | null;
+  createdBy?: (number | null) | User;
+  prefix?: string | null;
+  _objectKey?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -348,42 +392,7 @@ export interface NewsCategory {
   createdAt: string;
 }
 /**
- * CMS accounts. Only admins create accounts and change roles; there is no public sign-up.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name: string;
-  avatar?: (number | null) | Media;
-  bio?: string | null;
-  /**
-   * Author: writes own articles and submits them. Editor: reviews, publishes, schedules any article and handles contact requests. Admin: everything incl. accounts and categories.
-   */
-  roles: ('admin' | 'editor' | 'author')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * Requests sent from the Contact page. Submitted content is read-only; update the Status and the internal Note. Use the quick filters below or "Filters".
+ * Requests sent from the Contact page. Submitted content is read-only. Open a request, click "Reply by email", then update the Status (handler and time are recorded). Junk: set "Spam", then delete.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact-requests".
@@ -395,7 +404,9 @@ export interface ContactRequest {
   type: 'biz' | 'support' | 'press' | 'other';
   subject: string;
   message: string;
-  status: 'new' | 'processing' | 'done';
+  status: 'new' | 'processing' | 'done' | 'spam';
+  handledBy?: (number | null) | User;
+  handledAt?: string | null;
   /**
    * Visible to CMS users only.
    */
@@ -613,11 +624,11 @@ export interface NewsSelect<T extends boolean = true> {
         name?: T;
         url?: T;
       };
+  category?: T;
   generateSlug?: T;
   slug?: T;
   reviewStatus?: T;
   reviewNote?: T;
-  category?: T;
   publishedAt?: T;
   author?: T;
   coAuthors?: T;
@@ -658,6 +669,9 @@ export interface MediaSelect<T extends boolean = true> {
   altAuto?: T;
   caption?: T;
   credit?: T;
+  createdBy?: T;
+  prefix?: T;
+  _objectKey?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -726,6 +740,9 @@ export interface VideosSelect<T extends boolean = true> {
   credit?: T;
   duration?: T;
   durationLabel?: T;
+  createdBy?: T;
+  prefix?: T;
+  _objectKey?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -750,6 +767,8 @@ export interface ContactRequestsSelect<T extends boolean = true> {
   subject?: T;
   message?: T;
   status?: T;
+  handledBy?: T;
+  handledAt?: T;
   note?: T;
   locale?: T;
   ipHash?: T;
@@ -1033,6 +1052,9 @@ export interface CtaBlock {
    */
   note?: string | null;
   variant?: ('primary' | 'secondary') | null;
+  /**
+   * Recommended for external links.
+   */
   newTab?: boolean | null;
   nofollow?: boolean | null;
   id?: string | null;

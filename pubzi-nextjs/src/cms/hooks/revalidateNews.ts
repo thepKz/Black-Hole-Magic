@@ -1,21 +1,12 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload';
 
-import { CACHE_TAGS, newsDocTag } from '../lib/tags';
+import { CACHE_TAGS, newsDocTag, newsPaths } from '../../shared/cache';
 import { purge as purgeTargets, type RevalidateReq } from './revalidate';
-
-const LOCALES = ['vi', 'en'] as const;
 
 type NewsDocLike = { id: number | string; slug?: string | null; _status?: 'draft' | 'published' | null };
 
-/** Public paths that render a given article (both locales) + list, feeds, sitemap. */
-export function newsPaths(slugs: (string | null | undefined)[]): string[] {
-  const paths: string[] = ['/sitemap.xml'];
-  for (const l of LOCALES) {
-    paths.push(`/${l}/news`, `/${l}/news/rss.xml`);
-    for (const slug of slugs) if (slug) paths.push(`/${l}/news/${slug}`);
-  }
-  return paths;
-}
+/** Public paths of an article: defined once in src/shared/cache.ts (also used by POST /api/revalidate). */
+export { newsPaths };
 
 async function purge(slugs: (string | null | undefined)[], req: RevalidateReq) {
   const unique = [...new Set(slugs.filter((s): s is string => Boolean(s)))];

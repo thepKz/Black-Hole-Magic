@@ -1,4 +1,4 @@
-import type { Media, Video } from '@/cms/payload-types';
+import type { MediaDocLike as Media, VideoDocLike as Video } from './types';
 
 /**
  * Normalised image/video data for the rich blocks. Accepts whatever the Lexical

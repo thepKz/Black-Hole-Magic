@@ -373,3 +373,46 @@ html[data-theme='dark'] .bh-badge {
     color: var(--theme-elevation-500);
   }
 }
+
+/* "Chỉ xem" banner (fields/ReadOnlyNotice). */
+.bh-readonly-notice {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.08);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--theme-elevation-800);
+}
+
+/* "Gửi duyệt" / "Trả lại (Cần sửa)" (fields/ReviewActions). */
+.bh-review-btn {
+  margin: 0 8px 0 0;
+}
+
+/* Contact request reply bar (fields/ContactReply). */
+.bh-contact-reply {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 24px;
+
+  .btn {
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: var(--theme-elevation-500);
+  }
+}
+
+/* Hint under the schedule drawer's date picker (fields/ScheduleDefault). */
+.schedule-publish .bh-schedule-hint {
+  margin: 6px 0 0;
+}
+.schedule-publish .date-time-picker input[readonly] {
+  cursor: pointer;
+}

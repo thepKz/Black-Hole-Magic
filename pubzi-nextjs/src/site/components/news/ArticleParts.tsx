@@ -9,9 +9,8 @@ import { SectionHeading } from '@site/components/ui/SectionHeading';
 import { Tag } from '@site/components/ui/Tag';
 import { format, getDictionary, href, type Locale } from '@site/i18n';
 import { cn } from '@site/lib/cn';
-import type { NewsDetail, NewsListItem } from '@site/lib/types';
+import type { AdjacentPosts, NewsDetail, NewsListItem } from '@site/lib/types';
 
-import type { AdjacentPosts } from './adjacent';
 import { FadeImage } from './FadeImage';
 import { newsStrings } from './strings';
 
@@ -68,6 +67,7 @@ export function ArticleHeader({ post, locale, titleId }: { post: NewsDetail; loc
                   alt=""
                   width={36}
                   height={36}
+                  unoptimized={post.author.avatar.unoptimized}
                   className="size-9 rounded-full object-cover"
                 />
               ) : (
@@ -107,6 +107,7 @@ export function ArticleCover({ post }: { post: NewsDetail }) {
           fill
           preload
           sizes="(min-width: 800px) 760px, calc(100vw - 32px)"
+          unoptimized={cover.unoptimized}
           className="object-cover"
           style={{ objectPosition: `${cover.focal.x}% ${cover.focal.y}%` }}
         />

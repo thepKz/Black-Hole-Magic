@@ -1,18 +1,13 @@
 import { ArrowLeftIcon } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
-import config from '@payload-config';
-import { draftMode, headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPayload } from 'payload';
 import { cache } from 'react';
 
-import { lexicalHeadings, lexicalToPlainText } from '@/cms/lib/lexical';
-import { slugify } from '@/cms/lib/text';
 import { RefreshRouteOnSave } from '@/cms/live-preview/RefreshRouteOnSave';
 import { LocaleAlternates } from '@site/components/layout/LocaleAlternates';
-import { getAdjacentNews } from '@site/components/news/adjacent';
 import { ArticleBody } from '@site/components/news/ArticleBody';
+import { ArticleUnavailable } from '@site/components/news/ArticleUnavailable';
 import { ArticleCover, ArticleHeader, DraftBanner, PrevNextNav, RelatedNews } from '@site/components/news/ArticleParts';
 import { articleJsonLdImages, articleOgImage, articlePath } from '@site/components/news/meta';
 import { ShareButtons, type ShareLabels } from '@site/components/news/ShareButtons';
@@ -20,21 +15,27 @@ import { newsStrings } from '@site/components/news/strings';
 import { TableOfContents } from '@site/components/news/TableOfContents';
 import { Breadcrumb } from '@site/components/ui/Breadcrumb';
 import { absoluteUrl, getDictionary, href, isLocale, locales, type Locale } from '@site/i18n';
-import { getAllNewsSlugs, getNewsBySlug, getRelatedNews } from '@site/lib/news';
+import { contentSourceId } from '@site/lib/content';
+import { isDraftViewer as checkDraftViewer } from '@site/lib/content/preview';
+import { getAdjacentNews, getAllNewsSlugs, getNewsBySlug, getRelatedNews, isNewsUnavailable, shortenCacheForOutage } from '@site/lib/news';
 import { breadcrumbList, buildMetadata, JsonLd, newsArticle, SITE_NAME } from '@site/lib/seo';
 
 /**
  * /{locale}/news/{slug}
- * - ISR: published slugs are prerendered when the DB is reachable at build
+ * - Content comes from the active content source (CONTENT_SOURCE, see
+ *   src/site/lib/content); this page only uses the CMS-neutral DTOs.
+ * - ISR: published slugs are prerendered when the source is reachable at build
  *   time; others render on first request (dynamicParams) and are purged by the
- *   Payload hooks (revalidateTag/revalidatePath) on publish / unpublish.
- * - Draft Mode (/api/draft from the admin): latest draft + live-preview refresh,
- *   preview banner, noindex.
+ *   Payload hooks / the CMS webhook (POST /api/revalidate) on publish / unpublish.
+ * - Draft Mode (/api/draft): latest draft, preview banner, noindex; Payload's
+ *   live-preview refresh bridge only when the source is Payload.
  * - An EN URL of an article without an EN translation renders the VI fallback
  *   with noindex + a SELF canonical (no conflicting cross-URL canonical);
  *   hreflang lists only the real translations.
- * - DB failures THROW (strict) so ISR keeps the last good page instead of
- *   caching a 404.
+ * - Source failures THROW (strict) so ISR keeps the last good page instead of
+ *   caching a 404. With no cached copy at all, the page renders
+ *   <ArticleUnavailable> with a ~30 s ISR lifetime (ISR renders cannot use
+ *   ./error.tsx; that stays for unexpected errors).
  */
 export const dynamicParams = true;
 export const revalidate = 3600;
@@ -46,23 +47,11 @@ export async function generateStaticParams({ params }: { params: { locale: strin
 }
 
 /**
- * Draft Mode alone is not trusted: its cookie outlives the admin session, so
- * drafts are only served while a Payload user is still logged in (otherwise a
- * shared machine would keep showing unpublished drafts after /admin logout).
- * Cookies can't be cleared during render; the stale bypass cookie is simply
- * ignored (it is cleared by /api/draft/exit, the banner's exit form).
+ * Drafts only with Draft Mode + a valid signed preview cookie for the active
+ * content source (+ a live CMS session for Payload): see
+ * src/site/lib/content/preview.ts. Memoised per request.
  */
-const isDraftViewer = cache(async (): Promise<boolean> => {
-  const { isEnabled } = await draftMode();
-  if (!isEnabled) return false;
-  try {
-    const payload = await getPayload({ config });
-    const { user } = await payload.auth({ headers: await headers() });
-    return Boolean(user);
-  } catch {
-    return false;
-  }
-});
+const isDraftViewer = cache(checkDraftViewer);
 
 /** One fetch per request for metadata + page (draft reads are uncached). */
 const loadPost = cache(async (locale: Locale, slug: string) => {
@@ -74,8 +63,19 @@ const loadPost = cache(async (locale: Locale, slug: string) => {
 export async function generateMetadata({ params }: PageProps<'/[locale]/news/[slug]'>): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!isLocale(locale)) return {};
-  const { post, draft } = await loadPost(locale, slug);
   const t = getDictionary(locale);
+  let loaded: Awaited<ReturnType<typeof loadPost>>;
+  try {
+    loaded = await loadPost(locale, slug);
+  } catch (err) {
+    // Source outage with no cached copy: neutral, noindex metadata; the page
+    // renders <ArticleUnavailable> (see below).
+    if (isNewsUnavailable(err)) {
+      return { title: locale === 'en' ? 'Temporarily unavailable' : 'Tạm thời không tải được', robots: { index: false, follow: false } };
+    }
+    throw err;
+  }
+  const { post, draft } = loaded;
   if (!post) return { title: t.notFoundTitle, robots: { index: false, follow: true } };
 
   const path = articlePath(post.slug);
@@ -109,7 +109,19 @@ export default async function NewsArticlePage({ params }: PageProps<'/[locale]/n
   const { locale: rawLocale, slug } = await params;
   if (!isLocale(rawLocale)) notFound();
   const locale: Locale = rawLocale;
-  const { post, draft } = await loadPost(locale, slug);
+  let loaded: Awaited<ReturnType<typeof loadPost>>;
+  try {
+    loaded = await loadPost(locale, slug);
+  } catch (err) {
+    // Only reached when the source is down AND this article has no cached data
+    // (cached ones are served stale by unstable_cache). Throwing would end in
+    // Next's bare "Internal Server Error" (ISR renders bypass error.tsx), so
+    // render a branded page that ISR keeps for only ~30 s.
+    if (!isNewsUnavailable(err)) throw err;
+    await shortenCacheForOutage(`${locale}/${slug}`);
+    return <ArticleUnavailable locale={locale} path={href(locale, `/news/${encodeURIComponent(slug)}`)} />;
+  }
+  const { post, draft } = loaded;
   if (!post) notFound();
 
   const t = getDictionary(locale);
@@ -118,15 +130,13 @@ export default async function NewsArticlePage({ params }: PageProps<'/[locale]/n
   const url = absoluteUrl(href(locale, path));
 
   const [relatedAuto, adjacent] = await Promise.all([
-    getRelatedNews(locale, post.id, 3),
+    getRelatedNews(locale, post, 3),
     getAdjacentNews(locale, post.slug, post.publishedAt, { draft }),
   ]);
   const related = relatedAuto.length ? relatedAuto : post.related.slice(0, 3);
 
-  const headings = lexicalHeadings(post.content, slugify);
+  const { headings, wordCount } = post.outline;
   const showToc = headings.filter((h) => h.level === 2).length >= ROOT_H2_MIN;
-  const plain = lexicalToPlainText(post.content);
-  const wordCount = plain ? plain.split(/\s+/).filter(Boolean).length : 0;
 
   const crumbs = [
     { name: t.home, path: '/' },
@@ -156,7 +166,7 @@ export default async function NewsArticlePage({ params }: PageProps<'/[locale]/n
       {draft ? (
         <>
           <DraftBanner locale={locale} path={href(locale, path)} />
-          <RefreshRouteOnSave />
+          {contentSourceId() === 'payload' ? <RefreshRouteOnSave /> : null}
         </>
       ) : null}
       <LocaleAlternates paths={switcherPaths} />

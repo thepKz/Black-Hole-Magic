@@ -1,12 +1,12 @@
 import type { CollectionBeforeChangeHook, CollectionBeforeValidateHook, CollectionConfig } from 'payload';
 
-import { anyone, authenticated, editorOrAdmin } from '../access';
-import { revalidateCollection } from '../hooks/revalidate';
+import { anyone, authenticated, editorOrAdmin, ownUploadOrEditor } from '../access';
+import { createdByField, revalidateUploadUsage } from '../fields/createdBy';
+import { preventVideoDeleteInUse } from '../hooks/preventDeleteInUse';
 import { CACHE_TAGS } from '../lib/tags';
 import {
   formatDuration,
-  humanizeFilename,
-  incomingFilename,
+  humanizeIncoming,
   MB,
   pasteAllowList,
   probeVideo,
@@ -20,7 +20,7 @@ const prefillTitle: CollectionBeforeValidateHook = ({ data, operation, originalD
   if (!data) return data;
   if (operation !== 'create' && !('title' in data)) return data;
   const title = typeof data.title === 'string' ? data.title.trim() : '';
-  data.title = title || humanizeFilename(incomingFilename(req, data, originalDoc)) || 'Video không tên';
+  data.title = title || humanizeIncoming(req, data, originalDoc) || 'Video không tên';
   return data;
 };
 
@@ -65,12 +65,14 @@ export const Videos: CollectionConfig = {
   access: {
     read: anyone,
     create: authenticated,
-    update: authenticated,
-    // Removing a file breaks every article that uses it: editors/admins only.
+    // Authors edit / replace only their own uploads.
+    update: ownUploadOrEditor,
+    // Editors/admins only, and never while an article still uses the video.
     delete: editorOrAdmin,
   },
   hooks: {
-    ...revalidateCollection(CACHE_TAGS.media, CACHE_TAGS.news),
+    ...revalidateUploadUsage(CACHE_TAGS.media, CACHE_TAGS.news),
+    beforeDelete: [preventVideoDeleteInUse],
     beforeOperation: [
       uploadGuard({
         maxBytes: VIDEO_MAX_BYTES,
@@ -100,6 +102,7 @@ export const Videos: CollectionConfig = {
     {
       name: 'filesize',
       type: 'number',
+      label: { vi: 'Dung lượng', en: 'File size' },
       admin: { components: { Cell: '/cms/admin/cells/FileSizeCell#FileSizeCell' } },
     },
     {
@@ -162,5 +165,6 @@ export const Videos: CollectionConfig = {
         afterRead: [({ siblingData }) => formatDuration(siblingData?.duration as number | null | undefined)],
       },
     },
+    createdByField,
   ],
 };

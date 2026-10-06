@@ -1,61 +1,41 @@
-# Pubzi - eSports and Gaming Next.js
+# Black Hole Game — website + newsroom CMS
 
-Chuyển đổi template HTML Pubzi sang Next.js với TypeScript và App Router.
+Next.js 16 (App Router) + Payload CMS 3 (Postgres). Production: https://blackholegame.vn (Vercel).
 
-## 🎯 Features
+| Đường dẫn | Là gì | Mã nguồn |
+|---|---|---|
+| `/vi`, `/en`, `/[locale]/news`, `/[locale]/contact`, ... | Website công khai | `src/app/(site)`, `src/site` |
+| `/admin` | Trang quản trị cho biên tập viên tin game (Payload) | `src/app/(payload)`, `src/cms` |
+| `/api/*` | REST của Payload + `/api/health`, `/api/draft`, `/api/revalidate` | `src/app/(payload)/api`, `src/app/(site)/api` |
+| `/v2/*` | Site cũ (giữ nguyên, không sửa) | `src/app/(v2)`, `src/components`, ... |
 
-- ✅ **2 Homepage Variants**: index-2 (default /) và index-7 (/home-7)
-- ✅ **10+ Pages**: About, Contact, Team, Game, Match, News, Service, Pricing, Gallery, FAQ
-- ✅ **Component-Based Architecture**: 40+ React components được extract từ HTML
-- ✅ **jQuery Integration**: Giữ nguyên 100% animations và plugins
-- ✅ **GSAP Animations**: ScrollTrigger, SplitText, WOW.js
-- ✅ **TypeScript**: Type-safe components
-- ✅ **Responsive Design**: Mobile-first approach từ template gốc
-
-## 📁 Project Structure
-
-```
-pubzi-nextjs/
-├── src/
-│   ├── app/
-│   │   ├── (home-2)/          # Default homepage (index-2)
-│   │   ├── home-7/            # Alternative homepage
-│   │   ├── about/page.tsx
-│   │   ├── contact/page.tsx
-│   │   ├── team/page.tsx
-│   │   └── ... (10+ pages)
-│   ├── components/
-│   │   ├── shared/
-│   │   ├── home-2/            # 10 components
-│   │   └── home-7/            # 9 components
-│   └── lib/                   # jQuery & GSAP setup
-└── public/assets/             # CSS, JS, images
-```
-
-## 🚀 Quick Start
+## Chạy ở máy
 
 ```bash
-cd pubzi-nextjs
 npm install
-npm run dev
+cp .env.example .env      # điền DATABASE_URI, PAYLOAD_SECRET, SEED_ADMIN_* ...
+npm run db:up             # Postgres trong docker (cổng 5440)
+npm run seed              # tài khoản admin + danh mục + bài mẫu
+npm run dev               # http://localhost:3000, admin: /admin
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Ở máy, schema DB tự đồng bộ (push mode). Mọi nơi khác chỉ dùng migration trong `src/cms/migrations`.
 
-## 📝 Routing
+## Tài liệu
 
-- `/` - Homepage (index-2)
-- `/home-7` - Homepage variant 7
-- `/about`, `/contact`, `/team`, `/game`, `/match`, `/news`, `/service`, `/pricing`, `/gallery`, `/faq`
+- **[docs/DEPLOY-ADMIN.md](docs/DEPLOY-ADMIN.md)** — đưa `/admin` lên Vercel: Neon Postgres, Vercel Blob,
+  biến môi trường, migration, tài khoản admin đầu tiên (`npm run bootstrap:admin`), cron đăng bài
+  hẹn giờ, kiểm tra `/api/health`, xử lý sự cố.
+- **[docs/CONNECT-CMS.md](docs/CONNECT-CMS.md)** — đổi nguồn tin tức / hộp thư liên hệ sang CMS khác
+  (`CONTENT_SOURCE=payload | http | mock`) mà không sửa trang.
 
-## ⚙️ Technical Stack
+## Lệnh hay dùng
 
-- Next.js 15 + App Router
-- TypeScript
-- jQuery + GSAP (client-side)
-- Bootstrap CSS
-- Swiper.js
-
----
-
-**Created by AI-assisted migration**
+| Lệnh | Việc |
+|---|---|
+| `npm run typecheck` / `npm run lint` | kiểm tra TypeScript / ESLint |
+| `npm run build` | build production |
+| `npm run migrate:create <tên>` | tạo migration sau khi đổi cấu trúc collection (commit cùng thay đổi) |
+| `npm run migrate` / `npm run migrate:status` | chạy / xem migration |
+| `npm run generate:types` / `npm run generate:importmap` | sinh lại `payload-types.ts` / import map admin |
+| `npm run bootstrap:admin` | tạo hoặc đặt lại tài khoản admin (dùng cho production) |

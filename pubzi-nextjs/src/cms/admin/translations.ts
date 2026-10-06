@@ -1,3 +1,42 @@
+import { vi as stockVi } from '@payloadcms/translations/languages/vi';
+
+/**
+ * Spelling: this admin writes "xoá" / "khoá" (oa + tone on the a), the stock
+ * VI pack mixes in "xóa" / "khóa" ("Xác nhận xóa" next to "Xoá vĩnh viễn").
+ * Every stock string is re-spelled once here and merged UNDER the hand-written
+ * overrides below, so the whole admin reads the same.
+ */
+type Strings = { [key: string]: string | Strings };
+
+const respell = (text: string) =>
+  text.replace(/([xX])óa/g, '$1oá').replace(/([kK])hóa/g, '$1hoá').replace(/([xX])ỏa/g, '$1oả');
+
+function respelled(tree: Strings): Strings {
+  const out: Strings = {};
+  for (const [key, value] of Object.entries(tree)) {
+    if (typeof value === 'string') {
+      const next = respell(value);
+      if (next !== value) out[key] = next;
+    } else if (value && typeof value === 'object') {
+      const nested = respelled(value);
+      if (Object.keys(nested).length) out[key] = nested;
+    }
+  }
+  return out;
+}
+
+const deepMerge = (target: Strings, source: Strings): Strings => {
+  for (const [key, value] of Object.entries(source)) {
+    if (value && typeof value === 'object') {
+      const base = target[key];
+      target[key] = deepMerge(base && typeof base === 'object' ? base : {}, value);
+    } else {
+      target[key] = value;
+    }
+  }
+  return target;
+};
+
 /**
  * Vietnamese overrides for Payload's built-in admin strings
  * (`i18n.translations.vi`, deep-merged over @payloadcms/translations/vi).
@@ -8,7 +47,13 @@
  * newsroom. Lexical toolbar labels are owned by the editor features
  * (src/cms/editor.ts) - richtext-lexical merges its own i18n after this.
  */
-export const viOverrides = {
+const handWritten = {
+  authentication: {
+    loggedOutInactivity: 'Bạn đã được tự động đăng xuất vì không thao tác trong một khoảng thời gian dài.',
+    loggedOutSuccessfully: 'Bạn đã đăng xuất.',
+    forgotPasswordEmailInstructions:
+      'Nhập email tài khoản. Nếu hệ thống đã cấu hình gửi email, bạn sẽ nhận liên kết đặt lại mật khẩu (hết hạn sau 1 giờ). Nếu không nhận được, hãy liên hệ Quản trị viên.',
+  },
   fields: {
     block: 'Khối',
     blocks: 'khối',
@@ -26,7 +71,7 @@ export const viOverrides = {
     deleteFolder: 'Xoá thư mục',
     folderTypeDescription: 'Chọn loại nội dung được phép đặt trong thư mục này.',
     noFolder: 'Chưa vào thư mục',
-    searchByNameInFolder: 'Tìm theo tên trong {{folderName}}',
+    searchByNameInFolder: 'Tìm theo tên trong "{{folderName}}"',
   },
   upload: {
     addFile: 'Thêm tệp',
@@ -107,7 +152,8 @@ export const viOverrides = {
     problemUploadingFile: 'Không tải lên được tệp. Vui lòng thử lại.',
     revertingDocument: 'Không hoàn tác được. Vui lòng thử lại.',
     tokenInvalidOrExpired: 'Liên kết không hợp lệ hoặc đã hết hạn.',
-    unauthorized: 'Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.',
+    // Also the title of /admin/logout: must not sound like an error.
+    unauthorized: 'Vui lòng đăng nhập để tiếp tục.',
     unauthorizedAdmin: 'Tài khoản này không có quyền vào trang quản trị.',
     valueMustBeUnique: 'Giá trị này đã được dùng, hãy chọn giá trị khác.',
     autosaving: 'Không tự lưu được bài. Kiểm tra kết nối rồi bấm "Lưu nháp".',
@@ -169,7 +215,13 @@ export const viOverrides = {
     unpublishing: 'Đang gỡ bài…',
     versions: 'Lịch sử phiên bản',
   },
-} as const;
+};
+
+// Typed as the hand-written part (a subset of the stock pack keys) for `i18n.translations`.
+export const viOverrides = deepMerge(
+  respelled(stockVi.translations as unknown as Strings),
+  structuredClone(handWritten) as unknown as Strings,
+) as unknown as typeof handWritten;
 
 /**
  * Lexical editor labels (toolbar dropdowns, slash menu). richtext-lexical
@@ -220,19 +272,38 @@ const mergeInto = (target: Tree, source: Tree) => {
 export function applyLexicalOverrides<C extends { i18n?: { translations?: unknown } }>(config: C): C {
   const translations = (config.i18n?.translations ?? {}) as Record<string, Tree>;
   translations.vi ??= {};
+  // Plugin / Lexical strings merged during sanitising: same spelling pass.
+  mergeInto(translations.vi, respelled(translations.vi as Strings) as unknown as Tree);
   mergeInto(translations.vi, lexicalViOverrides as unknown as Tree);
   return config;
 }
 
 /**
  * `folders: true` adds a `folder` relationship whose label Payload hard-codes
- * as "Folder" (payload/dist/folders/buildFolderField.js). Relabel it on the
- * built config so the upload drawers read "Thư mục".
+ * as "Folder" (payload/dist/folders/buildFolderField.js) and a hidden
+ * `payload-folders` collection labelled "Folder(s)" with fields auto-labelled
+ * "Name" / "Folder Type" (payload/dist/folders/createFolderCollection.js).
+ * Relabel them on the built config so the upload drawers read "Thư mục",
+ * "Thêm Thư mục", "Tên thư mục"...
  */
-export function relabelFolderFields<C extends { collections?: { fields?: unknown[] }[] }>(config: C): C {
+const FOLDER_FIELD_LABELS: Record<string, { vi: string; en: string }> = {
+  name: { vi: 'Tên thư mục', en: 'Folder name' },
+  folderType: { vi: 'Dùng cho', en: 'Folder type' },
+  folder: { vi: 'Thư mục cha', en: 'Parent folder' },
+};
+
+export function relabelFolderFields<
+  C extends { collections?: { slug?: string; labels?: unknown; fields?: unknown[] }[] },
+>(config: C): C {
   for (const collection of config.collections ?? []) {
+    const isFolders = collection.slug === 'payload-folders';
+    if (isFolders) {
+      collection.labels = { singular: { vi: 'Thư mục', en: 'Folder' }, plural: { vi: 'Thư mục', en: 'Folders' } };
+    }
     for (const field of (collection.fields ?? []) as { name?: string; type?: string; label?: unknown }[]) {
-      if (field.name === 'folder' && field.type === 'relationship' && field.label === 'Folder') {
+      if (isFolders && field.name && FOLDER_FIELD_LABELS[field.name]) {
+        field.label = FOLDER_FIELD_LABELS[field.name];
+      } else if (field.name === 'folder' && field.type === 'relationship' && field.label === 'Folder') {
         field.label = { vi: 'Thư mục', en: 'Folder' };
       }
     }

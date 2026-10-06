@@ -1,7 +1,7 @@
 import type { CollectionBeforeValidateHook, CollectionConfig, FieldHook, PayloadRequest, Where } from 'payload';
 import { slugField as payloadSlugField } from 'payload';
 
-import { canPublish, editorOrAdminField, newsDelete, newsUpdate, publishedOrAuthenticated, authenticated } from '../access';
+import { authenticated, authenticatedField, canPublish, editorOrAdminField, newsDelete, newsUpdate } from '../access';
 import { newsEditor } from '../editor';
 import { searchField } from '../fields/slug';
 import { computeDerived, EXCERPT_LIMITS, guardNewsroomRules, keepLiveOnRestore, validateBeforePublish } from '../hooks/newsWorkflow';
@@ -59,23 +59,52 @@ async function uniqueSlug(
 }
 
 /**
- * Wraps Payload's `generateSlug` hook (on the hidden `generateSlug` checkbox,
- * which writes `data.slug`) and then de-duplicates `data.slug`. Field hooks of
- * sibling fields run concurrently, so this must live in the same hook.
- * Autosave runs this every few seconds: skip the DB query when the slug did not
- * change (it was already unique when stored).
+ * Slug policy (replaces Payload's `generateSlug` hook on the hidden
+ * `generateSlug` checkbox, which owns `data.slug`; sibling field hooks run
+ * concurrently, so slug + uniqueness must live in this one hook):
+ *
+ * - The slug FOLLOWS THE TITLE (Vietnamese title, accents removed) on every
+ *   save / autosave until the article is first published - so renaming a draft
+ *   or a "Tạo bản sao" copy renames its URL too.
+ * - It freezes on first publish (a live URL never changes by itself) and as
+ *   soon as an editor types a slug by hand (unlock -> edit -> save).
+ * - Only saves in the default locale (vi) regenerate it: the slug is shared.
+ * - Always de-duplicated against every article (drafts + trash): x, x-2, x-3...
+ *   Autosave skips the DB query when the slug did not change.
+ *
+ * Return value = new `generateSlug` (true while the slug still follows the title).
  */
-const withUniqueSlug =
-  (original: FieldHook | undefined): FieldHook =>
-  async (args) => {
-    const result = original ? await original(args) : args.value;
-    const data = args.data as Record<string, unknown> | undefined;
-    const slug = data?.slug;
-    if (data && typeof slug === 'string' && slug && slug !== args.originalDoc?.slug) {
-      data.slug = await uniqueSlug(args.req, slug, args.originalDoc?.id);
-    }
-    return result;
-  };
+const newsSlugPolicy: FieldHook = async ({ data, originalDoc, operation, req, value }) => {
+  if (!data) return value;
+  const prevSlug = typeof originalDoc?.slug === 'string' ? originalDoc.slug : null;
+  const incoming = typeof data.slug === 'string' ? data.slug.trim() : '';
+  const title = typeof data.title === 'string' ? data.title : null;
+  const fromTitle = title ? slugify(title) || null : null;
+  const defaultLocale = req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined;
+  const inDefaultLocale = !req.locale || req.locale === 'all' || req.locale === defaultLocale;
+  const publishing = data._status === 'published';
+  const wasPublished = Boolean(originalDoc?.publishedAt) || originalDoc?._status === 'published';
+
+  let auto: boolean;
+  if (operation === 'create') {
+    // prefillSlug fills an empty slug from the title, so a different one was typed.
+    const manual = Boolean(incoming) && incoming !== fromTitle;
+    auto = !manual;
+    if (auto && fromTitle) data.slug = fromTitle;
+    else if (incoming) data.slug = slugify(incoming) || incoming;
+  } else {
+    const manual = Boolean(incoming) && incoming !== prevSlug && incoming !== fromTitle;
+    auto = value !== false && !manual && !wasPublished;
+    if (manual) data.slug = slugify(incoming) || incoming;
+    else if (auto && inDefaultLocale && fromTitle) data.slug = fromTitle;
+  }
+
+  const slug = data.slug;
+  if (typeof slug === 'string' && slug && slug !== prevSlug) {
+    data.slug = await uniqueSlug(req, slug, originalDoc?.id);
+  }
+  return auto && !publishing;
+};
 
 /**
  * Drafts are validated (`drafts.validate`), and the required slug is validated
@@ -126,8 +155,14 @@ export const News: CollectionConfig = {
     enableListViewSelectAPI: true,
     components: {
       beforeListTable: ['/cms/admin/list/NewsQuickFilters#NewsQuickFilters'],
-      // "Hẹn giờ đăng" defaults to "Xuất bản" for articles that are not live yet.
-      edit: { beforeDocumentControls: ['/cms/admin/fields/ScheduleDefault#ScheduleDefault'] },
+      edit: {
+        beforeDocumentControls: [
+          // "Gửi duyệt" (authors) / "Trả lại (Cần sửa)" (editors).
+          '/cms/admin/fields/ReviewActions#ReviewActions',
+          // "Hẹn giờ đăng" defaults to "Xuất bản" for articles that are not live yet.
+          '/cms/admin/fields/ScheduleDefault#ScheduleDefault',
+        ],
+      },
     },
     livePreview: {
       url: ({ data, locale, req }) => buildPreviewUrl(data?.slug, locale?.code, req),
@@ -141,7 +176,7 @@ export const News: CollectionConfig = {
   },
   defaultSort: '-publishedAt',
   // Fields the list cells / hooks need even when their column is hidden.
-  forceSelect: { slug: true, _status: true, author: true },
+  forceSelect: { slug: true, _status: true, author: true, cover: true, category: true },
   versions: {
     drafts: {
       // `validate: true`: "Tạo mới" no longer autosaves an empty article; the
@@ -156,7 +191,11 @@ export const News: CollectionConfig = {
   // Public list query: published, newest first.
   indexes: [{ fields: ['_status', 'publishedAt'] }],
   access: {
-    read: publishedOrAuthenticated,
+    // CMS users only. The site reads news through the Local API (src/site/lib),
+    // so the public REST/GraphQL read stays closed: guests could otherwise read
+    // the unpublished draft of a live article with `?draft=true`, internal
+    // review notes, or dump everything with limit=0 & depth=10.
+    read: authenticated,
     create: authenticated,
     update: newsUpdate,
     delete: newsDelete,
@@ -170,6 +209,12 @@ export const News: CollectionConfig = {
   },
   fields: [
     // ---- main column (plugin-seo moves these into a "Nội dung" tab) ----
+    {
+      // "Chỉ xem" banner when the signed-in user cannot edit this article.
+      name: 'readOnlyNotice',
+      type: 'ui',
+      admin: { components: { Field: '/cms/admin/fields/ReadOnlyNotice#ReadOnlyNotice' } },
+    },
     {
       name: 'title',
       type: 'text',
@@ -295,6 +340,20 @@ export const News: CollectionConfig = {
     },
 
     // ---- sidebar ----
+    {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'news-categories',
+      required: true,
+      index: true,
+      label: { vi: 'Danh mục', en: 'Category' },
+      admin: {
+        position: 'sidebar',
+        allowCreate: false,
+        placeholder: 'Chọn danh mục',
+        description: { vi: 'Bắt buộc, kể cả khi lưu nháp.', en: 'Required, even for drafts.' },
+      },
+    },
     payloadSlugField({
       useAsSlug: 'title',
       position: 'sidebar',
@@ -304,10 +363,23 @@ export const News: CollectionConfig = {
         for (const field of row.fields) {
           if ('name' in field && field.name === 'slug' && field.type === 'text') {
             field.label = { vi: 'Đường dẫn (slug)', en: 'Slug' };
+            // The server always fills it from the title (prefillSlug + newsSlugPolicy),
+            // so an empty, locked slug is not an error the editor can fix.
+            field.validate = ((val: unknown, { siblingData }: { siblingData?: { generateSlug?: boolean } }) =>
+              (typeof val === 'string' && val.trim()) || siblingData?.generateSlug !== false
+                ? true
+                : 'Bắt buộc nhập.') as typeof field.validate;
+            // A copy gets a fresh slug from its own title ("… (bản sao)").
+            field.hooks = { ...field.hooks, beforeDuplicate: [() => null] };
           }
           if ('name' in field && field.name === 'generateSlug' && field.type === 'checkbox') {
-            const [original, ...rest] = field.hooks?.beforeChange ?? [];
-            field.hooks = { ...field.hooks, beforeChange: [withUniqueSlug(original), ...rest] };
+            const [, ...rest] = field.hooks?.beforeChange ?? [];
+            field.hooks = {
+              ...field.hooks,
+              beforeChange: [newsSlugPolicy, ...rest],
+              beforeDuplicate: [() => true],
+            };
+            field.access = { ...field.access, read: authenticatedField };
           }
         }
         return row;
@@ -323,8 +395,8 @@ export const News: CollectionConfig = {
           Field: {
             path: '/cms/admin/fields/FieldHint#FieldHint',
             clientProps: {
-              vi: 'Tự sinh từ tiêu đề (bỏ dấu) cho tới khi xuất bản; bấm khoá để sửa tay. Dùng chung VI/EN. Đổi slug của bài đã đăng sẽ làm hỏng link cũ.',
-              en: 'Generated from the title until published; unlock to edit. Shared by VI/EN. Changing a published slug breaks old links.',
+              vi: 'Tự đổi theo tiêu đề tiếng Việt (bỏ dấu) mỗi lần lưu, cho tới khi bài được xuất bản lần đầu. Muốn tự đặt: bấm "Mở khoá", sửa rồi lưu (từ đó không tự đổi nữa). Dùng chung VI/EN. Đổi slug của bài đã đăng sẽ làm hỏng link cũ.',
+              en: 'Follows the Vietnamese title on every save until the first publish. To set it yourself: Unlock, edit, save (it then stops following the title). Shared by VI/EN. Changing a published slug breaks old links.',
             },
           },
         },
@@ -339,6 +411,7 @@ export const News: CollectionConfig = {
       index: true,
       label: { vi: 'Trạng thái biên tập', en: 'Review status' },
       options: REVIEW_OPTIONS,
+      access: { read: authenticatedField },
       // Authors only see "Bản nháp" / "Chờ duyệt" (+ the current value).
       filterOptions: ({ options, req, siblingData }) =>
         canPublish(req.user as never)
@@ -350,8 +423,8 @@ export const News: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: {
-          vi: 'Phóng viên chuyển sang "Chờ duyệt" khi viết xong. Biên tập viên duyệt hoặc trả "Cần sửa". Tự thành "Đã duyệt" khi xuất bản.',
-          en: 'Authors set "Awaiting review" when done. Editors approve or return "Needs changes". Becomes "Approved" on publish.',
+          vi: 'Viết xong, phóng viên bấm "Gửi duyệt" (thanh trên cùng). Biên tập viên đăng bài hoặc bấm "Trả lại (Cần sửa)" kèm ghi chú. Tự thành "Đã duyệt" khi xuất bản.',
+          en: 'When done, authors click "Submit for review" (top bar). Editors publish or click "Return (needs changes)" with a note. Becomes "Approved" on publish.',
         },
         components: {
           Cell: {
@@ -366,24 +439,13 @@ export const News: CollectionConfig = {
       type: 'textarea',
       maxLength: 1000,
       label: { vi: 'Ghi chú biên tập', en: 'Editorial note' },
+      access: { read: authenticatedField },
+      hooks: { beforeDuplicate: [() => null] },
       admin: {
         position: 'sidebar',
         rows: 3,
         placeholder: { vi: 'Góp ý cho phóng viên / lưu ý khi duyệt', en: 'Notes between author and editor' },
         description: { vi: 'Nội bộ, không hiện trên site.', en: 'Internal, never shown on the site.' },
-      },
-    },
-    {
-      name: 'category',
-      type: 'relationship',
-      relationTo: 'news-categories',
-      required: true,
-      index: true,
-      label: { vi: 'Danh mục', en: 'Category' },
-      admin: {
-        position: 'sidebar',
-        allowCreate: false,
-        placeholder: 'Chọn danh mục',
       },
     },
     {
@@ -482,6 +544,7 @@ export const News: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       label: { vi: 'Người sửa cuối', en: 'Last edited by' },
+      access: { read: authenticatedField },
       admin: {
         position: 'sidebar',
         readOnly: true,

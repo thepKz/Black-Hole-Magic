@@ -1,13 +1,14 @@
 import type { CollectionBeforeValidateHook, CollectionConfig, ImageSize } from 'payload';
 
-import { anyone, authenticated, editorOrAdmin } from '../access';
-import { revalidateCollection } from '../hooks/revalidate';
+import { anyone, authenticated, editorOrAdmin, ownUploadOrEditor } from '../access';
+import { createdByField, revalidateUploadUsage } from '../fields/createdBy';
+import { preventMediaDeleteInUse } from '../hooks/preventDeleteInUse';
 import { CACHE_TAGS } from '../lib/tags';
 import {
-  humanizeFilename,
+  humanizeIncoming,
   IMAGE_MAX_BYTES,
   IMAGE_MIME_TYPES,
-  incomingFilename,
+  imageTempFileToBuffer,
   MB,
   pasteAllowList,
   uploadGuard,
@@ -31,10 +32,12 @@ const prefillAlt: CollectionBeforeValidateHook = ({ data, operation, originalDoc
   const alt = typeof data.alt === 'string' ? data.alt.trim() : '';
   if (alt) {
     data.alt = alt;
+    // A changed alt is a reviewed alt. An unchanged one keeps the flag unless the
+    // editor unticked "Alt tự sinh" to confirm the generated text is fine.
     if (operation === 'create' || alt !== originalDoc?.alt) data.altAuto = false;
     return data;
   }
-  const fromName = humanizeFilename(incomingFilename(req, data, originalDoc));
+  const fromName = humanizeIncoming(req, data, originalDoc);
   data.alt = fromName ?? (req.locale === 'en' ? 'Illustration' : 'Ảnh minh họa');
   data.altAuto = true;
   return data;
@@ -67,21 +70,27 @@ export const Media: CollectionConfig = {
       vi: 'Kéo thả hoặc dán nhiều ảnh cùng lúc. Nhận JPG, PNG, WebP, AVIF, GIF, tối đa 15 MB/ảnh; ảnh tự nén sang WebP và giới hạn cạnh dài 2560 px. Mô tả ảnh (alt) tự điền theo tên tệp, nên sửa lại cho đúng nội dung.',
       en: 'Drag & drop or paste several images at once. JPG, PNG, WebP, AVIF, GIF up to 15 MB each; images are converted to WebP and capped at 2560 px. Alt text is prefilled from the file name - please refine it.',
     },
-    defaultColumns: ['filename', 'alt', 'credit', 'filesize', 'width', 'height', 'createdAt'],
+    defaultColumns: ['filename', 'alt', 'altAuto', 'credit', 'filesize', 'width', 'height', 'createdAt'],
     listSearchableFields: ['filename', 'alt', 'caption', 'credit'],
     pagination: { defaultLimit: 40, limits: [20, 40, 80, 120] },
+    components: {
+      // "Tất cả · Cần sửa alt · Ảnh tôi tải lên"
+      beforeListTable: ['/cms/admin/list/MediaQuickFilters#MediaQuickFilters'],
+    },
   },
   defaultSort: '-createdAt',
   folders: true,
   access: {
     read: anyone,
     create: authenticated,
-    update: authenticated,
-    // Removing a file breaks every article that uses it: editors/admins only.
+    // Authors edit / replace only their own uploads (alt, crop, file).
+    update: ownUploadOrEditor,
+    // Editors/admins only, and never while an article still uses the image.
     delete: editorOrAdmin,
   },
   hooks: {
-    ...revalidateCollection(CACHE_TAGS.media, CACHE_TAGS.news),
+    ...revalidateUploadUsage(CACHE_TAGS.media, CACHE_TAGS.news),
+    beforeDelete: [preventMediaDeleteInUse],
     beforeOperation: [
       uploadGuard({
         maxBytes: IMAGE_MAX_BYTES,
@@ -96,6 +105,7 @@ export const Media: CollectionConfig = {
                 ? 'SVG bị chặn vì lý do bảo mật, hãy xuất sang PNG.'
                 : null,
       }),
+      imageTempFileToBuffer,
     ],
     beforeValidate: [prefillAlt],
   },
@@ -147,6 +157,7 @@ export const Media: CollectionConfig = {
     {
       name: 'filesize',
       type: 'number',
+      label: { vi: 'Dung lượng', en: 'File size' },
       admin: { components: { Cell: '/cms/admin/cells/FileSizeCell#FileSizeCell' } },
     },
     {
@@ -168,13 +179,19 @@ export const Media: CollectionConfig = {
       type: 'checkbox',
       localized: true,
       defaultValue: false,
+      index: true,
       label: { vi: 'Alt tự sinh (chưa duyệt)', en: 'Auto alt (unreviewed)' },
       admin: {
         position: 'sidebar',
-        readOnly: true,
         description: {
-          vi: 'Tự bật khi alt được điền theo tên tệp; tắt khi bạn sửa alt.',
-          en: 'On when the alt was filled from the file name; cleared once you edit it.',
+          vi: 'Tự bật khi alt được điền theo tên tệp. Bài viết dùng ảnh này chưa xuất bản được cho tới khi alt được duyệt: sửa alt, hoặc bỏ chọn ô này nếu alt đã đúng.',
+          en: 'On when the alt was filled from the file name. Articles using the image cannot be published until it is reviewed: edit the alt, or untick this if it is already right.',
+        },
+        components: {
+          Cell: {
+            path: '/cms/admin/cells/FlagCell#FlagCell',
+            clientProps: { vi: 'Cần sửa alt', en: 'Review alt', tone: 'warn' },
+          },
         },
       },
     },
@@ -200,5 +217,6 @@ export const Media: CollectionConfig = {
         placeholder: { vi: 'VD: Ảnh: Black Hole Game', en: 'e.g. Photo: Black Hole Game' },
       },
     },
+    createdByField,
   ],
 };

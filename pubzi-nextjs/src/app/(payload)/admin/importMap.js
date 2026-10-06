@@ -1,3 +1,4 @@
+import { ReadOnlyNotice as ReadOnlyNotice_5cec4064017acee417cfc34df51d766b } from '../../../cms/admin/fields/ReadOnlyNotice'
 import { ExcerptTools as ExcerptTools_c7cd7a1f5e8b5a17f64bff7bca020675 } from '../../../cms/admin/fields/ExcerptTools'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -17,7 +18,7 @@ import { CodeComponent as CodeComponent_e70f5e05f09f93e00b997edb1ef0c864 } from 
 import { codeConverterClient as codeConverterClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { CodeBlockBlockComponent as CodeBlockBlockComponent_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { TableFeatureClient as TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { TableFeatureClientVi as TableFeatureClientVi_46cf69f84a77321d61b27fdfddabea7d } from '../../../cms/admin/lexical/TableFeatureClientVi'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ChecklistFeatureClient as ChecklistFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
@@ -37,10 +38,13 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { NewsQuickFilters as NewsQuickFilters_f86d50e350b28c7ee9020607da5fe66e } from '../../../cms/admin/list/NewsQuickFilters'
+import { ReviewActions as ReviewActions_5f80db4eefb1db86fcbbf064d063bd7c } from '../../../cms/admin/fields/ReviewActions'
 import { ScheduleDefault as ScheduleDefault_5aaa3fa9415187725d22bb23147e6aed } from '../../../cms/admin/fields/ScheduleDefault'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FileSizeCell as FileSizeCell_6993c36dc06e8a0e57b3d037cb3b766c } from '../../../cms/admin/cells/FileSizeCell'
+import { MediaQuickFilters as MediaQuickFilters_ea8ae4a4efe32b47984c217f8bd1d7ca } from '../../../cms/admin/list/MediaQuickFilters'
+import { ContactReply as ContactReply_043d4aeb6f41ca4640e05f76c4a1753a } from '../../../cms/admin/fields/ContactReply'
 import { ContactQuickFilters as ContactQuickFilters_1583108cd80a50bc160707b6d5d0c544 } from '../../../cms/admin/list/ContactQuickFilters'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { Icon as Icon_4c7444b93dbccf84094c9864fd2f1234 } from '../../../cms/admin/Icon'
@@ -48,9 +52,11 @@ import { Logo as Logo_67b5933b1125a92daeb072b605fa27b4 } from '../../../cms/admi
 import { Dashboard as Dashboard_ac5e73e07aaecf4a73df6823b5fd3dfb } from '../../../cms/admin/dashboard/Dashboard'
 import { EditorHints as EditorHints_60b36078c640661abfbea8d4486b842b } from '../../../cms/admin/EditorHints'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/cms/admin/fields/ReadOnlyNotice#ReadOnlyNotice": ReadOnlyNotice_5cec4064017acee417cfc34df51d766b,
   "/cms/admin/fields/ExcerptTools#ExcerptTools": ExcerptTools_c7cd7a1f5e8b5a17f64bff7bca020675,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -70,7 +76,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#codeConverterClient": codeConverterClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#CodeBlockBlockComponent": CodeBlockBlockComponent_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@payloadcms/richtext-lexical/client#TableFeatureClient": TableFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/cms/admin/lexical/TableFeatureClientVi#TableFeatureClientVi": TableFeatureClientVi_46cf69f84a77321d61b27fdfddabea7d,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ChecklistFeatureClient": ChecklistFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
@@ -90,15 +96,19 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "/cms/admin/list/NewsQuickFilters#NewsQuickFilters": NewsQuickFilters_f86d50e350b28c7ee9020607da5fe66e,
+  "/cms/admin/fields/ReviewActions#ReviewActions": ReviewActions_5f80db4eefb1db86fcbbf064d063bd7c,
   "/cms/admin/fields/ScheduleDefault#ScheduleDefault": ScheduleDefault_5aaa3fa9415187725d22bb23147e6aed,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "/cms/admin/cells/FileSizeCell#FileSizeCell": FileSizeCell_6993c36dc06e8a0e57b3d037cb3b766c,
+  "/cms/admin/list/MediaQuickFilters#MediaQuickFilters": MediaQuickFilters_ea8ae4a4efe32b47984c217f8bd1d7ca,
+  "/cms/admin/fields/ContactReply#ContactReply": ContactReply_043d4aeb6f41ca4640e05f76c4a1753a,
   "/cms/admin/list/ContactQuickFilters#ContactQuickFilters": ContactQuickFilters_1583108cd80a50bc160707b6d5d0c544,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/cms/admin/Icon#Icon": Icon_4c7444b93dbccf84094c9864fd2f1234,
   "/cms/admin/Logo#Logo": Logo_67b5933b1125a92daeb072b605fa27b4,
   "/cms/admin/dashboard/Dashboard#Dashboard": Dashboard_ac5e73e07aaecf4a73df6823b5fd3dfb,
   "/cms/admin/EditorHints#EditorHints": EditorHints_60b36078c640661abfbea8d4486b842b,
-  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e
 }

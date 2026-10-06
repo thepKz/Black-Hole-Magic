@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
-import { foldText } from '@/cms/lib/text';
+import { foldText } from '@/shared/text';
 import { track } from '@site/components/analytics/track';
 import { Button } from '@site/components/ui/Button';
 import { Chip } from '@site/components/ui/Chip';

@@ -1,81 +1,51 @@
 import 'server-only';
 
-import config from '@payload-config';
 import { unstable_cache } from 'next/cache';
 import { draftMode } from 'next/headers';
-import { getPayload, type Payload, type Where } from 'payload';
 
-import type {
-  Media as PMedia,
-  News as PNews,
-  NewsCategory as PNewsCategory,
-  User as PUser,
-} from '@/cms/payload-types';
-import { CACHE_TAGS, newsDocTag } from '@/cms/lib/tags';
-import { foldText } from '@/cms/lib/text';
+import { CACHE_TAGS, newsDocTag } from '@/shared/cache';
 
+import { contentSourceCacheKey, contentSourceId, getNewsSource } from './content';
+import type { RelatedSeed } from './content/source';
+import { emptyPage, NEWS_PER_PAGE, NEWS_SLUG_RE } from './content/util';
 import type {
+  AdjacentPosts,
   Locale,
-  NewsAuthor,
   NewsCategory,
   NewsDetail,
-  NewsImage,
   NewsListItem,
   NewsListQuery,
   NewsSlugEntry,
   Paginated,
-  RichTextContent,
 } from './types';
 
 /**
- * News data layer (Payload Local API, server only).
+ * News data layer FACADE (server only). Pages import from here only; where the
+ * content comes from is decided by src/site/lib/content (env CONTENT_SOURCE:
+ * payload | http | mock - see docs/CONNECT-CMS.md).
  *
  * - Public reads return PUBLISHED docs only, are wrapped in `unstable_cache`
  *   tagged `news` (+ `news:{slug}` for one article, `news-categories` for
- *   categories) and revalidate at most every hour as a safety net. Payload
- *   hooks call `revalidateTag(tag, 'max')` + `revalidatePath` on publish /
- *   unpublish / delete (src/cms/hooks/revalidateNews.ts).
+ *   categories) and revalidate at most every hour as a safety net. Content
+ *   changes purge the tags: Payload hooks (src/cms/hooks/revalidateNews.ts) or,
+ *   for another CMS, its webhook to POST /api/revalidate. Cache keys carry the
+ *   source id, so switching CMS never serves the other source's entries.
  * - Draft reads (`getNewsBySlug(..., { draft: true })` or any call while Next
  *   Draft Mode is on) bypass the cache and return the latest draft version.
- * - Never throws by default: if the DB is empty/unreachable every function
+ * - Never throws by default: if the source is empty/unreachable every function
  *   returns an empty result (errors are logged, and NOT cached). ISR callers
  *   (article page, sitemap) pass `strict: true` to get a thrown
  *   NewsUnavailableError instead, so Next keeps the last good page.
- * - Locale fallback: untranslated EN fields fall back to VI (Payload config).
- *   `NewsDetail.locales` / `NewsSlugEntry.locales` list locales that really
+ * - `NewsDetail.locales` / `NewsSlugEntry.locales` list locales that really
  *   have their own title (use for hreflang / canonical).
  */
 
-export const NEWS_PER_PAGE = 9;
+export { NEWS_PER_PAGE };
 const REVALIDATE_SECONDS = 3600;
-const LOCALES: Locale[] = ['vi', 'en'];
 
-// ---------------------------------------------------------------------------
-// Payload access
-// ---------------------------------------------------------------------------
-
-const payloadClient = (): Promise<Payload> => getPayload({ config });
-
-/** Fields kept when a news doc is populated as a relationship (related posts, internal links). */
-const NEWS_CARD_SELECT = {
-  title: true,
-  slug: true,
-  excerpt: true,
-  cover: true,
-  category: true,
-  publishedAt: true,
-  featured: true,
-  readingTime: true,
-  updatedAt: true,
-  _status: true,
-} as const;
-
-const POPULATE = {
-  news: NEWS_CARD_SELECT,
-  users: { name: true, avatar: true, bio: true },
-} as const;
-
-const publishedWhere: Where = { _status: { equals: 'published' } };
+/** Source id (logs) and source cache key (id + variant, baked into every cache key; env is fixed per process). */
+const SRC = contentSourceId();
+const SRC_KEY = contentSourceCacheKey();
 
 /**
  * True when reads must skip `unstable_cache`: Next Draft Mode, or
@@ -93,10 +63,10 @@ async function isDraftModeOn(): Promise<boolean> {
 }
 
 /**
- * `strict` callers (ISR article page, sitemap) must THROW on a DB failure so
+ * `strict` callers (ISR article page, sitemap) must THROW on a source failure so
  * Next keeps serving the last good version and retries, instead of caching a
- * 404 / an empty sitemap for an hour. Exception: `next build` without a DB,
- * where we degrade to empty results so the build still succeeds.
+ * 404 / an empty sitemap for an hour. Exception: `next build` without a
+ * source, where we degrade to empty results so the build still succeeds.
  */
 const isBuildPhase = () => process.env.NEXT_PHASE === 'phase-production-build';
 
@@ -107,318 +77,84 @@ export class NewsUnavailableError extends Error {
   }
 }
 
+/** True for the strict-mode outage error (also across bundle boundaries). */
+export const isNewsUnavailable = (err: unknown): boolean =>
+  err instanceof NewsUnavailableError || (err as Error | null)?.name === 'NewsUnavailableError';
+
+/** Seconds an ISR page rendered during a source outage stays cached. */
+export const OUTAGE_REVALIDATE_SECONDS = 30;
+
+/**
+ * Call while rendering a page that could not load its data (source outage):
+ * an `unstable_cache` read with a short `revalidate` lowers the ISR lifetime of
+ * THIS render to OUTAGE_REVALIDATE_SECONDS (Next keeps the smallest revalidate
+ * seen during a prerender), so the "temporarily unavailable" page is replaced
+ * by the real one ~30 s after the source is back (or on the next news purge).
+ */
+export async function shortenCacheForOutage(key: string): Promise<void> {
+  await unstable_cache(async () => true, ['site-news-outage', SRC_KEY, key], {
+    revalidate: OUTAGE_REVALIDATE_SECONDS,
+    tags: [CACHE_TAGS.news],
+  })().catch(() => undefined);
+}
+
 function logError(scope: string, err: unknown) {
   const msg = err instanceof Error ? err.message : String(err);
-  console.error(`[news] ${scope} failed:`, msg.split(/\r?\n/)[0].slice(0, 200));
+  console.error(`[news] ${scope} failed (source=${SRC}):`, msg.split(/\r?\n/)[0].slice(0, 200));
 }
 
 // ---------------------------------------------------------------------------
-// Mappers (Payload docs -> UI DTOs in ./types)
+// Uncached calls into the active source
 // ---------------------------------------------------------------------------
 
-const isObj = <T extends object>(v: unknown): v is T => typeof v === 'object' && v !== null;
+const src = getNewsSource;
 
-export function toNewsImage(media: unknown, captionOverride?: string | null): NewsImage | null {
-  if (!isObj<PMedia>(media) || !media.url) return null;
-  const sizes: NewsImage['sizes'] = {};
-  for (const key of ['thumb', 'card', 'news', 'og'] as const) {
-    const s = media.sizes?.[key];
-    if (s?.url && s.width && s.height) sizes[key] = { src: s.url, width: s.width, height: s.height };
-  }
-  return {
-    src: media.url,
-    width: media.width ?? 1200,
-    height: media.height ?? 675,
-    alt: media.alt ?? '',
-    focal: { x: media.focalX ?? 50, y: media.focalY ?? 50 },
-    caption: captionOverride ?? media.caption ?? null,
-    sizes,
-  };
-}
-
-function toCategory(cat: unknown): NewsCategory | null {
-  if (!isObj<PNewsCategory>(cat) || !cat.slug) return null;
-  return { id: cat.id, slug: cat.slug, name: cat.name ?? cat.slug, order: cat.order ?? 0 };
-}
-
-function toAuthor(user: unknown): NewsAuthor | null {
-  if (!isObj<PUser>(user) || !user.name) return null;
-  return { id: user.id, name: user.name, avatar: toNewsImage(user.avatar), bio: user.bio ?? null };
-}
-
-function toListItem(doc: Partial<PNews>): NewsListItem | null {
-  if (doc.id == null || !doc.slug) return null;
-  const publishedAt = doc.publishedAt ?? doc.updatedAt ?? doc.createdAt ?? new Date(0).toISOString();
-  return {
-    id: doc.id,
-    slug: doc.slug,
-    title: doc.title ?? '',
-    excerpt: doc.excerpt ?? '',
-    category: toCategory(doc.category),
-    publishedAt,
-    updatedAt: doc.updatedAt ?? publishedAt,
-    cover: toNewsImage(doc.cover),
-    featured: Boolean(doc.featured),
-    readingTime: Math.max(1, doc.readingTime ?? 1),
-  };
-}
-
-const compact = <T,>(arr: (T | null)[]): T[] => arr.filter((x): x is T => x !== null);
-
-function paginate<T>(items: T[], page: number, perPage: number, totalItems: number): Paginated<T> {
-  const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
-  return {
-    items,
-    page,
-    perPage,
-    totalItems,
-    totalPages,
-    hasPrev: page > 1,
-    hasNext: page < totalPages,
-  };
-}
-
-function emptyPage<T>(page = 1, perPage = NEWS_PER_PAGE): Paginated<T> {
-  return paginate<T>([], Math.max(1, page), perPage, 0);
-}
+const queryList = async (locale: Locale, cat: string | null, q: string | null, page: number, perPage: number) =>
+  (await src()).list(locale, { cat, q, page, perPage });
+const queryFeatured = async (locale: Locale) => (await src()).featured(locale);
+const queryDetail = async (locale: Locale, slug: string, draft: boolean) => (await src()).bySlug(locale, slug, { draft });
+const queryRelated = async (locale: Locale, seed: RelatedSeed, limit: number) => (await src()).related(locale, seed, limit);
+const queryAdjacent = async (locale: Locale, slug: string, publishedAt: string) =>
+  (await src()).adjacent(locale, slug, publishedAt);
+const querySlugs = async () => (await src()).slugs();
+const queryCategories = async (locale: Locale) => (await src()).categories(locale);
 
 // ---------------------------------------------------------------------------
-// Queries (uncached)
+// Cache wrappers (source id in every key)
 // ---------------------------------------------------------------------------
 
-async function queryList(
-  locale: Locale,
-  cat: string | null,
-  q: string | null,
-  page: number,
-  perPage: number,
-): Promise<Paginated<NewsListItem>> {
-  const payload = await payloadClient();
-  const and: Where[] = [publishedWhere];
-  if (cat) and.push({ 'category.slug': { equals: cat } });
-  if (q) {
-    const folded = foldText(q);
-    and.push({ or: [{ searchText: { like: folded } }, { title: { like: q } }] });
-  }
-
-  const run = (p: number) =>
-    payload.find({
-      collection: 'news',
-      locale,
-      where: { and },
-      sort: '-publishedAt',
-      page: p,
-      limit: perPage,
-      depth: 1,
-      select: NEWS_CARD_SELECT as never,
-      overrideAccess: true,
-    });
-
-  let res = await run(page);
-  // Clamp an out-of-range page to the last page.
-  if (res.docs.length === 0 && res.totalDocs > 0 && page > res.totalPages) {
-    res = await run(res.totalPages);
-  }
-  const current = Math.min(Math.max(1, res.page ?? page), Math.max(1, res.totalPages));
-  return paginate(compact((res.docs as Partial<PNews>[]).map(toListItem)), current, perPage, res.totalDocs);
-}
-
-async function queryFeatured(locale: Locale): Promise<NewsListItem | null> {
-  const payload = await payloadClient();
-  const res = await payload.find({
-    collection: 'news',
-    locale,
-    where: { and: [publishedWhere, { featured: { equals: true } }] },
-    sort: '-publishedAt',
-    limit: 1,
-    depth: 1,
-    select: NEWS_CARD_SELECT as never,
-    overrideAccess: true,
-  });
-  const doc = res.docs[0] as Partial<PNews> | undefined;
-  return doc ? toListItem(doc) : null;
-}
-
-async function queryLocalesBySlug(payload: Payload, slug: string, draft: boolean): Promise<Locale[]> {
-  const res = await payload.find({
-    collection: 'news',
-    locale: 'all',
-    draft,
-    where: draft ? { slug: { equals: slug } } : { and: [publishedWhere, { slug: { equals: slug } }] },
-    limit: 1,
-    depth: 0,
-    select: { title: true } as never,
-    overrideAccess: true,
-  });
-  const title = (res.docs[0] as { title?: unknown } | undefined)?.title;
-  if (!isObj<Record<string, unknown>>(title)) return ['vi'];
-  const found = LOCALES.filter((l) => typeof title[l] === 'string' && (title[l] as string).trim() !== '');
-  return found.length ? found : ['vi'];
-}
-
-async function queryDetail(locale: Locale, slug: string, draft: boolean): Promise<NewsDetail | null> {
-  const payload = await payloadClient();
-  const res = await payload.find({
-    collection: 'news',
-    locale,
-    draft,
-    where: draft ? { slug: { equals: slug } } : { and: [publishedWhere, { slug: { equals: slug } }] },
-    limit: 1,
-    depth: 2,
-    populate: POPULATE as never,
-    overrideAccess: true,
-  });
-  const doc = res.docs[0] as PNews | undefined;
-  if (!doc) return null;
-  const base = toListItem(doc);
-  if (!base) return null;
-
-  const related = compact(
-    (doc.relatedPosts ?? [])
-      .filter((r): r is PNews => isObj<PNews>(r) && r._status === 'published' && r.id !== doc.id)
-      .map(toListItem),
-  );
-
-  const metaImage = toNewsImage(doc.meta?.image);
-  return {
-    ...base,
-    content: (doc.content ?? null) as RichTextContent | null,
-    author: toAuthor(doc.author),
-    seo: {
-      title: doc.meta?.title?.trim() || null,
-      description: doc.meta?.description?.trim() || null,
-      image: metaImage,
-    },
-    locales: await queryLocalesBySlug(payload, slug, draft),
-    related,
-    tags: [...new Set((doc.tags ?? []).map((tag) => String(tag).trim()).filter(Boolean))].slice(0, 10),
-  };
-}
-
-async function queryRelated(locale: Locale, id: NewsDetail['id'], limit: number): Promise<NewsListItem[]> {
-  const payload = await payloadClient();
-  const self = await payload.find({
-    collection: 'news',
-    locale,
-    where: { and: [publishedWhere, { id: { equals: id } }] },
-    limit: 1,
-    depth: 2,
-    select: { relatedPosts: true, category: true } as never,
-    populate: POPULATE as never,
-    overrideAccess: true,
-  });
-  const doc = self.docs[0] as Partial<PNews> | undefined;
-  if (!doc) return [];
-
-  const picked = compact(
-    (doc.relatedPosts ?? [])
-      .filter((r): r is PNews => isObj<PNews>(r) && r._status === 'published' && r.id !== id)
-      .map(toListItem),
-  ).slice(0, limit);
-  if (picked.length >= limit) return picked;
-
-  const exclude = [id, ...picked.map((p) => p.id)];
-  const categoryId = isObj<PNewsCategory>(doc.category) ? doc.category.id : doc.category;
-  const fill = async (where: Where[], n: number) =>
-    n <= 0
-      ? []
-      : compact(
-          (
-            (
-              await payload.find({
-                collection: 'news',
-                locale,
-                where: { and: [publishedWhere, { id: { not_in: exclude } }, ...where] },
-                sort: '-publishedAt',
-                limit: n,
-                depth: 1,
-                select: NEWS_CARD_SELECT as never,
-                overrideAccess: true,
-              })
-            ).docs as Partial<PNews>[]
-          ).map(toListItem),
-        );
-
-  const sameCat = categoryId != null ? await fill([{ category: { equals: categoryId } }], limit - picked.length) : [];
-  const result = [...picked, ...sameCat];
-  exclude.push(...sameCat.map((p) => p.id));
-  // Still short (small category): top up with the latest posts of any category.
-  if (result.length < limit) result.push(...(await fill([], limit - result.length)));
-  return result.slice(0, limit);
-}
-
-async function querySlugs(): Promise<NewsSlugEntry[]> {
-  const payload = await payloadClient();
-  const res = await payload.find({
-    collection: 'news',
-    locale: 'all',
-    where: publishedWhere,
-    sort: '-publishedAt',
-    pagination: false,
-    depth: 0,
-    select: { slug: true, title: true, updatedAt: true, publishedAt: true } as never,
-    overrideAccess: true,
-  });
-  return compact(
-    (res.docs as { slug?: string; title?: unknown; updatedAt?: string; publishedAt?: string | null }[]).map((d) => {
-      if (!d.slug) return null;
-      const title = isObj<Record<string, unknown>>(d.title) ? d.title : {};
-      const locales = LOCALES.filter((l) => typeof title[l] === 'string' && (title[l] as string).trim() !== '');
-      const updatedAt = d.updatedAt ?? new Date(0).toISOString();
-      return {
-        slug: d.slug,
-        updatedAt,
-        publishedAt: d.publishedAt ?? updatedAt,
-        locales: locales.length ? locales : (['vi'] as Locale[]),
-      };
-    }),
-  );
-}
-
-async function queryCategories(locale: Locale): Promise<NewsCategory[]> {
-  const payload = await payloadClient();
-  const res = await payload.find({
-    collection: 'news-categories',
-    locale,
-    sort: 'order',
-    pagination: false,
-    depth: 0,
-    overrideAccess: true,
-  });
-  return compact(res.docs.map(toCategory));
-}
-
-// ---------------------------------------------------------------------------
-// Cache wrappers
-// ---------------------------------------------------------------------------
-
-const cachedList = unstable_cache(queryList, ['site-news-list'], {
+const cachedList = unstable_cache(queryList, ['site-news-list', SRC_KEY], {
   tags: [CACHE_TAGS.news, CACHE_TAGS.newsCategories],
   revalidate: REVALIDATE_SECONDS,
 });
 
-const cachedFeatured = unstable_cache(queryFeatured, ['site-news-featured'], {
+const cachedFeatured = unstable_cache(queryFeatured, ['site-news-featured', SRC_KEY], {
   tags: [CACHE_TAGS.news],
   revalidate: REVALIDATE_SECONDS,
 });
 
-const cachedRelated = unstable_cache(queryRelated, ['site-news-related'], {
+const cachedRelated = unstable_cache(queryRelated, ['site-news-related', SRC_KEY], {
   tags: [CACHE_TAGS.news],
   revalidate: REVALIDATE_SECONDS,
 });
 
-const cachedSlugs = unstable_cache(querySlugs, ['site-news-slugs'], {
+const cachedAdjacent = unstable_cache(queryAdjacent, ['site-news-adjacent', SRC_KEY], {
   tags: [CACHE_TAGS.news],
   revalidate: REVALIDATE_SECONDS,
 });
 
-const cachedCategories = unstable_cache(queryCategories, ['site-news-categories'], {
+const cachedSlugs = unstable_cache(querySlugs, ['site-news-slugs', SRC_KEY], {
+  tags: [CACHE_TAGS.news],
+  revalidate: REVALIDATE_SECONDS,
+});
+
+const cachedCategories = unstable_cache(queryCategories, ['site-news-categories', SRC_KEY], {
   tags: [CACHE_TAGS.newsCategories],
   revalidate: REVALIDATE_SECONDS,
 });
 
 const cachedDetail = (locale: Locale, slug: string) =>
-  unstable_cache(() => queryDetail(locale, slug, false), ['site-news-detail', locale, slug], {
+  unstable_cache(() => queryDetail(locale, slug, false), ['site-news-detail', SRC_KEY, locale, slug], {
     tags: [CACHE_TAGS.news, newsDocTag(slug), CACHE_TAGS.media],
     revalidate: REVALIDATE_SECONDS,
   })();
@@ -451,8 +187,13 @@ export async function getNewsBySlug(
   slug: string,
   options: { draft?: boolean; strict?: boolean } = {},
 ): Promise<NewsDetail | null> {
-  const clean = decodeURIComponent(slug || '').trim().toLowerCase();
-  if (!/^[a-z0-9][a-z0-9-]{0,127}$/.test(clean)) return null;
+  let clean: string;
+  try {
+    clean = decodeURIComponent(slug || '').trim().toLowerCase();
+  } catch {
+    return null; // malformed %-escape
+  }
+  if (!NEWS_SLUG_RE.test(clean)) return null;
   try {
     if (options.draft) return await queryDetail(locale, clean, true);
     if (await isDraftModeOn()) return await queryDetail(locale, clean, false);
@@ -467,27 +208,48 @@ export async function getNewsBySlug(
 
 /**
  * Related posts for an article: its manual `related` picks first, then the
- * newest published posts of the same category (excluding `id`), up to `limit`
- * (then any category if still short).
+ * newest published posts of the same category, up to `limit` (then any
+ * category if still short). Pass the article itself when you have it (sources
+ * without an id lookup need its category / picks); a bare id still works.
  */
 export async function getRelatedNews(
   locale: Locale,
-  id: NewsDetail['id'],
+  article: NewsDetail['id'] | Pick<NewsDetail, 'id' | 'slug' | 'category' | 'related'>,
   limit = 3,
 ): Promise<NewsListItem[]> {
   const n = Math.min(12, Math.max(1, Math.floor(limit)));
+  const seed: RelatedSeed =
+    typeof article === 'object'
+      ? { id: article.id, slug: article.slug, category: article.category?.slug ?? null, picks: article.related }
+      : { id: article, slug: null, category: null, picks: [] };
   try {
     const fn = (await isDraftModeOn()) ? queryRelated : cachedRelated;
-    return await fn(locale, id, n);
+    return await fn(locale, seed, n);
   } catch (err) {
     logError('getRelatedNews', err);
     return [];
   }
 }
 
+/** Previous (older) / next (newer) published article around `publishedAt`. Never throws. */
+export async function getAdjacentNews(
+  locale: Locale,
+  slug: string,
+  publishedAt: string,
+  { draft = false }: { draft?: boolean } = {},
+): Promise<AdjacentPosts> {
+  try {
+    const fn = draft || (await isDraftModeOn()) ? queryAdjacent : cachedAdjacent;
+    return await fn(locale, slug, publishedAt);
+  } catch (err) {
+    logError('getAdjacentNews', err);
+    return { prev: null, next: null };
+  }
+}
+
 /**
  * All published slugs (sitemap, generateStaticParams).
- * `strict: true` (sitemap) throws on a DB failure outside `next build`.
+ * `strict: true` (sitemap) throws on a source failure outside `next build`.
  */
 export async function getAllNewsSlugs(options: { strict?: boolean } = {}): Promise<NewsSlugEntry[]> {
   try {
@@ -499,7 +261,7 @@ export async function getAllNewsSlugs(options: { strict?: boolean } = {}): Promi
   }
 }
 
-/** Categories ordered by `order` (segmented control on /news). */
+/** Categories in display order (segmented control on /news). */
 export async function getNewsCategories(locale: Locale): Promise<NewsCategory[]> {
   try {
     return await ((await isDraftModeOn()) ? queryCategories(locale) : cachedCategories(locale));
@@ -521,7 +283,7 @@ export async function getFeaturedNews(locale: Locale): Promise<NewsListItem | nu
 
 /**
  * True when the newest published post is younger than `maxAgeDays` (header
- * "new posts" dot). Cached via getNewsList; false without a DB.
+ * "new posts" dot). Cached via getNewsList; false without a source.
  */
 export async function hasRecentNews(locale: Locale, maxAgeDays = 7): Promise<boolean> {
   const [latest] = (await getNewsList(locale, { page: 1, perPage: 1 })).items;
@@ -530,7 +292,7 @@ export async function hasRecentNews(locale: Locale, maxAgeDays = 7): Promise<boo
   return Number.isFinite(age) && age < maxAgeDays * 24 * 60 * 60 * 1000;
 }
 
-/** Latest `limit` published posts (RSS feed, header "new posts" dot). */
+/** Latest `limit` published posts (RSS feed, home "Tin tức" block). */
 export async function getLatestNews(locale: Locale, limit = 3): Promise<NewsListItem[]> {
   const res = await getNewsList(locale, { page: 1, perPage: Math.min(48, Math.max(1, limit)) });
   return res.items;

@@ -1,4 +1,4 @@
-import type { Field } from 'payload';
+import type { Field, FilterOptions, Where } from 'payload';
 
 import {
   AlignFeature,
@@ -6,7 +6,6 @@ import {
   BlocksFeature,
   BoldFeature,
   ChecklistFeature,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
@@ -27,6 +26,7 @@ import {
 } from '@payloadcms/richtext-lexical';
 
 import { NEWS_BLOCKS } from './blocks';
+import { TableFeatureVi } from './lexical/tableVi';
 
 /**
  * Rich-text editors.
@@ -118,12 +118,29 @@ const inlineImage = () =>
 /* Links                                                                */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Internal links may only target PUBLISHED articles other than the current one
+ * (a draft or trashed target 404s on the site), and the picker cannot create a
+ * new article from inside the link drawer.
+ */
+const publishedOtherNews: FilterOptions = ({ id }) => {
+  const published: Where = { _status: { equals: 'published' } };
+  return id ? { and: [published, { id: { not_equals: id } }] } : published;
+};
+
+const restrictInternalDoc = <T extends { name?: string; type?: string; admin?: object }>(fields: T[]): T[] =>
+  fields.map((field) =>
+    field.name === 'doc' && field.type === 'relationship'
+      ? ({ ...field, filterOptions: publishedOtherNews, admin: { ...field.admin, allowCreate: false } } as T)
+      : field,
+  );
+
 const newsLink = () =>
   LinkFeature({
     enabledCollections: ['news'],
     maxDepth: 1,
     fields: ({ defaultFields }) => [
-      ...defaultFields,
+      ...restrictInternalDoc(defaultFields),
       {
         name: 'rel',
         type: 'select',
@@ -154,7 +171,7 @@ export const defaultEditor = lexicalEditor({
     ...defaultFeatures.filter((f) => f.key !== 'upload'),
     inlineImage(),
     FixedToolbarFeature(),
-    EXPERIMENTAL_TableFeature(),
+    TableFeatureVi(),
   ],
 });
 
@@ -179,7 +196,7 @@ export const newsEditor = lexicalEditor({
     ChecklistFeature(),
     BlockquoteFeature(),
     HorizontalRuleFeature(),
-    EXPERIMENTAL_TableFeature(),
+    TableFeatureVi(),
     // media + blocks
     inlineImage(),
     BlocksFeature({ blocks: NEWS_BLOCKS }),

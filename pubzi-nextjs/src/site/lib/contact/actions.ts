@@ -48,8 +48,8 @@ const str = (v: FormDataEntryValue | null) => (typeof v === 'string' ? v : '');
 /**
  * Contact form server action (use with React `useActionState`).
  * Pipeline: honeypot + fill-time check -> zod -> Turnstile (if secret set) ->
- * rate limit (recent docs per hashed IP) -> `submitContact()` -> Payload
- * `contact-requests` (read in /admin, see ./submit.ts).
+ * rate limit (per hashed IP, see ./rate-limit.ts) -> `submitContact()` -> the
+ * active ContactSink (Payload `contact-requests` by default; see ./submit.ts).
  * Bots caught by the honeypot (or a provably too-fast fill) get a fake success
  * so they learn nothing. A missing stamp (no JS) is NOT treated as a bot.
  */
@@ -81,7 +81,7 @@ export async function sendContact(_prev: ContactFormState, formData: FormData): 
   const token = str(formData.get(TURNSTILE_FIELD)) || null;
   if (!(await verifyTurnstile(token, ip))) return { status: 'error', error: 'errCaptcha' };
 
-  // 4. Rate limit (counted in the DB per hashed IP; no usable IP -> one shared bucket).
+  // 4. Rate limit (memory + the sink's durable count; no usable IP -> one shared bucket).
   const ipHash = hashIp(ip);
   try {
     if (!(await allowContactSubmission(ipHash))) return { status: 'error', error: 'errRateLimit' };
@@ -90,7 +90,7 @@ export async function sendContact(_prev: ContactFormState, formData: FormData): 
     return { status: 'error', error: 'errServer' };
   }
 
-  // 5. Store (Payload Local API).
+  // 5. Hand over to the contact sink (payload | http | log).
   const localeRaw = str(formData.get('locale'));
   const result = await submitContact({
     data: parsed.data,

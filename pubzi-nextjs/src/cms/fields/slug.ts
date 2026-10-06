@@ -1,5 +1,6 @@
 import type { Field, FieldHook, StaticLabel } from 'payload';
 
+import { authenticatedField } from '../access';
 import { foldText, slugify } from '../lib/text';
 
 /**
@@ -48,6 +49,8 @@ export function searchField(sourceField: string, localized: boolean, label?: Sta
     index: true,
     // Label shows up in the list search placeholder ("Tìm với Tiêu đề, ...").
     label: label ?? { vi: 'Nội dung tìm kiếm', en: 'Search text' },
+    // Internal search helper: never exposed through the public API.
+    access: { read: authenticatedField },
     admin: { hidden: true, disableListColumn: true, disableListFilter: true },
     hooks: { beforeChange: [compute] },
   };

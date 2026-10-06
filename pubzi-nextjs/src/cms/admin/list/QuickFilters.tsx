@@ -21,6 +21,17 @@ export type QuickFilter = {
 
 type SearchParams = Record<string, string | string[] | undefined> | undefined;
 
+/**
+ * True only on the collection's own list page (/admin/collections/<slug>).
+ * `beforeListTable` also renders inside list DRAWERS ("Chọn từ thư viện",
+ * relationship pickers) where these chips - plain page links - would navigate
+ * away from the article being edited.
+ */
+export const isListPage = (params: { segments?: string[] } | undefined, collection: string): boolean => {
+  const seg = params?.segments ?? [];
+  return seg[0] === 'collections' && seg[1] === collection && seg.length === 2;
+};
+
 const flatten = (where: QuickFilter['where']): [string, string][] =>
   Object.entries(where ?? {}).flatMap(([field, ops]) =>
     Object.entries(ops).map(([op, v]) => [`where[${field}][${op}]`, String(v)] as [string, string]),

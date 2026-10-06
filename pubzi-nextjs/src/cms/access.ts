@@ -46,11 +46,39 @@ export const nobody: Access = () => false;
 
 /**
  * Public read for draft-enabled collections: guests only see published docs,
- * CMS users see everything. This is what makes the REST API a safe public API.
+ * CMS users see everything.
+ * NOTE: not used for `news` any more - `?draft=true` lets a guest read the
+ * newest unpublished draft of a LIVE article through this rule (Payload only
+ * checks the main document's _status). News is read through the Local API by
+ * the site, so its REST/GraphQL read is closed to guests (`authenticated`).
  */
 export const publishedOrAuthenticated: Access = ({ req }) => {
   if (req.user) return true;
   const where: Where = { _status: { equals: 'published' } };
+  return where;
+};
+
+/** Field-level: any logged-in CMS user (internal fields never leave the CMS). */
+export const authenticatedField: FieldAccess = ({ req }) => Boolean(req.user);
+
+/** Field-level: admins, or the user reading their own account (e.g. `users.email`). */
+export const adminOrSelfField: FieldAccess = ({ req, id, doc }) => {
+  if (!req.user) return false;
+  if (isAdminUser(req)) return true;
+  const target = id ?? (doc as { id?: number | string } | undefined)?.id;
+  return target != null && String(target) === String(req.user.id);
+};
+
+/**
+ * Upload libraries (media / videos): editors and admins edit any file; authors
+ * only the files they uploaded themselves (`createdBy`), so a contributor cannot
+ * replace the cover or alt text of someone else's (possibly live) article.
+ */
+export const ownUploadOrEditor: Access = ({ req }) => {
+  const user = req.user as MaybeUser;
+  if (!user) return false;
+  if (canPublish(user)) return true;
+  const where: Where = { createdBy: { equals: user.id } };
   return where;
 };
 

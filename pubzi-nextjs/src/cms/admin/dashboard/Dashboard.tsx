@@ -52,13 +52,14 @@ export async function Dashboard({ payload, user, i18n }: Props) {
       .catch(() => ({ docs: [] as Row[], totalDocs: 0 }));
 
   const nowISO = new Date().toISOString();
-  const [myDrafts, pending, publishedToday, contactNew, jobs] = await Promise.all([
+  const todayISO = startOfTodayVN();
+  const [myDrafts, pending, publishedToday, contactNew, jobs, myChanges] = await Promise.all([
     findNews({ and: [{ author: { equals: user.id } }, { _status: { equals: 'draft' } }] }, 5),
     editor ? findNews({ reviewStatus: { equals: 'pending' } }, 5, 'updatedAt') : Promise.resolve(null),
     payload
       .count({
         collection: 'news',
-        where: { and: [{ _status: { equals: 'published' } }, { publishedAt: { greater_than_equal: startOfTodayVN() } }] },
+        where: { and: [{ _status: { equals: 'published' } }, { publishedAt: { greater_than_equal: todayISO } }] },
         ...asUser,
       })
       .catch(() => ({ totalDocs: 0 })),
@@ -81,6 +82,13 @@ export async function Dashboard({ payload, user, i18n }: Props) {
         overrideAccess: true,
       })
       .catch(() => ({ docs: [] as unknown[], totalDocs: 0 })),
+    // Authors: articles an editor sent back ("Cần sửa"). Read the LATEST version
+    // (`draft: true` via findNews): "Trả lại" is a draft save, so on an already
+    // published article the main row still says "Đã duyệt" and `count` (no
+    // draft support) reported 0 while the list below showed "Cần sửa".
+    editor
+      ? Promise.resolve(null)
+      : findNews({ and: [{ author: { equals: user.id } }, { reviewStatus: { equals: 'changes' } }] }, 1),
   ]);
 
   // Scheduled news publishes (+ titles in one query).
@@ -99,6 +107,17 @@ export async function Dashboard({ payload, user, i18n }: Props) {
   const t = (vi: string, enText: string) => (en ? enText : vi);
 
   const stats = [
+    ...(myChanges
+      ? [
+          {
+            key: 'changes',
+            label: t('Cần sửa (BTV trả lại)', 'Returned for changes'),
+            value: myChanges.totalDocs,
+            href: admin(`/collections/news?where[author][equals]=${user.id}&where[reviewStatus][equals]=changes`),
+            highlight: myChanges.totalDocs > 0,
+          },
+        ]
+      : []),
     {
       key: 'drafts',
       label: t('Bài nháp của tôi', 'My drafts'),
@@ -121,7 +140,9 @@ export async function Dashboard({ payload, user, i18n }: Props) {
       key: 'today',
       label: t('Đăng hôm nay', 'Published today'),
       value: publishedToday.totalDocs,
-      href: admin('/collections/news?where[_status][equals]=published'),
+      href: admin(
+        `/collections/news?where[_status][equals]=published&where[publishedAt][greater_than_equal]=${encodeURIComponent(todayISO)}`,
+      ),
     },
     ...(contactNew
       ? [
@@ -147,8 +168,8 @@ export async function Dashboard({ payload, user, i18n }: Props) {
             {editor
               ? t('Duyệt bài, lên lịch đăng và theo dõi hộp thư tại đây.', 'Review, schedule and keep an eye on the inbox here.')
               : t(
-                  'Viết bài, rồi chuyển "Trạng thái biên tập" sang "Chờ duyệt" để biên tập viên duyệt và đăng.',
-                  'Write, then set "Review status" to "Awaiting review" so an editor can publish it.',
+                  'Viết bài, rồi bấm "Gửi duyệt" ở thanh trên cùng để biên tập viên duyệt và đăng. Bài bị trả lại hiện ở ô "Cần sửa", kèm ghi chú của biên tập viên.',
+                  'Write, then click "Submit for review" in the top bar so an editor can publish it. Returned articles show under "Returned for changes" with the editor’s note.',
                 )}
           </p>
         </div>

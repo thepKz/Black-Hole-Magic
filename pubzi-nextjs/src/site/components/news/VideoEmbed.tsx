@@ -3,7 +3,7 @@
 import { PlayIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 
-import { cssAspectRatio, type ParsedVideo } from '@/cms/lib/video';
+import { cssAspectRatio, type ParsedVideo } from '@/shared/video';
 
 export interface VideoEmbedProps {
   video: ParsedVideo;

@@ -77,6 +77,7 @@ export function NewsCard({ item, locale, variant = 'default', preload = false, h
             fill
             preload={preload}
             sizes={sizes ?? defaultSizes}
+            unoptimized={item.cover.unoptimized}
             className="media-zoom object-cover"
             style={{ objectPosition: `${item.cover.focal.x}% ${item.cover.focal.y}%` }}
           />

@@ -1,0 +1,86 @@
+{
+  "categories": [
+    { "id": 3, "slug": "notice", "name": { "vi": "Thông báo", "en": "Notices" }, "order": 3 },
+    { "id": 1, "slug": "game", "name": { "vi": "Tin game", "en": "Game news" }, "order": 1 },
+    { "id": 2, "slug": "event", "name": { "vi": "Sự kiện", "en": "Events" }, "order": 2 }
+  ],
+  "news": [
+    {
+      "id": 101,
+      "slug": "kiem-the-cap-nhat-lon",
+      "status": "published",
+      "title": { "vi": "Kiếm Thế ra mắt bản cập nhật lớn", "en": "Kiem The launches a major update" },
+      "excerpt": { "vi": "Môn phái mới và bản đồ mới.", "en": "New sect and new maps." },
+      "publishedAt": "2026-10-01T03:00:00.000Z",
+      "updatedAt": "2026-10-02T03:00:00.000Z",
+      "featured": true,
+      "category": 1,
+      "availableLocales": ["vi", "en"],
+      "tags": ["Kiếm Thế", { "name": "cập nhật" }, "Kiếm Thế"],
+      "cover": {
+        "url": "/uploads/kiem-the.webp",
+        "width": 1600,
+        "height": 900,
+        "alt": "Ảnh bìa Kiếm Thế",
+        "focalX": 40,
+        "focalY": 30,
+        "formats": {
+          "thumbnail": { "url": "/uploads/kiem-the-thumb.webp", "width": 320, "height": 180 },
+          "medium": { "url": "/uploads/kiem-the-md.webp", "width": 800, "height": 450 },
+          "large": { "url": "/uploads/kiem-the-lg.webp", "width": 1600, "height": 900 }
+        }
+      },
+      "author": { "id": 7, "name": "Ban biên tập", "bio": "Tin chính thức", "avatar": { "url": "https://other-cdn.example.net/a.png", "width": 64, "height": 64 } },
+      "seo": { "title": "Kiếm Thế cập nhật | Black Hole Game", "description": "Mô tả SEO" },
+      "related": [102],
+      "content": {
+        "vi": "<h1>Tiêu đề phụ</h1><p onclick=\"alert(1)\" style=\"color:red\" class=\"x\">Đoạn mở đầu <a href=\"javascript:alert(1)\">xấu</a> và <a href=\"https://example.com/x\" target=\"_blank\" rel=\"nofollow\">ngoài</a> và <a href=\"/vi/games\">trong</a>.</p><script>alert('x')</script><h2>Môn phái mới</h2><p>Nội dung.</p><h2>Môn phái mới</h2><h3>Kỹ năng &amp; trang bị</h3><img src=\"/uploads/inline.webp\" alt=\"Ảnh\" width=\"800\" height=\"450\" onerror=\"x()\"><img src=\"data:image/png;base64,AAAA\"><iframe src=\"https://evil.example/embed\"></iframe><iframe src=\"https://www.youtube-nocookie.com/embed/abc\"></iframe><table><tr><th>Ngày</th></tr><tr><td colspan=\"2\" style=\"x\">01/11</td></tr></table><h5>Ghi chú</h5>",
+        "en": "<h2>New sect</h2><p>English body.</p>"
+      }
+    },
+    {
+      "id": 102,
+      "slug": "su-kien-trung-thu",
+      "status": "published",
+      "title": { "vi": "Sự kiện Trung Thu" },
+      "excerpt": { "vi": "Sự kiện theo mùa." },
+      "publishedAt": "2026-09-20T03:00:00.000Z",
+      "updatedAt": "2026-09-20T03:00:00.000Z",
+      "category": 2,
+      "availableLocales": ["vi"],
+      "cover": { "url": "https://cdn.example.com/media/trung-thu.webp", "width": 1200, "height": 675, "alt": "Trung Thu" },
+      "content": { "vi": "<p>Nội dung sự kiện.</p>" }
+    },
+    {
+      "id": 103,
+      "slug": "bao-tri-may-chu",
+      "status": "published",
+      "title": { "vi": "Thông báo bảo trì máy chủ" },
+      "excerpt": { "vi": "Bảo trì 2 giờ." },
+      "publishedAt": "2026-09-10T01:00:00.000Z",
+      "updatedAt": "2026-09-10T01:00:00.000Z",
+      "category": 3,
+      "content": { "vi": "<p>Bảo trì.</p>" }
+    },
+    {
+      "id": 104,
+      "status": "published",
+      "title": { "vi": "Bài lỗi không có slug (phải bị bỏ qua)" },
+      "publishedAt": "2026-09-05T01:00:00.000Z",
+      "updatedAt": "2026-09-05T01:00:00.000Z",
+      "category": 1,
+      "content": { "vi": "<p>x</p>" }
+    },
+    {
+      "id": 105,
+      "slug": "ban-nhap-bi-mat",
+      "status": "draft",
+      "title": { "vi": "Bản nháp bí mật" },
+      "excerpt": { "vi": "Chỉ hiện khi xem trước." },
+      "publishedAt": "2026-10-03T01:00:00.000Z",
+      "updatedAt": "2026-10-03T01:00:00.000Z",
+      "category": 1,
+      "content": { "vi": "<p>Nháp.</p>" }
+    }
+  ]
+}

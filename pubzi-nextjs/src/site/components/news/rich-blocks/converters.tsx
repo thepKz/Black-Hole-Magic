@@ -1,16 +1,7 @@
 import type { JSXConverters } from '@payloadcms/richtext-lexical/react';
 import type { SerializedLexicalNode } from 'lexical';
 
-import { parseEmbedVideoUrl, parseSocialUrl, SOCIAL_PROVIDER_LABELS } from '@/cms/blocks/embed-url';
-import type {
-  CalloutBlock,
-  CtaBlock,
-  GalleryBlock,
-  QuoteBlock,
-  RelatedNewsBlock,
-  SocialEmbedBlock,
-  VideoEmbedBlock,
-} from '@/cms/payload-types';
+import { parseEmbedVideoUrl, parseSocialUrl, SOCIAL_PROVIDER_LABELS } from '@/shared/embed-url';
 import { format, type Locale } from '@site/i18n';
 
 import { Gallery } from './Gallery';
@@ -21,6 +12,15 @@ import s from './rich-blocks.module.css';
 import { SocialEmbed } from './SocialEmbed';
 import { richBlockStrings, type RichBlockStrings } from './strings';
 import { Callout, CtaButton, PullQuote, RelatedInline } from './TextBlocks';
+import type {
+  CalloutBlock,
+  CtaBlock,
+  GalleryBlock,
+  QuoteBlock,
+  RelatedNewsBlock,
+  SocialEmbedBlock,
+  VideoEmbedBlock,
+} from './types';
 
 /**
  * Lexical -> JSX converters for every newsroom editor block and the inline

@@ -1,18 +1,22 @@
-import config from '@payload-config';
-import { draftMode } from 'next/headers';
+import { cookies, draftMode } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPayload } from 'payload';
 
-import { parsePreviewPath } from '@/cms/lib/preview';
+import { parsePreviewPath } from '@/shared/preview-path';
+import { getNewsSource } from '@site/lib/content';
+import { createPreviewCookieValue, PREVIEW_COOKIE, previewCookieOptions } from '@site/lib/content/preview';
 
 /**
- * GET /api/draft?path=/{vi|en}/news/{slug}
+ * GET /api/draft?path=/{vi|en}/news/{slug}[&token=...]
  *
- * Entry point of Payload live preview + the "Preview" button (see
- * src/cms/lib/preview.ts). No shared secret: the request must carry a valid
- * Payload admin session cookie (same origin as /admin), so only logged-in CMS
- * users can turn on Draft Mode. Then redirects to the article with `?preview=1`.
+ * Entry point of the CMS preview (Payload live preview + "Preview" button, or
+ * an external CMS's preview link). The ACTIVE content source decides access
+ * (src/site/lib/content/preview.ts):
+ * - payload: a valid Payload admin session cookie (same origin as /admin),
+ * - http   : `token` = CMS_PREVIEW_SECRET, or `exp` + `sig` (HMAC).
+ * Then Draft Mode + the signed `bh_preview` cookie are set and the browser is
+ * redirected to the article with `?preview=1`.
  * The target is validated against /{vi|en}/news/{slug} (no open redirect).
+ * A CMS outage answers 503 instead of crashing.
  */
 export const dynamic = 'force-dynamic';
 
@@ -23,14 +27,30 @@ export async function GET(request: Request) {
     return new Response('Invalid preview path', { status: 400 });
   }
 
-  const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: request.headers });
-  if (!user) {
-    return new Response('Unauthorized: log in to /admin first', { status: 401 });
+  let allowed = false;
+  let sourceId: Awaited<ReturnType<typeof getNewsSource>>['id'];
+  try {
+    const source = await getNewsSource();
+    sourceId = source.id;
+    allowed = source.verifyPreview ? await source.verifyPreview({ headers: request.headers, searchParams }) : false;
+  } catch (err) {
+    console.error('[draft] preview check failed:', err instanceof Error ? err.message.split('\n')[0].slice(0, 200) : 'error');
+    return new Response('Preview temporarily unavailable', { status: 503, headers: { 'cache-control': 'no-store' } });
+  }
+  if (!allowed) {
+    return new Response(sourceId === 'payload' ? 'Unauthorized: log in to /admin first' : 'Unauthorized', {
+      status: 401,
+      headers: { 'cache-control': 'no-store' },
+    });
   }
 
-  const draft = await draftMode();
-  draft.enable();
+  const value = createPreviewCookieValue(sourceId);
+  if (!value) {
+    return new Response('Preview is not configured (no signing secret)', { status: 503 });
+  }
+
+  (await draftMode()).enable();
+  (await cookies()).set(PREVIEW_COOKIE, value, previewCookieOptions());
 
   redirect(`/${target.locale}/news/${target.slug}?preview=1`);
 }

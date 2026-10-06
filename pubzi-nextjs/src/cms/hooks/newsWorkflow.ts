@@ -85,25 +85,50 @@ export const guardNewsroomRules: CollectionBeforeChangeHook = async ({ data, ori
  */
 export const keepLiveOnRestore: CollectionBeforeChangeHook = async ({ data, originalDoc, operation, req }) => {
   if (!data || operation !== 'update' || !req.context?.isRestoringVersion) return data;
-  if (data._status === 'published' || originalDoc?.id == null || !canPublish(req.user as never)) return data;
+  if (originalDoc?.id == null || !canPublish(req.user as never)) return data;
   if (isDraftRequest(req)) return data;
-  const live = await req.payload
+  const live = (await req.payload
     .findByID({
       collection: 'news',
       id: originalDoc.id,
       draft: false,
       depth: 0,
-      select: { _status: true },
+      select: { _status: true, publishedAt: true },
       overrideAccess: true,
       disableErrors: true,
       req,
     })
-    .catch(() => null);
-  if ((live as { _status?: string } | null)?._status === 'published') data._status = 'published';
+    .catch(() => null)) as { _status?: string; publishedAt?: string | null } | null;
+  if (live?._status !== 'published') return data;
+  data._status = 'published';
+  // A version saved before the first publish has no publishedAt. Restoring it
+  // must keep the live date: a null date sorts FIRST on `-publishedAt` in
+  // Postgres (NULLS FIRST on DESC) and pinned the article to the top of /news.
+  if (!data.publishedAt && live.publishedAt) data.publishedAt = live.publishedAt;
   return data;
 };
 
-type MediaAlt = { id: number | string; alt?: string | null; filename?: string | null };
+type MediaAlt = { id: number | string; alt?: string | null; altAuto?: boolean | null; filename?: string | null };
+
+type LexicalNode = { type?: string; children?: LexicalNode[] };
+
+/** Plain text of the first non-empty top-level paragraph (the sapo must not repeat it). */
+export function firstParagraphText(state: unknown): string {
+  const nodes = (state as { root?: LexicalNode } | null | undefined)?.root?.children ?? [];
+  for (const node of nodes) {
+    if (node.type !== 'paragraph') continue;
+    const text = lexicalToPlainText({ root: node } as never).replace(/\s+/g, ' ').trim();
+    if (text) return text;
+  }
+  return '';
+}
+
+/** Comparable form: lowercase, no punctuation / extra spaces. */
+export const normalizeForCompare = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[\s\p{P}\p{S}]+/gu, ' ')
+    .trim();
 
 /** Media ids of every upload node in a Lexical document. */
 function uploadIds(state: unknown): (number | string)[] {
@@ -145,11 +170,18 @@ export const validateBeforePublish: CollectionBeforeChangeHook = async ({ data, 
 
   const excerpt = typeof doc.excerpt === 'string' ? doc.excerpt.replace(/\s+/g, ' ').trim() : '';
   if (!excerpt) {
-    add('excerpt', `Chưa có sapo. Viết ${EXCERPT_LIMITS.min}–${EXCERPT_LIMITS.max} ký tự (hoặc bấm "Lấy từ đoạn đầu").`);
+    add('excerpt', `Chưa có sapo. Viết ${EXCERPT_LIMITS.min}–${EXCERPT_LIMITS.max} ký tự (có thể bấm "Gợi ý từ đoạn đầu" rồi viết lại).`);
   } else if (excerpt.length < EXCERPT_LIMITS.min) {
     add('excerpt', `Sapo quá ngắn (${excerpt.length} ký tự). Cần tối thiểu ${EXCERPT_LIMITS.min} ký tự.`);
   } else if (excerpt.length > EXCERPT_LIMITS.max) {
     add('excerpt', `Sapo quá dài (${excerpt.length} ký tự). Tối đa ${EXCERPT_LIMITS.max} ký tự.`);
+  } else {
+    // The article page shows the sapo right above the body: an identical first
+    // paragraph reads twice in a row.
+    const first = normalizeForCompare(firstParagraphText(doc.content));
+    if (first && normalizeForCompare(excerpt) === first) {
+      add('excerpt', 'Sapo đang trùng nguyên văn đoạn mở đầu. Hãy viết lại sapo (tóm ý chính) hoặc sửa đoạn đầu cho khác.');
+    }
   }
 
   // Alt text of the cover + every inline image (one query).
@@ -169,7 +201,7 @@ export const validateBeforePublish: CollectionBeforeChangeHook = async ({ data, 
       depth: 0,
       pagination: false,
       locale: req.locale ?? undefined,
-      select: { alt: true, filename: true },
+      select: { alt: true, altAuto: true, filename: true },
       req,
       overrideAccess: true,
     });
@@ -177,6 +209,8 @@ export const validateBeforePublish: CollectionBeforeChangeHook = async ({ data, 
   }
   const byId = new Map(media.map((m) => [String(m.id), m]));
   const hasAlt = (id: number | string) => Boolean(byId.get(String(id))?.alt?.trim());
+  // Alt generated from the file name ("Qa gallery") and never reviewed.
+  const autoAlt = (id: number | string) => Boolean(byId.get(String(id))?.altAuto);
 
   if (coverId == null) {
     add('cover', 'Chưa có ảnh bìa.');
@@ -184,12 +218,20 @@ export const validateBeforePublish: CollectionBeforeChangeHook = async ({ data, 
     add('cover', 'Ảnh bìa không còn trong thư viện. Hãy chọn lại.');
   } else if (!hasAlt(coverId)) {
     add('cover', 'Ảnh bìa chưa có mô tả ảnh (alt). Bấm vào ảnh để bổ sung.');
+  } else if (autoAlt(coverId)) {
+    add(
+      'cover',
+      `Mô tả ảnh (alt) của ảnh bìa đang tự sinh từ tên tệp ("${byId.get(String(coverId))?.alt}"). Bấm vào ảnh để viết lại, hoặc bỏ chọn "Alt tự sinh" nếu đã đúng.`,
+    );
   }
 
-  const missingAlt = inlineIds.filter((id) => byId.has(String(id)) && !hasAlt(id));
+  const missingAlt = inlineIds.filter((id) => byId.has(String(id)) && (!hasAlt(id) || autoAlt(id)));
   if (missingAlt.length) {
     const names = missingAlt.map((id) => byId.get(String(id))?.filename || `#${id}`).slice(0, 5);
-    add('content', `${missingAlt.length} ảnh trong bài chưa có mô tả (alt): ${names.join(', ')}${missingAlt.length > 5 ? '…' : ''}.`);
+    add(
+      'content',
+      `${missingAlt.length} ảnh trong bài chưa có mô tả (alt) được duyệt: ${names.join(', ')}${missingAlt.length > 5 ? '…' : ''}. Mở ảnh trong Thư viện ảnh để sửa alt.`,
+    );
   }
 
   if (errors.length) {
@@ -210,8 +252,11 @@ export const computeDerived: CollectionBeforeChangeHook = ({ data, originalDoc, 
     data.readingTime = readingTimeMinutes(data.content);
   }
   if (data._status === 'published') {
-    // First publish (manual or scheduled) stamps the display date unless set by hand.
-    if (!data.publishedAt && !originalDoc?.publishedAt) data.publishedAt = new Date().toISOString();
+    // A published article ALWAYS has a date: first publish (manual or scheduled)
+    // stamps now unless set by hand; a save that would clear it (restoring an
+    // old version, an emptied field) keeps the previous date. A null date
+    // sorts first on `-publishedAt` and would pin the article to the top.
+    if (!data.publishedAt) data.publishedAt = originalDoc?.publishedAt || new Date().toISOString();
     data.reviewStatus = 'approved';
   }
   if (req.user && canPublish(req.user as never) === false && data.reviewStatus === 'approved') {

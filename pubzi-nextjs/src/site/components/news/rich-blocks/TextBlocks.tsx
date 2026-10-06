@@ -3,13 +3,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import type { News } from '@/cms/payload-types';
 import { href, type Locale } from '@site/i18n';
 import { cn } from '@site/lib/cn';
 
 import { posterUrl, safeHref } from './media';
 import s from './rich-blocks.module.css';
 import type { RichBlockStrings } from './strings';
+import type { NewsDocLike } from './types';
 
 const isInternal = (url: string) => url.startsWith('/') && !url.startsWith('//');
 
@@ -155,7 +155,7 @@ export function CtaButton({
 /* Related news ("Đọc thêm")                                           */
 /* ------------------------------------------------------------------ */
 
-type RelatedPost = Pick<News, 'id' | 'title' | 'slug' | 'excerpt' | 'cover' | '_status'>;
+type RelatedPost = NewsDocLike;
 
 export function RelatedInline({
   title,

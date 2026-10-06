@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload';
 
 import { adminOnly, anyone, editorOrAdmin } from '../access';
 import { slugField } from '../fields/slug';
+import { preventCategoryDeleteInUse } from '../hooks/preventDeleteInUse';
 import { revalidateCollection } from '../hooks/revalidate';
 import { CACHE_TAGS } from '../lib/tags';
 
@@ -34,7 +35,11 @@ export const NewsCategories: CollectionConfig = {
     update: editorOrAdmin,
     delete: adminOnly,
   },
-  hooks: revalidateCollection(CACHE_TAGS.newsCategories, CACHE_TAGS.news),
+  hooks: {
+    ...revalidateCollection(CACHE_TAGS.newsCategories, CACHE_TAGS.news),
+    // Category is required on every article: refuse to delete one still in use.
+    beforeDelete: [preventCategoryDeleteInUse],
+  },
   fields: [
     {
       name: 'name',

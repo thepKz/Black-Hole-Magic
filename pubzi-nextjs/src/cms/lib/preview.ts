@@ -64,10 +64,5 @@ export function buildPreviewUrl(
   return `${requestOrigin(req)}/api/draft?${params.toString()}`;
 }
 
-/** Validates a preview target path: only /{vi|en}/news/{slug} is allowed (no open redirect). */
-export function parsePreviewPath(path: string | null): { locale: PreviewLocale; slug: string } | null {
-  if (!path) return null;
-  const m = path.match(/^\/(vi|en)\/news\/([a-z0-9][a-z0-9-]{0,127})$/);
-  if (!m) return null;
-  return { locale: m[1] as PreviewLocale, slug: m[2] };
-}
+/** Validates a preview target path (/{vi|en}/news/{slug}); lives in src/shared (also used by /api/draft). */
+export { parsePreviewPath } from '../../shared/preview-path';
